@@ -4,6 +4,7 @@
 
 # include "car.hpp"
 
+	car_test test(void);; // ./test_car.cpp
 	car_test test_hello(void); // ./test_car.cpp
 
 #endif

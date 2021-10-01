@@ -3,19 +3,33 @@
 
 # include <iostream>
 
-# define assert_cmp(x, y) car_assert_cmp(x, y, __LINE__, __FILE__)
+# define assert(x) car_assert(x, __LINE__, __FILE__,  __func__, #x)
 
 typedef void car_test;
 
+#define RED "\033[1;31m"
+#define GREEN "\033[1;32m"
+#define YELLOW "\033[1;33m"
+#define BLUE "\033[1;34m"
+#define MAGENTA "\033[1;35m"
+#define CYAN "\033[1;36m"
+#define BOLD "\033[1m"
+#define UNDERLINE "\033[4m"
+#define RESET "\033[0m"
+
+
 template <typename T>
-void car_assert_cmp(T x, T y, int line, std::string filename)
+void car_assert(T x, int line, std::string filename, std::string funcname,
+	std::string x_str)
 {
-	if (x == y)
-		std::cout << "OK" << std::endl;
-	else
-		std::cout << "KO" << std::endl;
-	std::cout << "File: " << filename << std::endl;
-	std::cout << "Line: " << line << std::endl;
+	if (!x)
+	{
+		std::cout << CYAN << BOLD << " >>> " << RESET
+		<< RED << "[✖] " << BLUE << "Assertion" 
+		<< RED << " failed: " << RESET << BOLD
+		"`" << x_str << "`" << RESET << " in " << funcname 
+		<< "(" << filename << ":" << line << ")" << std::endl;
+	}
 }
 
 #endif

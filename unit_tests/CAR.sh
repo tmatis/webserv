@@ -21,10 +21,13 @@ echo "" >> collected.hpp;
 CPP_FILES=`find . -type f -name "*.cpp"`;
 for file in $CPP_FILES; do
 	echo "Collected file: $file";
-	PROTO=`grep void $file`;
+	PROTO=`grep car_test $file`;
+	N_PROTO=`echo "$PROTO" | wc -l`;
+	echo $N_PROTO "prototypes founds";
 	IFS=$'\n';
 	for proto in $PROTO; do
 		echo "	$proto; // $file" >> collected.hpp;
+		echo ${proto} | cut -d ' ' -f2 | cut -d '(' -f1;
 	done
 done
 
