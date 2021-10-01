@@ -6,7 +6,7 @@
 #    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/01 23:34:19 by tmatis           ###   ########.fr        #
+#    Updated: 2021/10/02 00:17:29 by tmatis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@
 ################################################################################
 
 
-NAME	= bin_test
+NAME	= collected
 CC 		= clang++
 CFLAGS	= -Wall -Wextra -Werror -std=c++98
 DFLAGS	= -MMD -MF $(@:.o=.d)
@@ -48,12 +48,11 @@ DEPS_MAIN			= $(addprefix objs/, ${MAIN:$(FILE_EXTENSION)=.d})
 #                                 Makefile logic                               #
 ################################################################################
 
--include $(DEPS) $(DEPS_MAIN)
-$(NAME):	${OBJS} ${OBJ_MAIN}
-			$(CC) $(CFLAGS) $(DFLAGS) -I$(INCLUDE_PATH) -o $@ ${OBJS} ${OBJ_MAIN}
+all: $(NAME)
 
-setup:
-	@$(call save_files_changed)
+-include $(DEPS)
+$(NAME):	${OBJS}
+			$(CC) $(CFLAGS) $(DFLAGS) -I$(INCLUDE_PATH) -o $@ ${OBJS} ${OBJS_PROJ}
 
 objs/%.o: 	$(SRCS_PATH)/%$(FILE_EXTENSION)
 			@mkdir -p $(dir $@)

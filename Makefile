@@ -6,7 +6,7 @@
 #    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/09/30 20:50:04 by tmatis           ###   ########.fr        #
+#    Updated: 2021/10/02 00:05:30 by tmatis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,7 +34,7 @@ SRCS_PATH		= ./src
 
 INCLUDE_PATH	= ./src
 
-SRCS			= 
+SRCS			= other.cpp other2.cpp
 
 MAIN			= main.cpp
 
@@ -225,6 +225,7 @@ endif
 $(NAME):	${OBJS} ${OBJ_MAIN}
 			@$(call display_progress_bar)
 			@$(call run_and_test,$(CC) $(CFLAGS) $(DFLAGS) -I$(INCLUDE_PATH) -o $@ ${OBJS} ${OBJ_MAIN})
+			@echo "                                                         "
 
 setup:
 	@$(call save_files_changed)
@@ -243,5 +244,8 @@ fclean:		header clean
 			@printf "%-53b%b" "$(COM_COLOR)fclean:" "$(OK_COLOR)[✓]$(NO_COLOR)\n"
 
 re:			fclean all
+
+unit:		all
+			@cd unit_tests && bash CAR.sh ${OBJS}
 
 .PHONY:		all clean fclean re header

@@ -53,3 +53,17 @@ echo "}" >> collected.cpp;
 
 echo "" >> collected.hpp;
 echo "#endif" >> collected.hpp;
+
+OBJS=""
+for objs in "$@"; do
+	OBJS="$OBJS ../$objs";
+done
+if [ "${OBJS:0:1}" == " " ]; then
+	OBJS="${OBJS:1}";
+fi
+
+CPP_FILES=`echo $CPP_FILES`
+cat Makefile.template | sed "s@$(echo objs_template | sed 's/\./\\./g')@${OBJS}@g" | sed "s@$(echo srcs_template | sed 's/\./\\./g')@${CPP_FILES}@g" > Makefile;
+make -s
+./collected
+rm -rf Makefile collected.hpp collected.cpp collected;
