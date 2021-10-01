@@ -4,7 +4,7 @@
 
 ### why ?
 
-In a computer byte are ordered in a way that is not the same as in the network so if we want to transmit 
+In a computer bytes are ordered in a way that is not the same as in the network so if we want to transmit 
 data over the network, we have to use this function to order our bytes in the right way.
 
 ### prototype
