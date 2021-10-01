@@ -1,0 +1,72 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile.template                                  :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
+#    Updated: 2021/10/01 23:34:19 by tmatis           ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+################################################################################
+#                                     CONFIG                                   #
+################################################################################
+
+
+NAME	= bin_test
+CC 		= clang++
+CFLAGS	= -Wall -Wextra -Werror -std=c++98
+DFLAGS	= -MMD -MF $(@:.o=.d)
+
+################################################################################
+#                                 PROGRAM'S SRCS                               #
+################################################################################
+
+FILE_EXTENSION	= .cpp
+
+SRCS_PATH		= ./
+
+INCLUDE_PATH	= ./
+
+SRCS			= srcs_template
+
+################################################################################
+#                                  Makefile  objs                              #
+################################################################################
+
+SHELL := /bin/bash
+
+
+OBJS				= $(addprefix objs/, ${SRCS:$(FILE_EXTENSION)=.o})
+OBJS_PROJ			= objs_template
+DEPS				= $(addprefix objs/, ${SRCS:$(FILE_EXTENSION)=.d})
+DEPS_MAIN			= $(addprefix objs/, ${MAIN:$(FILE_EXTENSION)=.d})
+
+################################################################################
+#                                 Makefile logic                               #
+################################################################################
+
+-include $(DEPS) $(DEPS_MAIN)
+$(NAME):	${OBJS} ${OBJ_MAIN}
+			$(CC) $(CFLAGS) $(DFLAGS) -I$(INCLUDE_PATH) -o $@ ${OBJS} ${OBJ_MAIN}
+
+setup:
+	@$(call save_files_changed)
+
+objs/%.o: 	$(SRCS_PATH)/%$(FILE_EXTENSION)
+			@mkdir -p $(dir $@)
+			$(CC) $(CFLAGS) $(DFLAGS) -c $< -o $@ -I$(INCLUDE_PATH)
+
+clean:		header
+			@rm -rf objs objs_tests
+			@printf "%-53b%b" "$(COM_COLOR)clean:" "$(OK_COLOR)[✓]$(NO_COLOR)\n"
+
+fclean:		header clean
+			@rm -rf $(NAME)
+			@printf "%-53b%b" "$(COM_COLOR)fclean:" "$(OK_COLOR)[✓]$(NO_COLOR)\n"
+
+re:			fclean all
+
+.PHONY:		all clean fclean re header
