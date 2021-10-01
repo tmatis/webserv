@@ -17,6 +17,10 @@ typedef void car_test;
 #define UNDERLINE "\033[4m"
 #define RESET "\033[0m"
 
+typedef void test_function(void);
+
+void run_tests(test_function *tests[]);
+
 
 template <typename T>
 void car_assert(T x, int line, std::string filename, std::string funcname,
