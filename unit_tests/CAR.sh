@@ -39,7 +39,7 @@ for file in $CPP_FILES; do
 	IFS=$'\n';
 	for proto in $PROTO; do
 		echo "	$proto; // $file" >> collected.hpp;
-		NAME=`echo $proto | cut -d ' ' -f2 | cut -d '(' -f1`
+		NAME=`echo $proto | sed 's/	/ /g' | cut -d ' ' -f2 | cut -d '(' -f1`
 		echo "		$NAME," >> collected.cpp;
 	done
 done
@@ -66,4 +66,4 @@ CPP_FILES=`echo $CPP_FILES`
 cat Makefile.template | sed "s@$(echo objs_template | sed 's/\./\\./g')@${OBJS}@g" | sed "s@$(echo srcs_template | sed 's/\./\\./g')@${CPP_FILES}@g" > Makefile;
 make -s
 ./collected
-rm -rf Makefile collected.hpp collected.cpp collected;
+make -s fclean

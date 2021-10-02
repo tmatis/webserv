@@ -6,7 +6,7 @@
 #    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/02 00:17:29 by tmatis           ###   ########.fr        #
+#    Updated: 2021/10/02 16:30:56 by tmatis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -58,13 +58,11 @@ objs/%.o: 	$(SRCS_PATH)/%$(FILE_EXTENSION)
 			@mkdir -p $(dir $@)
 			$(CC) $(CFLAGS) $(DFLAGS) -c $< -o $@ -I$(INCLUDE_PATH)
 
-clean:		header
-			@rm -rf objs objs_tests
-			@printf "%-53b%b" "$(COM_COLOR)clean:" "$(OK_COLOR)[✓]$(NO_COLOR)\n"
+clean:		
+			@rm -rf objs
 
-fclean:		header clean
-			@rm -rf $(NAME)
-			@printf "%-53b%b" "$(COM_COLOR)fclean:" "$(OK_COLOR)[✓]$(NO_COLOR)\n"
+fclean:		clean
+			@rm -rf $(NAME) Makefile collected collected.hpp collected.cpp
 
 re:			fclean all
 

@@ -19,8 +19,10 @@ typedef void car_test;
 
 typedef void test_function(void);
 
-void run_tests(test_function *tests[]);
+int run_tests(test_function *tests[]);
 
+extern int success_assert;
+extern int fail_assert;
 
 template <typename T>
 void car_assert(T x, int line, std::string filename, std::string funcname,
@@ -33,7 +35,10 @@ void car_assert(T x, int line, std::string filename, std::string funcname,
 		<< RED << " failed: " << RESET << BOLD
 		"`" << x_str << "`" << RESET << " in " << funcname 
 		<< "(" << filename << ":" << line << ")" << std::endl;
+		fail_assert++;
 	}
+	else
+		success_assert++;
 }
 
 #endif
