@@ -6,7 +6,7 @@
 #    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/02 16:32:46 by tmatis           ###   ########.fr        #
+#    Updated: 2021/10/03 13:54:36 by tmatis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -236,16 +236,21 @@ objs/%.o: 	$(SRCS_PATH)/%$(FILE_EXTENSION)
 			@$(call run_and_test,$(CC) $(CFLAGS) $(DFLAGS) -c $< -o $@ -I$(INCLUDE_PATH))
 
 clean:		header
-			@rm -rf objs objs_tests
+			@rm -rf objs unit_tests/objs unit_tests/collected.*
 			@printf "%-53b%b" "$(COM_COLOR)clean:" "$(OK_COLOR)[✓]$(NO_COLOR)\n"
 
 fclean:		header clean
-			@rm -rf $(NAME)
+			@rm -rf $(NAME) unit_tests/collected
 			@printf "%-53b%b" "$(COM_COLOR)fclean:" "$(OK_COLOR)[✓]$(NO_COLOR)\n"
 
 re:			fclean all
 
 unit:		all
 			@cd unit_tests && bash CAR.sh ${OBJS}
+			@unit_tests/collected
+
+unit_all: 	all
+			@cd unit_tests && bash CAR.sh ${OBJS}
+			@unit_tests/collected --show-all
 
 .PHONY:		all clean fclean re header
