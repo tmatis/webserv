@@ -6,3 +6,5 @@ unit_tests/collected.cpp
 unit_tests/collected
 unit_tests/Makefile
 webserv
+bin_test
+vscode/

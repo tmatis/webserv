@@ -2,7 +2,7 @@
 
 int success_assert = 0;
 int	fail_assert = 0;
-bool show_success = false;
+std::string filter = "";
 
 #ifdef __linux__
 # define OS "Linux"
@@ -12,21 +12,21 @@ bool show_success = false;
 # define OS "Unknow"
 #endif
 
-int run_tests(test_function *tests[], bool show)
+int run_tests(test_function *tests[])
 {
 	success_assert = 0;
 	fail_assert = 0;
-	show_success = show;
 	int nb_tests;
 	for (nb_tests = 0; tests[nb_tests] != NULL; nb_tests++);
 	std::cout << BOLD
 		<< "========================== TEST SESSION START =========================="
 		<< RESET << std::endl;
-
 	std::cout << "Build date: " << __DATE__ << " " << __TIME__ << std::endl;
-	std::cout << "OS: " << OS << std::endl;
-	std::cout << "Compiler: " << __VERSION__ << std::endl ;
-	std::cout << BOLD << "Functions collected: " << nb_tests << RESET << std::endl << std::endl;
+	std::cout << "OS: " << OS << std::endl ;
+	std::cout << "Compiler: " << __VERSION__ << std::endl << std::endl;
+	std::cout << BOLD << "Functions collected: " << nb_tests << RESET << std::endl;
+	if (filter != "")
+		std::cout << BOLD << "Filter: " << filter << RESET << std::endl << std::endl;
 
 	for (int i = 0; tests[i] != NULL; i++)
 		tests[i]();

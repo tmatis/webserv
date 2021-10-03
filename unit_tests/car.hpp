@@ -19,11 +19,11 @@ typedef void car_test;
 
 typedef void test_function(void);
 
-int run_tests(test_function *tests[], bool show);
+int run_tests(test_function *tests[]);
 
 extern int success_assert;
 extern int fail_assert;
-extern bool show_success;
+extern std::string filter;
 
 template <typename T>
 void car_assert(T x, int line, std::string filename, std::string funcname,
@@ -41,7 +41,8 @@ void car_assert(T x, int line, std::string filename, std::string funcname,
 	else
 	{
 		success_assert++;
-		if (show_success)
+		if (filter != "" 
+			&& (filter == "--show-all" || funcname.find(filter) != std::string::npos))
 			std::cout << CYAN << BOLD << " >>> " << RESET
 			<< GREEN << "[✔] " << BLUE << "Assertion" 
 			<< GREEN << " passed: " << RESET << BOLD

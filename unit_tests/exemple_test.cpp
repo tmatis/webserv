@@ -1,13 +1,13 @@
 #include "car.hpp"
+#include <stdlib.h>
 
-car_test exemple_ok(void)
+car_test test_atoi(void)
 {
-	assert(5 == 5);
-	assert(5 != 6);
-}
-
-car_test exemple_ko(void)
-{
-	assert(5 == 6);
-	assert(5 != 5);
+	assert(atoi("5") == 5);
+	assert(atoi("-5") == -5);
+	assert(atoi("0") == 0);
+	assert(atoi("-0") == 0);
+	assert(atoi("") == 0);
+	assert(atoi("-") == 0);
+	assert(atoi("-42") == 42); // will fail
 }
