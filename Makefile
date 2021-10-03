@@ -6,7 +6,7 @@
 #    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/03 13:54:36 by tmatis           ###   ########.fr        #
+#    Updated: 2021/10/03 14:01:37 by tmatis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -85,7 +85,6 @@ else
 endif
 
 ifeq ($(shell git rev-parse HEAD &>/dev/null; echo $$?),0)
-	AUTHOR	:= $(shell git log --format='%aN' | sort -u | head -c -1 | sed -z 's/\n/, /g')
 	DATE	:= $(shell git log -1 --date=format:"%Y/%m/%d %T" --format="%ad")
 	HASH	:= $(shell git rev-parse --short HEAD)
 endif
