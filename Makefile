@@ -6,7 +6,7 @@
 #    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/09/30 20:50:04 by tmatis           ###   ########.fr        #
+#    Updated: 2021/10/03 16:06:38 by tmatis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,7 +34,7 @@ SRCS_PATH		= ./src
 
 INCLUDE_PATH	= ./src
 
-SRCS			= 
+SRCS			= other.cpp other2.cpp
 
 MAIN			= main.cpp
 
@@ -85,7 +85,6 @@ else
 endif
 
 ifeq ($(shell git rev-parse HEAD &>/dev/null; echo $$?),0)
-	AUTHOR	:= $(shell git log --format='%aN' | sort -u | head -c -1 | sed -z 's/\n/, /g')
 	DATE	:= $(shell git log -1 --date=format:"%Y/%m/%d %T" --format="%ad")
 	HASH	:= $(shell git rev-parse --short HEAD)
 endif
@@ -225,6 +224,7 @@ endif
 $(NAME):	${OBJS} ${OBJ_MAIN}
 			@$(call display_progress_bar)
 			@$(call run_and_test,$(CC) $(CFLAGS) $(DFLAGS) -I$(INCLUDE_PATH) -o $@ ${OBJS} ${OBJ_MAIN})
+			@echo "                                                         "
 
 setup:
 	@$(call save_files_changed)
@@ -235,13 +235,21 @@ objs/%.o: 	$(SRCS_PATH)/%$(FILE_EXTENSION)
 			@$(call run_and_test,$(CC) $(CFLAGS) $(DFLAGS) -c $< -o $@ -I$(INCLUDE_PATH))
 
 clean:		header
-			@rm -rf objs objs_tests
+			@rm -rf objs unit_tests/objs unit_tests/collected.*
 			@printf "%-53b%b" "$(COM_COLOR)clean:" "$(OK_COLOR)[✓]$(NO_COLOR)\n"
 
 fclean:		header clean
-			@rm -rf $(NAME)
+			@rm -rf $(NAME) unit_tests/collected ./bin_test
 			@printf "%-53b%b" "$(COM_COLOR)fclean:" "$(OK_COLOR)[✓]$(NO_COLOR)\n"
 
 re:			fclean all
 
-.PHONY:		all clean fclean re header
+unit:		all
+			@cd unit_tests && bash CAR.sh ${OBJS}
+			@./bin_test
+
+unit_all: 	all
+			@cd unit_tests && bash CAR.sh ${OBJS}
+			@./bin_test --show-all
+
+.PHONY:		all clean fclean re header unit unit_all
