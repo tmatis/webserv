@@ -62,8 +62,7 @@ done
 echo "		NULL" >> collected.cpp;
 echo "	};" >> collected.cpp;
 echo "" >> collected.cpp;
-echo "	run_tests(tests);" >> collected.cpp;
-echo "	return 0;" >> collected.cpp;
+echo "	return (run_tests(tests));" >> collected.cpp;
 echo "}" >> collected.cpp;
 
 echo "" >> collected.hpp;
