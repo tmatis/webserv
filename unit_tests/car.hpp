@@ -19,10 +19,11 @@ typedef void car_test;
 
 typedef void test_function(void);
 
-int run_tests(test_function *tests[]);
+int run_tests(test_function *tests[], bool show);
 
 extern int success_assert;
 extern int fail_assert;
+extern bool show_success;
 
 template <typename T>
 void car_assert(T x, int line, std::string filename, std::string funcname,
@@ -38,7 +39,15 @@ void car_assert(T x, int line, std::string filename, std::string funcname,
 		fail_assert++;
 	}
 	else
+	{
 		success_assert++;
+		if (show_success)
+			std::cout << CYAN << BOLD << " >>> " << RESET
+			<< GREEN << "[✔] " << BLUE << "Assertion" 
+			<< GREEN << " passed: " << RESET << BOLD
+			"`" << x_str << "`" << RESET << " in " << funcname 
+			<< "(" << filename << ":" << line << ")" << std::endl;
+	}
 }
 
 #endif
