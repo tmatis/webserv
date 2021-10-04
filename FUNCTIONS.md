@@ -124,7 +124,8 @@ Normally only one single protocol exists within the specified domain and type so
 ```c
 #include <iostream>
 #include <sys/types.h>
-#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 int	main(void)
 {
@@ -268,3 +269,51 @@ int	main(void)
 
 ### notes
 * The maximum value of *backlog* the implementation supports is **SOMAXCONN** (defined in sys/socket.h).
+
+## accept()
+
+### prototype
+
+```c
+ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+```
+#### sockfd
+socket in a listening state. (see **listen()**)
+#### addr
+address structure to fill with the address of the client socket.
+#### addrlen
+size of the address structure. After calling this function it will contain the size of the client's address.
+
+### description
+
+Used by connection-based socket types like SOCK_STREAM, it extracts the first pending connection request for the listening socket then creates a new socket and returns a file descriptor reffering to it.
+
+### exemple
+
+```c
+#include <iostream>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+
+int	main(void)
+{
+	/* ** insert here listen() exemple ** */
+
+	sockaddr_in	client;
+	socklen_t	clientSize = sizeof(client);
+
+	int			clientSocket = accept(serverSocket,
+										(sockaddr*)&client,
+										&clientSize);
+
+	if (clientSocket == -1)
+	{
+		perror("accept() failed ");
+		return (EXIT_FAILURE);		
+	}
+	close(serverSocket);
+	close(clientSocket);
+}
+```
