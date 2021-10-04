@@ -100,3 +100,42 @@ Cons :
 
 Pros :
 * seems to be pretty useful for [polling](https://en.wikipedia.org/wiki/Polling_(computer_science)).
+
+## socket()
+
+### what is a socket ?
+A socket is a software structure that serves for sending and receiving data across a network. The structure and properties of a socket are defined by an application programming interface (API) for the networking architecture. In Unix-like operating systems, sockets work like file descriptors.
+
+### prototype
+
+```c
+int socket(int domain, int type, int protocol);
+```
+
+#### domain
+Address family the socket can communicate with.
+#### type
+The two mostly used socket types are SOCK_STREAM and SOCK_DGRAM, the first one provides a reliable, connection-based bytes stream and the second one supports datagrams (connectionless and may lead to data loss).
+#### protocol
+Normally only one single protocol exists within the specified domain and type so protocol will be set to 0 but the protocols identifiers can be found in /etc/protocols.
+
+### example
+
+```c
+#include <iostream>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int	main(void)
+{
+	int	serverSocket = socket(AF_INET, SOCK_STREAM, 6);
+	if (serverSocket == -1)
+		std::cerr << "Can't create socket !";
+	close(serverSocket);
+}
+```
+This exemple creates a socket of type SOCK_STREAM which can communicate with IPv4 addresses. As the protocol equals 0, i guess it is TCP but if we want to be sure
+about that we can specify the value 6 according to /etc/protocols
+
+### notes
+* All sockets MUST BE closed with close() before exiting the program.
