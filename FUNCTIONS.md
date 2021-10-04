@@ -100,3 +100,220 @@ Cons :
 
 Pros :
 * seems to be pretty useful for [polling](https://en.wikipedia.org/wiki/Polling_(computer_science)).
+
+## socket()
+
+### what is a socket ?
+A socket is a software structure that serves for sending and receiving data across a network. The structure and properties of a socket are defined by an application programming interface (API) for the networking architecture. In Unix-like operating systems, sockets work like file descriptors.
+
+### prototype
+
+```c
+int socket(int domain, int type, int protocol);
+```
+
+#### domain
+Address family the socket can communicate with.
+#### type
+The two mostly used socket types are **SOCK_STREAM** and **SOCK_DGRAM**, the first one provides a reliable, connection-based bytes stream and the second one supports datagrams (connectionless and may lead to data loss).
+#### protocol
+Normally only one single protocol exists within the specified domain and type so protocol will be set to 0 but the protocols identifiers can be found in /etc/protocols.
+
+### example
+
+```c
+#include <iostream>
+#include <sys/types.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+int	main(void)
+{
+	int	serverSocket = socket(AF_INET, SOCK_STREAM, 6);
+	if (serverSocket == -1)
+	{
+		perror("socket() failed ");
+		return (EXIT_FAILURE);
+	}
+	close(serverSocket);
+}
+```
+This exemple creates a socket of *type* **SOCK_STREAM** which can communicate with IPv4 addresses. As *protocol* equals 0, i guess it is TCP but if we want to be sure about that we can specify the value 6 according to /etc/protocols.
+
+### notes
+* The type argument may also include an OR bitwise operation with the value **SOCK_NONBLOCK** to mark the socket as nonblocking.
+* All sockets MUST BE closed with **close()** before exiting the program.
+
+## bind()
+
+### why ?
+
+When a socket is created it has no address assigned to it. In the case of **SOCK_STREAM** socket, it is necessary to assign it an address with **bind()** before receiving connections.
+
+### prototype
+
+```c
+int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+```
+
+### exemple
+
+**struct sockaddr** is a structure describing a generic socket address but for a internet socket address we will rather use **struct sockaddr_in**.
+
+**sockaddr_in** has four members:
+* sin_family	= address family
+* sin_addr		= unsigned integer to represent the address
+* sin_port		= port in network byte order
+* sin_zero		= i don't get its purpose yet
+
+```c
+#include <iostream>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int	main(void)
+{
+	int	serverSocket = socket(AF_INET, SOCK_STREAM, 0); // create socket
+	
+	// create address structure for the socket
+	sockaddr_in	hint;
+	hint.sin_family = AF_INET;
+	hint.sin_port = htons(8080);
+	hint.sin_addr.s_addr = inet_addr("0.0.0.0");
+	if (bind(socket, (sockaddr*)&hint, sizeof(hint)) == -1) // bind the address to the socket
+	{
+		perror("bind() failed ");
+		return (EXIT_FAILURE);
+	}
+}
+```
+
+### notes
+* Binding a server to an address equals to "0.0.0.0" means that the server will listen to all addresses.
+* see **inet_addr()** for a better understanding of the above example.
+* i didn't check for socket() failure in this exemple for readability reasons but of course in pratice we should do it
+
+## inet_addr()
+
+### why ?
+
+We usually see and use IPv4 addresses written in numbers-and-dots notation but the **sockaddr_in** structure use unsigned integers.
+**inet_addr()** allow us to easily convert an address in a string format to binary in network byte order.
+
+### prototype
+
+```c
+in_addr_t inet_addr(const char *cp);
+```
+
+### exemple
+ 
+```c
+#include <iostream>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+int	main(void)
+{
+	int	localhost		= inet_addr("127.0.0.1");
+	int	all_address		= inet_addr("0.0.0.0");
+	int	random_address	= inet_addr("192.168.0.24");
+
+	std::cout << "localhost\t= " << localhost << "\n";
+	std::cout << "all_address\t= " << all_address << "\n";
+	std::cout << "random_address\t= " << random_address << std::endl;
+}
+```
+this code will give us the following output:
+```
+localhost       = 16777343
+all_address     = 0
+random_address  = 402696384
+```
+
+## listen()
+
+### why ?
+
+Marks a socket as passive, a passive socket is a socket that will be used to accept incoming connections with **accept()**.
+
+### prototype
+
+```c
+int listen(int sockfd, int backlog);
+```
+#### sockfd
+socket that will be listening.
+#### backlog
+max size of the queue of pending connections
+
+### exemple
+
+```c
+#include <iostream>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+int	main(void)
+{
+	/* ** insert here bind() exemple ** */
+
+	if (listen(serverSocket, SOMAXCONN) == -1)
+	{
+		perror("listen() failed ");
+		return (EXIT_FAILURE);
+	}
+}
+```
+
+### notes
+* The maximum value of *backlog* the implementation supports is **SOMAXCONN** (defined in sys/socket.h).
+
+## accept()
+
+### prototype
+
+```c
+ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+```
+#### sockfd
+socket in a listening state. (see **listen()**)
+#### addr
+address structure to fill with the address of the client socket.
+#### addrlen
+size of the address structure. After calling this function it will contain the size of the client's address.
+
+### description
+
+Used by connection-based socket types like SOCK_STREAM, it extracts the first pending connection request for the listening socket then creates a new socket and returns a file descriptor reffering to it.
+
+### exemple
+
+```c
+#include <iostream>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+
+int	main(void)
+{
+	/* ** insert here listen() exemple ** */
+
+	sockaddr_in	client;
+	socklen_t	clientSize = sizeof(client);
+
+	int			clientSocket = accept(serverSocket,
+										(sockaddr*)&client,
+										&clientSize);
+
+	if (clientSocket == -1)
+	{
+		perror("accept() failed ");
+		return (EXIT_FAILURE);		
+	}
+	close(serverSocket);
+	close(clientSocket);
+}
+```
