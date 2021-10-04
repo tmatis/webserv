@@ -115,7 +115,7 @@ int socket(int domain, int type, int protocol);
 #### domain
 Address family the socket can communicate with.
 #### type
-The two mostly used socket types are SOCK_STREAM and SOCK_DGRAM, the first one provides a reliable, connection-based bytes stream and the second one supports datagrams (connectionless and may lead to data loss).
+The two mostly used socket types are **SOCK_STREAM** and **SOCK_DGRAM**, the first one provides a reliable, connection-based bytes stream and the second one supports datagrams (connectionless and may lead to data loss).
 #### protocol
 Normally only one single protocol exists within the specified domain and type so protocol will be set to 0 but the protocols identifiers can be found in /etc/protocols.
 
@@ -130,23 +130,24 @@ int	main(void)
 {
 	int	serverSocket = socket(AF_INET, SOCK_STREAM, 6);
 	if (serverSocket == -1)
-		std::cerr << "Can't create socket !";
+	{
+		perror("socket() failed ");
+		return (EXIT_FAILURE);
+	}
 	close(serverSocket);
 }
 ```
-This exemple creates a socket of type SOCK_STREAM which can communicate with IPv4 addresses. As the protocol equals 0, i guess it is TCP but if we want to be sure
-about that we can specify the value 6 according to /etc/protocols
+This exemple creates a socket of *type* **SOCK_STREAM** which can communicate with IPv4 addresses. As *protocol* equals 0, i guess it is TCP but if we want to be sure about that we can specify the value 6 according to /etc/protocols.
 
 ### notes
-* The type argument may also include an OR bitwise operation with the value SOCK_NONBLOCK to mark the socket as nonblocking.
-* All sockets MUST BE closed with close() before exiting the program.
+* The type argument may also include an OR bitwise operation with the value **SOCK_NONBLOCK** to mark the socket as nonblocking.
+* All sockets MUST BE closed with **close()** before exiting the program.
 
 ## bind()
 
 ### why ?
 
-When a socket is created it has no address assigned to it. In the case of SOCK_STREAM socket, it is necessary to assign it an address with bind() before receiving 
-connections.
+When a socket is created it has no address assigned to it. In the case of **SOCK_STREAM** socket, it is necessary to assign it an address with **bind()** before receiving connections.
 
 ### prototype
 
@@ -178,13 +179,18 @@ int	main(void)
 	hint.sin_family = AF_INET;
 	hint.sin_port = htons(8080);
 	hint.sin_addr.s_addr = inet_addr("0.0.0.0");
-	bind(socket, (sockaddr*)&hint, sizeof(hint)); // bind the address to the socket
+	if (bind(socket, (sockaddr*)&hint, sizeof(hint)) == -1) // bind the address to the socket
+	{
+		perror("bind() failed ");
+		return (EXIT_FAILURE);
+	}
 }
 ```
 
 ### notes
 * Binding a server to an address equals to "0.0.0.0" means that the server will listen to all addresses.
-* see inet_addr() for a better understanding of the above example.
+* see **inet_addr()** for a better understanding of the above example.
+* i didn't check for socket() failure in this exemple for readability reasons but of course in pratice we should do it
 
 ## inet_addr()
 
@@ -223,3 +229,42 @@ localhost       = 16777343
 all_address     = 0
 random_address  = 402696384
 ```
+
+## listen()
+
+### why ?
+
+Marks a socket as passive, a passive socket is a socket that will be used to accept incoming connections with **accept()**.
+
+### prototype
+
+```c
+int listen(int sockfd, int backlog);
+```
+#### sockfd
+socket that will be listening.
+#### backlog
+max size of the queue of pending connections
+
+### exemple
+
+```c
+#include <iostream>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+int	main(void)
+{
+	/* ** insert here bind() exemple ** */
+
+	if (listen(serverSocket, SOMAXCONN) == -1)
+	{
+		perror("listen() failed ");
+		return (EXIT_FAILURE);
+	}
+}
+```
+
+### notes
+* The maximum value of *backlog* the implementation supports is **SOMAXCONN** (defined in sys/socket.h).
