@@ -138,4 +138,88 @@ This exemple creates a socket of type SOCK_STREAM which can communicate with IPv
 about that we can specify the value 6 according to /etc/protocols
 
 ### notes
+* The type argument may also include an OR bitwise operation with the value SOCK_NONBLOCK to mark the socket as nonblocking.
 * All sockets MUST BE closed with close() before exiting the program.
+
+## bind()
+
+### why ?
+
+When a socket is created it has no address assigned to it. In the case of SOCK_STREAM socket, it is necessary to assign it an address with bind() before receiving 
+connections.
+
+### prototype
+
+```c
+int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+```
+
+### exemple
+
+**struct sockaddr** is a structure describing a generic socket address but for a internet socket address we will rather use **struct sockaddr_in**.
+
+**sockaddr_in** has four members:
+* sin_family	= address family
+* sin_addr		= unsigned integer to represent the address
+* sin_port		= port in network byte order
+* sin_zero		= i don't get its purpose yet
+
+```c
+#include <iostream>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int	main(void)
+{
+	int	serverSocket = socket(AF_INET, SOCK_STREAM, 0); // create socket
+	
+	// create address structure for the socket
+	sockaddr_in	hint;
+	hint.sin_family = AF_INET;
+	hint.sin_port = htons(8080);
+	hint.sin_addr.s_addr = inet_addr("0.0.0.0");
+	bind(socket, (sockaddr*)&hint, sizeof(hint)); // bind the address to the socket
+}
+```
+
+### notes
+* Binding a server to an address equals to "0.0.0.0" means that the server will listen to all addresses.
+* see inet_addr() for a better understanding of the above example.
+
+## inet_addr()
+
+### why ?
+
+We usually see and use IPv4 addresses written in numbers-and-dots notation but the **sockaddr_in** structure use unsigned integers.
+**inet_addr()** allow us to easily convert an address in a string format to binary in network byte order.
+
+### prototype
+
+```c
+in_addr_t inet_addr(const char *cp);
+```
+
+### exemple
+ 
+```c
+#include <iostream>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+int	main(void)
+{
+	int	localhost		= inet_addr("127.0.0.1");
+	int	all_address		= inet_addr("0.0.0.0");
+	int	random_address	= inet_addr("192.168.0.24");
+
+	std::cout << "localhost\t= " << localhost << "\n";
+	std::cout << "all_address\t= " << all_address << "\n";
+	std::cout << "random_address\t= " << random_address << std::endl;
+}
+```
+this code will give us the following output:
+```
+localhost       = 16777343
+all_address     = 0
+random_address  = 402696384
+```
