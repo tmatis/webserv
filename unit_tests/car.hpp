@@ -3,6 +3,7 @@
 
 # include <iostream>
 
+# undef assert
 # define assert(x) car_assert(x, __LINE__, __FILE__,  __func__, #x)
 
 typedef void car_test;
