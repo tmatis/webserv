@@ -6,92 +6,133 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/04 19:57:13 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/05 14:48:35 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/07 18:19:47 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdio.h>
-#include <iostream>
-#include <cerrno>
-#include <cstring>
-#include <cstdlib>
-#include <unistd.h>
+#include "webserv.hpp"
 
-int main(void)
+#define PORT 8080
+
+int setup_welcome_socket(uint16_t port)
 {
-	std::string rep_header("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\n\r\n");
-	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+	int welcome_socket;
+	struct sockaddr_in server_address;
 
-	if (server_fd < 0)
-	{
-		std::cout << "Error: cannot create socket: " << strerror(errno) << std::endl;
-		exit(1);
-	}
+	welcome_socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (welcome_socket < 0)
+		return (-1);
 
-	struct sockaddr_in address_server;
+	server_address.sin_family = AF_INET;
+	server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+	server_address.sin_port = htons(port);
+	memset(server_address.sin_zero, 0, sizeof(server_address.sin_zero));
 
-	address_server.sin_family = AF_INET;
-	address_server.sin_addr.s_addr = inet_addr("0.0.0.0");
-	address_server.sin_port = htons(8080);
-	memset(address_server.sin_zero, 0, sizeof(address_server.sin_zero));
+	if (bind(welcome_socket, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
+		return (-1);
+	if (listen(welcome_socket, SOMAXCONN) < 0)
+		return (-1);
+	return (welcome_socket);
+}
+
+int handle_registered_client(std::vector<struct pollfd> &pollfd, std::vector<struct pollfd>::iterator it)
+{
+	typedef int (*event_handlers)(std::vector<struct pollfd> &, std::vector<struct pollfd>::iterator);
+	static event_handlers handlers[] = {
+		event_pollin,
+		event_pollhup,
+		event_pollerr,
+		event_pollnval,
+		NULL
+	};
 	
-	if (bind(server_fd, (struct sockaddr *)&address_server, sizeof(address_server)) < 0)
-	{
-		std::cout << "Error: cannot bind name: " << strerror(errno) << std::endl;
-		close(server_fd);
-		exit(1);
-	}
+	static short events[] = {
+		POLLIN,
+		POLLHUP,
+		POLLERR,
+		POLLNVAL
+	};
 
-	if (listen(server_fd, SOMAXCONN) < 0)
+	for (int i = 0; handlers[i]; i++)
 	{
-		std::cout << "Error: cannot listen: " << strerror(errno) << std::endl;
-		close(server_fd);
-		exit(1);
+		if (it->revents & events[i])
+			return (handlers[i](pollfd, it));
 	}
+	return (0);
+}
+
+int register_new_client(int welcome_socket,
+	std::vector<struct pollfd> &pollfd, std::vector<std::string> &client_data)
+{
+	struct sockaddr_in client_address;
+	socklen_t client_address_size = sizeof(client_address);
+
+	int client_socket = accept(welcome_socket,
+							   (struct sockaddr *)&client_address, &client_address_size);
+	if (client_socket < 0)
+		return (-1);
+	else
+	{
+		std::cout << "new client: " << inet_ntoa(client_address.sin_addr)
+		<< " (" << pollfd.size() << ")" << std::endl;
+		// we add the new client to the list of pollfd
+		struct pollfd poll_client_socket;
+		poll_client_socket.fd = client_socket;
+		poll_client_socket.events = POLLIN;
+		pollfd.push_back(poll_client_socket);
+	}
+	return (0);
+}
+
+int serve_clients(int welcome_socket)
+{
+	std::vector<struct pollfd> pollfd;
+	std::vector<std::string> client_data;
+
+	// we add welcome socket to the list of pollfd
+	struct pollfd poll_welcome_socket;
+	poll_welcome_socket.fd = welcome_socket;
+	poll_welcome_socket.events = POLLIN;
+	pollfd.push_back(poll_welcome_socket);
 
 	while (true)
 	{
-		struct sockaddr_in address_client;
-		socklen_t address_client_len = sizeof(address_client);
-
-		int client_fd = accept(server_fd, (struct sockaddr *)&address_client, &address_client_len);
-		if (client_fd < 0)
+		int poll_result = poll(&pollfd.front(), pollfd.size(), 2000);
+		if (poll_result < 0)
+			return (-1);
+		if (poll_result == 0)
+			continue;
+		if (pollfd.front().revents & POLLIN)
 		{
-			std::cout << "Error: cannot accept: " << strerror(errno) << std::endl;
-			exit(1);
+			// we have a new client
+			if (register_new_client(welcome_socket, pollfd) < 0)
+				std::cerr << "register_new_client failed: "
+					<< strerror(errno) << std::endl;
 		}
-		
-		char buffer[BUFSIZ];
-
-		std::string	received_string;
-		
-		ssize_t readed = 0;
-		
-		while ((readed = read(client_fd, buffer, sizeof(buffer) - 1)) != 0)
+		for (std::vector<struct pollfd>::iterator it =
+				 pollfd.begin() + 1;
+			 it != pollfd.end(); ++it)
 		{
-			if (readed < 0)
-			{
-				std::cout << "Error: cannot read: " << strerror(errno) << std::endl;
-				close(client_fd);
-				close(server_fd);
-				exit(1);
-			}
-			std::cout << "received " << readed << " bytes" << std::endl;
-			buffer[readed] = '\0';
-			
-			received_string += buffer;
-			if (*received_string.rbegin() == 10) // check if end of header
-				break ;
+			if (handle_registered_client(pollfd, it))
+				break;
 		}
-		std::cout << "received string: `" << received_string << "`" << std::endl;
-		
-		std::string to_reply;
-
-		to_reply = rep_header + "hello world" + "\r\n";
-		write(client_fd, to_reply.c_str(), to_reply.size());
-		close(client_fd);
 	}
+	return (0);
+}
+
+int main(void)
+{
+	int welcome_socket = setup_welcome_socket(PORT);
+	if (welcome_socket < 0)
+	{
+		std::cerr << "Error: " << strerror(errno) << std::endl;
+		return (1);
+	}
+	std::cout << "Server is running on port " << PORT << std::endl;
+	if (serve_clients(welcome_socket) < 0)
+	{
+		std::cerr << "Error: " << strerror(errno) << std::endl;
+		return (1);
+	}
+	return (0);
 }

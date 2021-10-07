@@ -6,7 +6,7 @@
 #    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/05 14:21:45 by tmatis           ###   ########.fr        #
+#    Updated: 2021/10/07 18:12:42 by tmatis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,7 +34,7 @@ SRCS_PATH		= ./src
 
 INCLUDE_PATH	= ./src
 
-SRCS			=
+SRCS			= poll_cases.cpp
 
 MAIN			= main.cpp
 
@@ -96,7 +96,7 @@ if [ $$RESULT -ne 0 ]; then \
 	printf "%b\n" "$(ERROR_COLOR)[✖]$(NO_COLOR)"; \
 	rm -rf .files_changed; \
 	if [ $(NOVISU) -eq 0 ]; then \
-		clear; \
+		echo; \
 	fi; \
 elif [ -s $@.log ]; then \
 	printf "%b\n" "$(WARN_COLOR)[⚠]$(NO_COLOR)"; \
