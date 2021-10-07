@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/04 19:57:13 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/07 18:19:47 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/07 19:13:37 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,9 @@ int setup_welcome_socket(uint16_t port)
 	welcome_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (welcome_socket < 0)
 		return (-1);
-
+	int	enable = 1;
+	setsockopt(welcome_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
+	
 	server_address.sin_family = AF_INET;
 	server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 	server_address.sin_port = htons(port);
@@ -35,11 +37,14 @@ int setup_welcome_socket(uint16_t port)
 	return (welcome_socket);
 }
 
-int handle_registered_client(std::vector<struct pollfd> &pollfd, std::vector<struct pollfd>::iterator it)
+int handle_registered_client(std::vector<struct pollfd> &pollfd, std::vector<std::string> &client_data, std::vector<struct pollfd>::iterator it)
 {
-	typedef int (*event_handlers)(std::vector<struct pollfd> &, std::vector<struct pollfd>::iterator);
+	typedef int (*event_handlers)(std::vector<struct pollfd> &,
+		std::vector<std::string> &,
+		std::vector<struct pollfd>::iterator);
 	static event_handlers handlers[] = {
 		event_pollin,
+		event_pollout,
 		event_pollhup,
 		event_pollerr,
 		event_pollnval,
@@ -48,6 +53,7 @@ int handle_registered_client(std::vector<struct pollfd> &pollfd, std::vector<str
 	
 	static short events[] = {
 		POLLIN,
+		POLLOUT,
 		POLLHUP,
 		POLLERR,
 		POLLNVAL
@@ -56,7 +62,7 @@ int handle_registered_client(std::vector<struct pollfd> &pollfd, std::vector<str
 	for (int i = 0; handlers[i]; i++)
 	{
 		if (it->revents & events[i])
-			return (handlers[i](pollfd, it));
+			return (handlers[i](pollfd, client_data, it));
 	}
 	return (0);
 }
@@ -80,6 +86,7 @@ int register_new_client(int welcome_socket,
 		poll_client_socket.fd = client_socket;
 		poll_client_socket.events = POLLIN;
 		pollfd.push_back(poll_client_socket);
+		client_data.push_back("");
 	}
 	return (0);
 }
@@ -105,15 +112,16 @@ int serve_clients(int welcome_socket)
 		if (pollfd.front().revents & POLLIN)
 		{
 			// we have a new client
-			if (register_new_client(welcome_socket, pollfd) < 0)
+			if (register_new_client(welcome_socket, pollfd, client_data) < 0)
 				std::cerr << "register_new_client failed: "
 					<< strerror(errno) << std::endl;
+			continue ;
 		}
 		for (std::vector<struct pollfd>::iterator it =
-				 pollfd.begin() + 1;
-			 it != pollfd.end(); ++it)
+				 (pollfd.begin() + 1);
+			 it != pollfd.end(); it++)
 		{
-			if (handle_registered_client(pollfd, it))
+			if (handle_registered_client(pollfd, client_data, it))
 				break;
 		}
 	}
