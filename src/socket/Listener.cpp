@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:52:30 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 16:18:29 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/08 17:30:24 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,10 @@ Listener::Listener(const char* address, const int& port)
 	_addr.sin_addr.s_addr	= inet_addr(address);
 	memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
 
+	// non-blocking fd
+	if (TCP_Socket::set_non_blocking(*this) == -1)
+		throw CreationFailure("fcntl: ");
+
 	// reusable address
 	int enable = 1;
 	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) == -1)
@@ -37,18 +41,4 @@ Listener::Listener(const char* address, const int& port)
 	// marks socket as passive
 	if (listen(_fd, SOMAXCONN) == -1)
 		throw CreationFailure("listen: ");
-}
-
-Listener::
-CreationFailure::CreationFailure(const char* errinfo) :
-	_info(errinfo)
-{
-	_info.append(strerror(errno));
-}
-
-const char*
-Listener::
-CreationFailure::what(void) const throw()
-{
-	return (_info.data());
 }

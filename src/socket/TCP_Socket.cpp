@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:32:57 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 15:55:08 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/08 17:30:37 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,13 +28,6 @@ TCP_Socket::operator=(const TCP_Socket& rhs)
 	return (*this);
 }
 
-int
-TCP_Socket::set_non_blocking(void)
-{
-	// set non-blocking flag on file descriptor
-	return (fcntl(_fd, F_SETFL, O_NONBLOCK));
-}
-
 const int&
 TCP_Socket::get_fd(void) const
 {
@@ -46,3 +39,25 @@ TCP_Socket::get_name(void) const
 {
 	return (_addr);
 }
+
+int
+TCP_Socket::set_non_blocking(TCP_Socket& sock)
+{
+	// set non-blocking flag on file descriptor
+	return (fcntl(sock._fd, F_SETFL, O_NONBLOCK));
+}
+
+TCP_Socket::
+CreationFailure::CreationFailure(const char* errinfo) :
+	_info(errinfo)
+{
+	_info.append(strerror(errno));
+}
+
+const char*
+TCP_Socket::
+CreationFailure::what(void) const throw()
+{
+	return (_info.data());
+}
+
