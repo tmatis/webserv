@@ -12,6 +12,8 @@
 #include <vector>
 #include <poll.h>
 
+# include "http/HTTPHeader.hpp"
+
 int event_pollin(std::vector<struct pollfd> &pollfd,
 				 std::vector<std::string> &client_datas,
 				 std::vector<struct pollfd>::iterator it);
