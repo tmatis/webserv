@@ -150,8 +150,6 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 	if (_header_set && !_is_ready)
 	{
 		const std::vector<std::string> *content_length = _header.getValue("Content-Length");
-		if (content_length == NULL)
-			return ; // header malformed: we do not have a content-length
 		size_t content_length_value = std::strtoul((*content_length)[0].c_str(), NULL, 10);
 		_buffer.resize(content_length_value);
 		_body = _buffer;
