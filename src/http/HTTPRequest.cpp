@@ -1,18 +1,17 @@
 #include "HTTPRequest.hpp"
 #include <sstream>
+#include <iostream>
 
 HTTPRequest::HTTPRequest(void)
-	: HTTPGeneral() ,_method(""), _version(""),
-		_uri("/"), _is_ready(false)
+	: HTTPGeneral(), _method(""), _version(""),
+	  _uri("/"), _is_ready(false)
 {
-
 }
 
 HTTPRequest::HTTPRequest(HTTPRequest const &src)
 	: HTTPGeneral(src), _method(src._method),
-		_version(src._version), _uri(src._uri), _is_ready(false)
+	  _version(src._version), _uri(src._uri), _is_ready(false)
 {
-
 }
 
 HTTPRequest &HTTPRequest::operator=(HTTPRequest const &rhs)
@@ -30,7 +29,6 @@ HTTPRequest &HTTPRequest::operator=(HTTPRequest const &rhs)
 
 HTTPRequest::~HTTPRequest(void)
 {
-
 }
 
 void HTTPRequest::setMethod(std::string const &method)
@@ -93,7 +91,7 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 		size_t pos = _buffer.find("\n");
 		std::string line = _buffer.substr(0, pos);
 		_buffer.erase(0, pos + 1);
-		
+
 		std::stringstream ss(line);
 		std::vector<std::string> tokens;
 		std::string token;
@@ -108,16 +106,20 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 		else
 			throw std::exception(); // header malformed
 	}
-	else if (_method != "" && _buffer.find("\n") != std::string::npos)
+	if (_method != "" && !_is_ready)
 	{
-		// get first line
-		size_t pos = _buffer.find("\n");
-		std::string line = _buffer.substr(0, pos);
-		_buffer.erase(0, pos + 1);
+		size_t pos;
 
-		if (line == "")
-			_is_ready = true;
-		else
-			_header.parseLine(line);
+		while ((pos = _buffer.find("\n")) != std::string::npos)
+		{
+			size_t pos = _buffer.find("\n");
+			std::string line = _buffer.substr(0, pos);
+			_buffer.erase(0, pos + 1);
+
+			if (line == "" && _method == "GET")
+				_is_ready = true;
+			else
+				_header.parseLine(line);
+		}
 	}
 }

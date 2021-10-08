@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 15:19:05 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/08 15:38:27 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ void HTTPHeader::parseLine(std::string line)
 	_headers.push_back(std::make_pair(title, tokens));
 }
 
-std::vector<std::string> const *HTTPHeader::getHeaderValue(std::string key) const
+std::vector<std::string> const *HTTPHeader::getValue(std::string key) const
 {
 	for (std::vector<std::pair<std::string, std::vector<std::string> > >::const_iterator
 		it = _headers.begin(); it != _headers.end(); ++it)

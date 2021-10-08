@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:15:26 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 12:32:46 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/08 15:38:24 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ public:
 	~HTTPHeader(void);
 
 	void parseLine(std::string line);
-	std::vector<std::string> const *getHeaderValue(std::string key) const;
+	std::vector<std::string> const *getValue(std::string key) const;
 	std::string toString(void) const;
 };
 

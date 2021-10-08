@@ -6,7 +6,7 @@
 #    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/08 12:10:28 by tmatis           ###   ########.fr        #
+#    Updated: 2021/10/08 15:34:44 by tmatis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,7 +34,8 @@ SRCS_PATH		= ./src
 
 INCLUDE_PATH	= ./src
 
-SRCS			= poll_cases.cpp http/HTTPHeader.cpp
+SRCS			= poll_cases.cpp http/HTTPHeader.cpp http/HTTPGeneral.cpp \
+					 http/HTTPRequest.cpp
 
 MAIN			= main.cpp
 

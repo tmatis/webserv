@@ -13,6 +13,7 @@
 #include <poll.h>
 
 # include "http/HTTPHeader.hpp"
+# include "http/HTTPRequest.hpp"
 
 int event_pollin(std::vector<struct pollfd> &pollfd,
 				 std::vector<std::string> &client_datas,
