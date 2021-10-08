@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 12:39:33 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/08 12:59:29 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,8 @@ void HTTPHeader::parseLine(std::string line)
 	std::vector<std::string> tokens;
 
 	if (!line.empty() && *(line.end() - 1) == '\n')
+		line.resize(line.size() - 1);
+	if (!line.empty() && *(line.end() - 1) == '\r')
 		line.resize(line.size() - 1);
 	size_t pos = line.find(":");
 	if (pos == std::string::npos)
@@ -88,4 +90,23 @@ std::vector<std::string> const *HTTPHeader::getHeaderValue(std::string key) cons
 			return (&it->second);
 	}
 	return (NULL);
+}
+
+std::string HTTPHeader::toString(void) const
+{
+	std::string result;
+	for (std::vector<std::pair<std::string, std::vector<std::string> > >::const_iterator
+		it = _headers.begin(); it != _headers.end(); ++it)
+	{
+		result += it->first + ": ";
+		for (std::vector<std::string>::const_iterator it2 = it->second.begin();
+			it2 != it->second.end(); ++it2)
+		{
+			result += *it2;
+			if (it2 != it->second.end() - 1)
+				result += ",";
+		}
+		result += "\r\n";
+	}
+	return (result);
 }
