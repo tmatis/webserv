@@ -5,7 +5,7 @@
 
 HTTPRequest::HTTPRequest(void)
 	: HTTPGeneral(), _method(""), _version(""),
-	  _uri("/"), _is_ready(false), _command_set(false),_header_set(false), _buffer("")
+	  _uri("/"), _is_ready(false), _command_set(false), _header_set(false), _buffer("")
 {
 }
 
@@ -107,27 +107,26 @@ static std::vector<std::string> parse_request_command(std::string &buffer)
 	std::string token;
 	while (std::getline(ss, token, ' '))
 		tokens.push_back(token);
-	if (tokens.size() == 3)
-		return (tokens);
-	else
-		throw std::exception(); // header malformed
+	return (tokens);
 }
 
 void HTTPRequest::parseChunk(std::string const &chunk)
 {
 	_buffer += chunk;
-	// replace \r\n by \n
+
 	format_request(_buffer);
 
 	// parse headers if not already done
 	if (!_command_set && _buffer.find("\n") != std::string::npos)
 	{
 		std::vector<std::string> tokens = parse_request_command(_buffer);
-		
-		_method = tokens[0];
-		_uri = tokens[1];
-		_version = tokens[2];
-		_command_set = true;
+		if (tokens.size() == 3)
+		{
+			_method = tokens[0];
+			_uri = tokens[1];
+			_version = tokens[2];
+			_command_set = true;
+		}
 	}
 	if (_command_set && !_header_set)
 	{
@@ -150,9 +149,29 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 	if (_header_set && !_is_ready)
 	{
 		const std::vector<std::string> *content_length = _header.getValue("Content-Length");
-		size_t content_length_value = std::strtoul((*content_length)[0].c_str(), NULL, 10);
-		_buffer.resize(content_length_value);
-		_body = _buffer;
-		_is_ready = true;
+		if (content_length)
+		{
+			size_t content_length_value = std::strtoul((*content_length)[0].c_str(), NULL, 10);
+			if (_body.size() + _buffer.size() >= content_length_value)
+				_buffer.resize(content_length_value - _body.size());
+			_body += _buffer;
+			if (_body.size() == content_length_value)
+				_is_ready = true;
+		}
+		else
+			_is_ready = true;
 	}
+}
+
+void HTTPRequest::clear(void)
+{
+	_method = "";
+	_version = "";
+	_uri = "/";
+	_is_ready = false;
+	_command_set = false;
+	_header_set = false;
+	_buffer = "";
+	_header.clear();
+	_body = "";
 }

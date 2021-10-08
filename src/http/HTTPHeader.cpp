@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 15:38:27 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/08 18:48:17 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,20 +57,24 @@ void HTTPHeader::parseLine(std::string line)
 	if (value.empty())
 		return;
 	//remove spaces at the begining and end of the value
-	std::string tmp;
-	for (std::string::iterator it = value.begin(); it != value.end(); ++it)
-	{
-		if (*it != ' ')
-			tmp += *it;
-	}
-	value = tmp;
+	while (value.size() > 0 && (value[0] == ' '))
+		value.erase(0, 1);
+	while (value.size() > 0 && (value[value.size() - 1] == ' '))
+		value.erase(value.size() - 1, 1);
 	// split value by ,
 	std::stringstream ss(value);
 	std::string token;
 	while (std::getline(ss, token, ','))
+	{
+		while (token.size() > 0 && (token[0] == ' '))
+			token.erase(0, 1);
+		while (token.size() > 0 && (token[token.size() - 1] == ' '))
+			token.erase(token.size() - 1, 1);
 		tokens.push_back(token);
+	}
 	for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator
-		it = _headers.begin(); it != _headers.end(); ++it)
+			 it = _headers.begin();
+		 it != _headers.end(); ++it)
 	{
 		if (it->first == title)
 		{
@@ -84,7 +88,8 @@ void HTTPHeader::parseLine(std::string line)
 std::vector<std::string> const *HTTPHeader::getValue(std::string key) const
 {
 	for (std::vector<std::pair<std::string, std::vector<std::string> > >::const_iterator
-		it = _headers.begin(); it != _headers.end(); ++it)
+			 it = _headers.begin();
+		 it != _headers.end(); ++it)
 	{
 		if (it->first == key)
 			return (&it->second);
@@ -96,11 +101,12 @@ std::string HTTPHeader::toString(void) const
 {
 	std::string result;
 	for (std::vector<std::pair<std::string, std::vector<std::string> > >::const_iterator
-		it = _headers.begin(); it != _headers.end(); ++it)
+			 it = _headers.begin();
+		 it != _headers.end(); ++it)
 	{
 		result += it->first + ": ";
 		for (std::vector<std::string>::const_iterator it2 = it->second.begin();
-			it2 != it->second.end(); ++it2)
+			 it2 != it->second.end(); ++it2)
 		{
 			result += *it2;
 			if (it2 != it->second.end() - 1)
@@ -109,4 +115,9 @@ std::string HTTPHeader::toString(void) const
 		result += "\r\n";
 	}
 	return (result);
+}
+
+void HTTPHeader::clear(void)
+{
+	_headers.clear();
 }

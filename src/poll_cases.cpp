@@ -6,14 +6,15 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 17:52:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/07 21:32:47 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/08 18:45:55 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
+#include <sstream>
 
 void delete_client(std::vector<struct pollfd> &pollfd,
-				std::vector<std::string> &client_datas,
+				std::vector<HTTPRequest> &client_datas,
 				std::vector<struct pollfd>::iterator it)
 {
 	close(it->fd);
@@ -22,7 +23,7 @@ void delete_client(std::vector<struct pollfd> &pollfd,
 }
 
 int event_pollin(std::vector<struct pollfd> &pollfd,
-				std::vector<std::string> &client_datas,
+				std::vector<HTTPRequest> &client_datas,
 				std::vector<struct pollfd>::iterator it)
 {
 	char buffer[1024];
@@ -45,22 +46,34 @@ int event_pollin(std::vector<struct pollfd> &pollfd,
 		buffer[read_bytes] = '\0';
 		std::cout << "client " << it - pollfd.begin()
 				  << ": " << buffer;
-		client_datas[it - pollfd.begin() - 1] += buffer;
-		it->events = POLLOUT; // when we finished read we can write
+		client_datas[it - pollfd.begin() - 1].parseChunk(buffer);
+		if (client_datas[it - pollfd.begin() - 1].isReady())
+			it->events = POLLOUT; // when we finished read we can write
 	}
 	return (0);
 }
 
+template <typename T>
+std::string itoa(T value)
+{
+	std::ostringstream os;
+	os << value;
+	return os.str();
+}
+
 int event_pollout(std::vector<struct pollfd> &pollfd,
-				  std::vector<std::string> &client_datas,
+				  std::vector<HTTPRequest> &client_datas,
 				  std::vector<struct pollfd>::iterator it)
 {
-	std::string reply("you said: `");
+    std::string header("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ");
 
-	reply += client_datas[it - pollfd.begin() - 1];
+	std::string body = "You sent that header:\r\n" + client_datas[it - pollfd.begin() - 1].getHeader().toString();
+	body += "and that body: \r\n" + client_datas[it - pollfd.begin() - 1].getBody();
+	header += itoa(body.size());
+	header += "\r\n\r\n";
+	std::string response = header + body;
 	client_datas[it - pollfd.begin() - 1].clear();
-	reply += "`";
-	if (write(it->fd, reply.c_str(), reply.size()) < 0)
+	if (write(it->fd, response.c_str(), response.size()) < 0)
 	{
 		std::cerr << "write failed " << strerror(errno) << " (client "
 			<< it - pollfd.begin() << ")" << std::endl;
@@ -71,7 +84,7 @@ int event_pollout(std::vector<struct pollfd> &pollfd,
 }
 
 int event_pollhup(std::vector<struct pollfd> &pollfd,
-				std::vector<std::string> &client_datas,
+				std::vector<HTTPRequest> &client_datas,
 				std::vector<struct pollfd>::iterator it)
 {
 	std::cout << "client " << it - pollfd.begin()
@@ -81,7 +94,7 @@ int event_pollhup(std::vector<struct pollfd> &pollfd,
 }
 
 int event_pollerr(std::vector<struct pollfd> &pollfd,
-				std::vector<std::string> &client_datas,
+				std::vector<HTTPRequest> &client_datas,
 				std::vector<struct pollfd>::iterator it)
 {
 	std::cout << "client " << it - pollfd.begin()
@@ -91,7 +104,7 @@ int event_pollerr(std::vector<struct pollfd> &pollfd,
 }
 
 int event_pollnval(std::vector<struct pollfd> &pollfd,
-				std::vector<std::string> &client_datas,
+				std::vector<HTTPRequest> &client_datas,
 				std::vector<struct pollfd>::iterator it)
 {
 	std::cout << "client " << it - pollfd.begin()

@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 14:27:06 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 17:54:04 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/08 18:38:15 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@ class HTTPRequest : public HTTPGeneral
 		bool isReady(void) const;
 
 		void parseChunk(std::string const &chunk);
+
+		void clear(void);
 
 };
 		
