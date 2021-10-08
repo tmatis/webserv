@@ -14,25 +14,26 @@
 
 # include "http/HTTPHeader.hpp"
 # include "http/HTTPRequest.hpp"
+# include "http/HTTPResponse.hpp"
 
 int event_pollin(std::vector<struct pollfd> &pollfd,
-				 std::vector<HTTPRequest> &client_datas,
+				 std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
 				 std::vector<struct pollfd>::iterator it);
 
 int event_pollout(std::vector<struct pollfd> &pollfd,
-				 std::vector<HTTPRequest> &client_datas,
+				 std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
 				 std::vector<struct pollfd>::iterator it);
 
 int event_pollhup(std::vector<struct pollfd> &pollfd,
-				  std::vector<HTTPRequest> &client_datas,
+				  std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
 				  std::vector<struct pollfd>::iterator it);
 
 int event_pollerr(std::vector<struct pollfd> &pollfd,
-				  std::vector<HTTPRequest> &client_datas,
+				  std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
 				  std::vector<struct pollfd>::iterator it);
 
 int event_pollnval(std::vector<struct pollfd> &pollfd,
-				   std::vector<HTTPRequest> &client_datas,
+				   std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
 				   std::vector<struct pollfd>::iterator it);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 17:52:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 18:45:55 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/08 22:19:06 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #include <sstream>
 
 void delete_client(std::vector<struct pollfd> &pollfd,
-				std::vector<HTTPRequest> &client_datas,
+				std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
 				std::vector<struct pollfd>::iterator it)
 {
 	close(it->fd);
@@ -23,7 +23,7 @@ void delete_client(std::vector<struct pollfd> &pollfd,
 }
 
 int event_pollin(std::vector<struct pollfd> &pollfd,
-				std::vector<HTTPRequest> &client_datas,
+				std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
 				std::vector<struct pollfd>::iterator it)
 {
 	char buffer[1024];
@@ -46,8 +46,8 @@ int event_pollin(std::vector<struct pollfd> &pollfd,
 		buffer[read_bytes] = '\0';
 		std::cout << "client " << it - pollfd.begin()
 				  << ": " << buffer;
-		client_datas[it - pollfd.begin() - 1].parseChunk(buffer);
-		if (client_datas[it - pollfd.begin() - 1].isReady())
+		client_datas[it - pollfd.begin() - 1].first.parseChunk(buffer);
+		if (client_datas[it - pollfd.begin() - 1].first.isReady())
 			it->events = POLLOUT; // when we finished read we can write
 	}
 	return (0);
@@ -62,17 +62,24 @@ std::string itoa(T value)
 }
 
 int event_pollout(std::vector<struct pollfd> &pollfd,
-				  std::vector<HTTPRequest> &client_datas,
+				  std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
 				  std::vector<struct pollfd>::iterator it)
 {
-    std::string header("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ");
+    client_datas[it - pollfd.begin() - 1]
+		.second.getHeader().addValue("Content-Type",
+		std::vector<std::string>(1, "text/plain"));
+	client_datas[it - pollfd.begin() - 1]
+		.second.setBody("lol\r\n");
+	client_datas[it - pollfd.begin() - 1]
+		.second.setStatus(OK);
+	client_datas[it - pollfd.begin() - 1]
+		.second.setReady(true);
 
-	std::string body = "You sent that header:\r\n" + client_datas[it - pollfd.begin() - 1].getHeader().toString();
-	body += "and that body: \r\n" + client_datas[it - pollfd.begin() - 1].getBody();
-	header += itoa(body.size());
-	header += "\r\n\r\n";
-	std::string response = header + body;
-	client_datas[it - pollfd.begin() - 1].clear();
+	std::string response = client_datas[it - pollfd.begin() - 1]
+									.second.toString();
+
+	client_datas[it - pollfd.begin() - 1].first.clear();
+	client_datas[it - pollfd.begin() - 1].second.clear();
 	if (write(it->fd, response.c_str(), response.size()) < 0)
 	{
 		std::cerr << "write failed " << strerror(errno) << " (client "
@@ -84,7 +91,7 @@ int event_pollout(std::vector<struct pollfd> &pollfd,
 }
 
 int event_pollhup(std::vector<struct pollfd> &pollfd,
-				std::vector<HTTPRequest> &client_datas,
+				std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
 				std::vector<struct pollfd>::iterator it)
 {
 	std::cout << "client " << it - pollfd.begin()
@@ -94,7 +101,7 @@ int event_pollhup(std::vector<struct pollfd> &pollfd,
 }
 
 int event_pollerr(std::vector<struct pollfd> &pollfd,
-				std::vector<HTTPRequest> &client_datas,
+				std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
 				std::vector<struct pollfd>::iterator it)
 {
 	std::cout << "client " << it - pollfd.begin()
@@ -104,7 +111,7 @@ int event_pollerr(std::vector<struct pollfd> &pollfd,
 }
 
 int event_pollnval(std::vector<struct pollfd> &pollfd,
-				std::vector<HTTPRequest> &client_datas,
+				std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
 				std::vector<struct pollfd>::iterator it)
 {
 	std::cout << "client " << it - pollfd.begin()

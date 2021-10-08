@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:12:37 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 14:56:46 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/08 21:02:31 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,13 @@ public:
 	virtual ~HTTPGeneral(void);
 
 	/*  Getters  */
-	HTTPHeader const &getHeader(void) const;
+	HTTPHeader &getHeader(void);
 	std::string const &getBody(void) const;
 	
 	/*  Setters  */
 	void setHeader(HTTPHeader const &header);
 	void setBody(std::string const &body);
+	void clear(void);
 
 };
 

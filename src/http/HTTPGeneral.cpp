@@ -21,7 +21,7 @@ HTTPGeneral &HTTPGeneral::operator=(HTTPGeneral const &rhs)
 HTTPGeneral::~HTTPGeneral()
 {}
 
-HTTPHeader const &HTTPGeneral::getHeader() const
+HTTPHeader &HTTPGeneral::getHeader()
 {
 	return (_header);
 }
@@ -39,4 +39,10 @@ void HTTPGeneral::setHeader(HTTPHeader const &header)
 void HTTPGeneral::setBody(std::string const &body)
 {
 	_body = body;
+}
+
+void HTTPGeneral::clear(void)
+{
+	_header.clear();
+	_body.clear();
 }

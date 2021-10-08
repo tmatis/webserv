@@ -165,13 +165,12 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 
 void HTTPRequest::clear(void)
 {
+	HTTPGeneral::clear();
+	_header.clear();
 	_method = "";
 	_version = "";
 	_uri = "/";
 	_is_ready = false;
 	_command_set = false;
 	_header_set = false;
-	_buffer = "";
-	_header.clear();
-	_body = "";
 }

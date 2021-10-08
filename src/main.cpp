@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/04 19:57:13 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 18:12:21 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/08 21:51:59 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,12 @@ int setup_welcome_socket(uint16_t port)
 	return (welcome_socket);
 }
 
-int handle_registered_client(std::vector<struct pollfd> &pollfd, std::vector<HTTPRequest> &client_data, std::vector<struct pollfd>::iterator it)
+int handle_registered_client(std::vector<struct pollfd> &pollfd,
+		std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_data,
+		std::vector<struct pollfd>::iterator it)
 {
 	typedef int (*event_handlers)(std::vector<struct pollfd> &,
-		std::vector<HTTPRequest> &,
+		std::vector<std::pair<HTTPRequest, HTTPResponse> > &,
 		std::vector<struct pollfd>::iterator);
 	static event_handlers handlers[] = {
 		event_pollin,
@@ -68,7 +70,8 @@ int handle_registered_client(std::vector<struct pollfd> &pollfd, std::vector<HTT
 }
 
 int register_new_client(int welcome_socket,
-	std::vector<struct pollfd> &pollfd, std::vector<HTTPRequest> &client_data)
+	std::vector<struct pollfd> &pollfd,
+	std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_data)
 {
 	struct sockaddr_in client_address;
 	socklen_t client_address_size = sizeof(client_address);
@@ -86,7 +89,7 @@ int register_new_client(int welcome_socket,
 		poll_client_socket.fd = client_socket;
 		poll_client_socket.events = POLLIN;
 		pollfd.push_back(poll_client_socket);
-		client_data.push_back(HTTPRequest());
+		client_data.push_back(std::make_pair(HTTPRequest(), HTTPResponse()));
 	}
 	return (0);
 }
@@ -94,7 +97,7 @@ int register_new_client(int welcome_socket,
 int serve_clients(int welcome_socket)
 {
 	std::vector<struct pollfd> pollfd;
-	std::vector<HTTPRequest> client_data;
+	std::vector<std::pair<HTTPRequest, HTTPResponse> > client_data;
 
 	// we add welcome socket to the list of pollfd
 	struct pollfd poll_welcome_socket;

@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 18:48:17 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/08 20:56:50 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,21 @@ HTTPHeader &HTTPHeader::operator=(HTTPHeader const &rhs)
 
 HTTPHeader::~HTTPHeader(void)
 {
+}
+
+void HTTPHeader::addValue(std::string key, std::vector<std::string> const &value)
+{
+	for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator
+			 it = _headers.begin();
+		 it != _headers.end(); ++it)
+	{
+		if (it->first == key)
+		{
+			it->second = value;
+			return;
+		}
+	}
+	_headers.push_back(std::make_pair(key, value));
 }
 
 /* 
@@ -72,17 +87,7 @@ void HTTPHeader::parseLine(std::string line)
 			token.erase(token.size() - 1, 1);
 		tokens.push_back(token);
 	}
-	for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator
-			 it = _headers.begin();
-		 it != _headers.end(); ++it)
-	{
-		if (it->first == title)
-		{
-			it->second = tokens;
-			return;
-		}
-	}
-	_headers.push_back(std::make_pair(title, tokens));
+	this->addValue(title, tokens);
 }
 
 std::vector<std::string> const *HTTPHeader::getValue(std::string key) const
