@@ -81,3 +81,4 @@ echo
 CPP_FILES=`echo $CPP_FILES`
 cat Makefile.template | sed "s@$(echo objs_template | sed 's/\./\\./g')@${OBJS}@g" | sed "s@$(echo srcs_template | sed 's/\./\\./g')@${CPP_FILES}@g" > Makefile;
 make -s
+rm collected.*

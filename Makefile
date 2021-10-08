@@ -6,7 +6,7 @@
 #    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/03 16:06:38 by tmatis           ###   ########.fr        #
+#    Updated: 2021/10/08 15:34:44 by tmatis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@
 
 NAME	= webserv
 CC 		= clang++
-CFLAGS	= -Wall -Wextra -Werror -std=c++98
+CFLAGS	= -Wall -Wextra -Werror -std=c++98 -g
 DFLAGS	= -MMD -MF $(@:.o=.d)
 AUTHOR	= tmatis mamartin nouchata
 DATE	= 30/09/2021
@@ -34,7 +34,8 @@ SRCS_PATH		= ./src
 
 INCLUDE_PATH	= ./src
 
-SRCS			= other.cpp other2.cpp
+SRCS			= poll_cases.cpp http/HTTPHeader.cpp http/HTTPGeneral.cpp \
+					 http/HTTPRequest.cpp
 
 MAIN			= main.cpp
 
@@ -96,7 +97,7 @@ if [ $$RESULT -ne 0 ]; then \
 	printf "%b\n" "$(ERROR_COLOR)[✖]$(NO_COLOR)"; \
 	rm -rf .files_changed; \
 	if [ $(NOVISU) -eq 0 ]; then \
-		clear; \
+		echo; \
 	fi; \
 elif [ -s $@.log ]; then \
 	printf "%b\n" "$(WARN_COLOR)[⚠]$(NO_COLOR)"; \
