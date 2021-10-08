@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 17:52:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 22:19:06 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/08 22:28:55 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,8 @@ int event_pollout(std::vector<struct pollfd> &pollfd,
 		.second.getHeader().addValue("Content-Type",
 		std::vector<std::string>(1, "text/plain"));
 	client_datas[it - pollfd.begin() - 1]
-		.second.setBody("lol\r\n");
+		.second.setBody("your are client: " 
+			+ itoa(it - pollfd.begin()) + "\r\n");
 	client_datas[it - pollfd.begin() - 1]
 		.second.setStatus(OK);
 	client_datas[it - pollfd.begin() - 1]

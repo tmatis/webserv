@@ -155,7 +155,7 @@ std::string HTTPResponse::toString(void) const
 {
 	std::string res;
 
-	res += itoa(_status) + " " + status_code_to_string(_status) += "\r\n";
+	res += "HTTP/1.1 " + itoa(_status) + " " + status_code_to_string(_status) + "\r\n";
 	res += _header.toString();
 	res += "\r\n";
 	res += _body;
