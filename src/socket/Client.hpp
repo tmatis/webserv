@@ -6,14 +6,13 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 23:20:12 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/08 23:25:46 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
-# include <vector>
 # include <poll.h>
 
 # include "TCP_Socket.hpp"

@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 23:16:14 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/08 23:25:57 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define SERVER_HPP
 
 # include <algorithm>
+# include <vector>
 
 # include "Listener.hpp"
 # include "Client.hpp"

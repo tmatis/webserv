@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 23:16:37 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/08 23:25:25 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ Server::add_new_client(void)
 
 	if (client.connect(_host.get_fd()) == -1)
 		return (-1);
+	_clients.push_back(client);
 	return (0);
 }
 
