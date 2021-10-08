@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 14:27:06 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 17:49:24 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/08 17:54:04 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ class HTTPRequest : public HTTPGeneral
 		std::string _uri;
 		bool		_is_ready;
 		bool 	  	_command_set;
+		bool 	  	_header_set;
 		std::string _buffer;
 
 	public:

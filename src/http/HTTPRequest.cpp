@@ -5,14 +5,14 @@
 
 HTTPRequest::HTTPRequest(void)
 	: HTTPGeneral(), _method(""), _version(""),
-	  _uri("/"), _is_ready(false), _command_set(false), _buffer("")
+	  _uri("/"), _is_ready(false), _command_set(false),_header_set(false), _buffer("")
 {
 }
 
 HTTPRequest::HTTPRequest(HTTPRequest const &src)
 	: HTTPGeneral(src), _method(src._method),
 	  _version(src._version), _uri(src._uri),
-	  _is_ready(false), _command_set(src._command_set), _buffer(src._buffer)
+	  _is_ready(false), _command_set(src._command_set), _header_set(src._header_set), _buffer(src._buffer)
 {
 }
 
@@ -26,6 +26,7 @@ HTTPRequest &HTTPRequest::operator=(HTTPRequest const &rhs)
 		_uri = rhs._uri;
 		_is_ready = rhs._is_ready;
 		_command_set = rhs._command_set;
+		_header_set = rhs._header_set;
 		_buffer = rhs._buffer;
 	}
 	return (*this);
@@ -128,7 +129,7 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 		_version = tokens[2];
 		_command_set = true;
 	}
-	if (!_is_ready && _command_set)
+	if (_command_set && !_header_set)
 	{
 		size_t pos;
 
@@ -136,16 +137,20 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 		{
 			std::string line = get_line_cut(_buffer);
 
-			if (line == "" && !_header.getValue("Content-Length")) // if we have a content-length we need to get the body
-				_is_ready = true;
-			else if (line != "")
+			if (line == "")
+			{
+				_header_set = true;
+				if (!_header.getValue("Content-Length"))
+					_is_ready = true;
+			}
+			else
 				_header.parseLine(line);
 		}
 	}
-	if (!_is_ready && _header.getValue("Content-Length"))
+	if (_header_set && !_is_ready)
 	{
 		const std::vector<std::string> *content_length = _header.getValue("Content-Length");
-		if (content_length != NULL)
+		if (content_length == NULL)
 			return ; // header malformed: we do not have a content-length
 		size_t content_length_value = std::strtoul((*content_length)[0].c_str(), NULL, 10);
 		_buffer.resize(content_length_value);
