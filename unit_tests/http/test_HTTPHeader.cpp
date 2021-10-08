@@ -17,7 +17,6 @@ car_test test_parseLine(void)
 
 	header.parseLine("name: value4\r\n");
 	assert((*header.getHeaderValue("name"))[0] == "value4");
-
 }
 
 car_test test_toString(void)

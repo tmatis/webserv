@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 12:59:29 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/08 15:19:05 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ void HTTPHeader::parseLine(std::string line)
 	std::string value = line.substr(pos + 1);
 	if (value.empty())
 		return;
-	//remove spaces at the begining and end of the value c++98
+	//remove spaces at the begining and end of the value
 	std::string tmp;
 	for (std::string::iterator it = value.begin(); it != value.end(); ++it)
 	{
