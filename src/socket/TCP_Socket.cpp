@@ -6,13 +6,13 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:32:57 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 17:30:37 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/08 18:16:50 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "TCP_Socket.hpp"
 
-TCP_Socket::TCP_Socket(const int& fd, const sockaddr_in& address) :
+TCP_Socket::TCP_Socket(int fd, const sockaddr_in& address) :
 	_fd(fd), _addr(address) {}
 
 TCP_Socket::TCP_Socket(const TCP_Socket& rhs)
@@ -28,14 +28,14 @@ TCP_Socket::operator=(const TCP_Socket& rhs)
 	return (*this);
 }
 
-const int&
+const int
 TCP_Socket::get_fd(void) const
 {
 	return (_fd);
 }
 
 const sockaddr_in&
-TCP_Socket::get_name(void) const
+TCP_Socket::get_addr(void) const
 {
 	return (_addr);
 }

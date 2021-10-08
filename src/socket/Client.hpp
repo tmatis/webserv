@@ -1,27 +1,43 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Listener.hpp                                       :+:      :+:    :+:   */
+/*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/08 15:46:07 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 23:12:53 by mamartin         ###   ########.fr       */
+/*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
+/*   Updated: 2021/10/08 23:20:12 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef LISTENER_HPP
-# define LISTENER_HPP
+#ifndef CLIENT_HPP
+# define CLIENT_HPP
 
-# include <map>
+# include <vector>
+# include <poll.h>
 
 # include "TCP_Socket.hpp"
 
-class Listener : public TCP_Socket
+typedef struct pollfd	pollfd;
+
+typedef	enum e_client_state
+{
+	IDLE,
+	WAITING_ANSWER,
+	PENDING_REQUEST,
+	DISCONNECTED
+}		client_state;
+
+class Client : public TCP_Socket
 {
 	public:
 	
-		Listener(const char *address, int port);
+		Client(void);
+		
+		int			connect(int host_fd);
+		operator	pollfd() const;
+
+		client_state	state;
 };
 
 #endif

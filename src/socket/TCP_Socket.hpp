@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:16:14 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 17:30:10 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/08 18:16:31 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,13 @@ class TCP_Socket
 {
 	public:
 
-		TCP_Socket(const int& fd = -1, const sockaddr_in& address = sockaddr_in());
+		TCP_Socket(int fd = -1, const sockaddr_in& address = sockaddr_in());
 		TCP_Socket(const TCP_Socket& rhs);
 
 		TCP_Socket&			operator=(const TCP_Socket& rhs);
 
-		const int&			get_fd(void) const;
-		const sockaddr_in&	get_name(void) const;
+		const int			get_fd(void) const;
+		const sockaddr_in&	get_addr(void) const;
 		
 	protected:
 

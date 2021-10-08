@@ -1,27 +1,38 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Listener.hpp                                       :+:      :+:    :+:   */
+/*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/08 15:46:07 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 23:12:53 by mamartin         ###   ########.fr       */
+/*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
+/*   Updated: 2021/10/08 23:20:10 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef LISTENER_HPP
-# define LISTENER_HPP
+#include "Client.hpp"
 
-# include <map>
+Client::Client(void) :
+	state(PENDING_REQUEST) {}
 
-# include "TCP_Socket.hpp"
-
-class Listener : public TCP_Socket
+int
+Client::connect(int host_fd)
 {
-	public:
-	
-		Listener(const char *address, int port);
-};
+	socklen_t	size = sizeof(_addr);
 
-#endif
+	// create connected socket
+	_fd = accept(host_fd, (sockaddr*)&_addr, &size);
+	if (_fd == -1)
+		return (-1);
+	return (0);
+}
+
+Client::operator pollfd() const
+{
+	pollfd	pfd;
+
+	pfd.fd		= _fd;
+	pfd.events	= 0;
+	pfd.revents	= 0;
+	return (pfd);
+}
