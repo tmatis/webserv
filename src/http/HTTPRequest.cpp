@@ -1,16 +1,18 @@
 #include "HTTPRequest.hpp"
 #include <sstream>
 #include <iostream>
+#include <cstdlib>
 
 HTTPRequest::HTTPRequest(void)
 	: HTTPGeneral(), _method(""), _version(""),
-	  _uri("/"), _is_ready(false)
+	  _uri("/"), _is_ready(false), _command_set(false), _buffer("")
 {
 }
 
 HTTPRequest::HTTPRequest(HTTPRequest const &src)
 	: HTTPGeneral(src), _method(src._method),
-	  _version(src._version), _uri(src._uri), _is_ready(false)
+	  _version(src._version), _uri(src._uri),
+	  _is_ready(false), _command_set(src._command_set), _buffer(src._buffer)
 {
 }
 
@@ -23,6 +25,8 @@ HTTPRequest &HTTPRequest::operator=(HTTPRequest const &rhs)
 		_version = rhs._version;
 		_uri = rhs._uri;
 		_is_ready = rhs._is_ready;
+		_command_set = rhs._command_set;
+		_buffer = rhs._buffer;
 	}
 	return (*this);
 }
@@ -66,60 +70,86 @@ bool HTTPRequest::isReady(void) const
 	return (_is_ready);
 }
 
-void HTTPRequest::parseChunk(std::string const &chunk)
+static void format_request(std::string &buffer)
 {
-	_buffer += chunk;
-	// replace \r\n by \n
 	size_t pos = 0;
-	while ((pos = _buffer.find("\r\n", pos)) != std::string::npos)
+	while ((pos = buffer.find("\r\n", pos)) != std::string::npos)
 	{
-		_buffer.replace(pos, 2, "\n");
+		buffer.replace(pos, 2, "\n");
 		pos++;
 	}
 	// replace \r by \n
 	pos = 0;
-	while ((pos = _buffer.find("\r", pos)) != std::string::npos)
+	while ((pos = buffer.find("\r", pos)) != std::string::npos)
 	{
-		_buffer.replace(pos, 1, "\n");
+		buffer.replace(pos, 1, "\n");
 		pos++;
 	}
+}
 
-	// parse header if not already done
-	if (_method == "" && _buffer.find("\n") != std::string::npos)
+static std::string get_line_cut(std::string &buffer)
+{
+	size_t pos = buffer.find("\n");
+	if (pos == std::string::npos)
+		return ("");
+	std::string line = buffer.substr(0, pos);
+	buffer.erase(0, pos + 1);
+	return (line);
+}
+
+static std::vector<std::string> parse_request_command(std::string &buffer)
+{
+	std::string line = get_line_cut(buffer);
+
+	std::stringstream ss(line);
+	std::vector<std::string> tokens;
+	std::string token;
+	while (std::getline(ss, token, ' '))
+		tokens.push_back(token);
+	if (tokens.size() == 3)
+		return (tokens);
+	else
+		throw std::exception(); // header malformed
+}
+
+void HTTPRequest::parseChunk(std::string const &chunk)
+{
+	_buffer += chunk;
+	// replace \r\n by \n
+	format_request(_buffer);
+
+	// parse headers if not already done
+	if (!_command_set && _buffer.find("\n") != std::string::npos)
 	{
-		// get first line
-		size_t pos = _buffer.find("\n");
-		std::string line = _buffer.substr(0, pos);
-		_buffer.erase(0, pos + 1);
-
-		std::stringstream ss(line);
-		std::vector<std::string> tokens;
-		std::string token;
-		while (std::getline(ss, token, ' '))
-			tokens.push_back(token);
-		if (tokens.size() == 3)
-		{
-			_method = tokens[0];
-			_uri = tokens[1];
-			_version = tokens[2];
-		}
-		else
-			throw std::exception(); // header malformed
+		std::vector<std::string> tokens = parse_request_command(_buffer);
+		
+		_method = tokens[0];
+		_uri = tokens[1];
+		_version = tokens[2];
+		_command_set = true;
 	}
-	if (_method != "" && !_is_ready)
+	if (!_is_ready && _command_set)
 	{
 		size_t pos;
 
 		while ((pos = _buffer.find("\n")) != std::string::npos)
 		{
-			size_t pos = _buffer.find("\n");
-			std::string line = _buffer.substr(0, pos);
-			_buffer.erase(0, pos + 1);
+			std::string line = get_line_cut(_buffer);
 
-			if (line == "" && _method == "GET")
+			if (line == "" && !_header.getValue("Content-Length")) // if we have a content-length we need to get the body
 				_is_ready = true;
-			else
+			else if (line != "")
 				_header.parseLine(line);
 		}
+	}
+	if (!_is_ready && _header.getValue("Content-Length"))
+	{
+		const std::vector<std::string> *content_length = _header.getValue("Content-Length");
+		if (content_length != NULL)
+			return ; // header malformed: we do not have a content-length
+		size_t content_length_value = std::strtoul((*content_length)[0].c_str(), NULL, 10);
+		_buffer.resize(content_length_value);
+		_body = _buffer;
+		_is_ready = true;
 	}
 }
