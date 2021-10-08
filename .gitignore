@@ -8,3 +8,4 @@ unit_tests/Makefile
 webserv
 bin_test
 vscode/
+.vscode/
