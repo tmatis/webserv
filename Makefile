@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+         #
+#    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/09 12:08:46 by nouchata         ###   ########.fr        #
+#    Updated: 2021/10/09 14:16:07 by tmatis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@
 
 NAME	= webserv
 CC 		= clang++
-CFLAGS	= #-Wall -Wextra -Werror -std=c++98 -g
+CFLAGS	= -Wall -Wextra -Werror -std=c++98
 DFLAGS	= -MMD -MF $(@:.o=.d)
 AUTHOR	= tmatis mamartin nouchata
 DATE	= 30/09/2021
