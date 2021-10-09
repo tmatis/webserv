@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 23:25:57 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/09 02:55:27 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ class Server
 		virtual ~Server(void);
 
 		int		add_new_client(void);
-		void	delete_client(client_iterator client);
 		void	flush_clients(void);
 
 		/*
@@ -42,8 +41,6 @@ class Server
 		*/
 
 	private:
-
-		void					_close_socket(TCP_Socket& sock);
 
 		Listener				_host;		// listener socket
 		std::vector<Client>		_clients;	// list of clients connected

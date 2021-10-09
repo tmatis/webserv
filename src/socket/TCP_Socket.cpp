@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:32:57 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 18:16:50 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/09 03:00:21 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,13 +29,13 @@ TCP_Socket::operator=(const TCP_Socket& rhs)
 }
 
 const int
-TCP_Socket::get_fd(void) const
+TCP_Socket::fd(void) const
 {
 	return (_fd);
 }
 
 const sockaddr_in&
-TCP_Socket::get_addr(void) const
+TCP_Socket::addr(void) const
 {
 	return (_addr);
 }
@@ -53,6 +53,9 @@ CreationFailure::CreationFailure(const char* errinfo) :
 {
 	_info.append(strerror(errno));
 }
+
+TCP_Socket::
+CreationFailure::~CreationFailure() throw() {}
 
 const char*
 TCP_Socket::

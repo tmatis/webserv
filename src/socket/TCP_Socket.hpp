@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:16:14 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 18:16:31 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/09 03:00:05 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,8 @@ class TCP_Socket
 
 		TCP_Socket&			operator=(const TCP_Socket& rhs);
 
-		const int			get_fd(void) const;
-		const sockaddr_in&	get_addr(void) const;
+		const int			fd(void) const;
+		const sockaddr_in&	addr(void) const;
 		
 	protected:
 
@@ -40,6 +40,7 @@ class TCP_Socket
 		{
 			public:
 				CreationFailure(const char* errinfo);
+				virtual ~CreationFailure() throw();
 				virtual const char*	what(void) const throw();
 			private:
 				std::string			_info;
