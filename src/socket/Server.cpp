@@ -49,7 +49,10 @@ Server::flush_clients(void)
 	while (it != _clients.end())
 	{
 		if (it->state() == DISCONNECTED)
+		{
+			close(it->fd());
 			it = _clients.erase(it);
+		}
 		else
 			it++;
 	}
