@@ -3,10 +3,14 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
+#    By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
+<<<<<<< HEAD
 #    Updated: 2021/10/09 13:22:51 by tmatis           ###   ########.fr        #
+=======
+#    Updated: 2021/10/09 12:08:46 by nouchata         ###   ########.fr        #
+>>>>>>> master
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +21,11 @@
 
 NAME	= webserv
 CC 		= clang++
+<<<<<<< HEAD
 CFLAGS	= -Wall -Wextra -Werror -std=c++98
+=======
+CFLAGS	= #-Wall -Wextra -Werror -std=c++98 -g
+>>>>>>> master
 DFLAGS	= -MMD -MF $(@:.o=.d)
 AUTHOR	= tmatis mamartin nouchata
 DATE	= 30/09/2021
@@ -34,8 +42,10 @@ SRCS_PATH		= ./src
 
 INCLUDE_PATH	= ./src
 
-SRCS			= poll_cases.cpp http/HTTPHeader.cpp http/HTTPGeneral.cpp \
-					 http/HTTPRequest.cpp http/HTTPResponse.cpp
+SRCS	= 	poll_cases.cpp http/HTTPHeader.cpp http/HTTPGeneral.cpp \
+			http/HTTPRequest.cpp http/HTTPResponse.cpp \
+			socket/Client.cpp socket/Listener.cpp socket/Server.cpp \
+			socket/TCP_Socket.cpp polling/polling.cpp
 
 MAIN			= main.cpp
 
