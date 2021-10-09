@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:55:51 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/09 11:57:24 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/09 13:28:45 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class PollClass
 	typedef Server			server;
 	typedef Client			client;
 
-	public: //private:
+	private:
 	unsigned int						_timeout;
 	std::vector<std::pair<unsigned int, unsigned int> >	_server_data_size;
 	std::vector<pfd>					_pfd_list;

@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:16:14 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/09 11:56:33 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/09 13:28:32 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ class TCP_Socket
 		int					fd(void) const;
 		const sockaddr_in&	addr(void) const;
 		
-	public: //protected:
+	protected:
 
 		class CreationFailure : public std::exception
 		{

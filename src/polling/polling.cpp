@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:03:40 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/09 13:20:46 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/09 13:31:16 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,8 @@ void				PollClass::update_server_pfd(unsigned int index)
 	} catch (std::exception &e) { throw ; }
 	while (i < new_cfd_size)
 	{
-		if (this->_pfd_list[offset + i].fd == this->_server_list[index]->get_clients()[i].fd())
+		if (this->_pfd_list[offset + i].fd == \
+		this->_server_list[index]->get_clients()[i].fd())
 		{
 			switch (this->_server_list[index]->get_clients()[i].state())
 			{
@@ -135,7 +136,8 @@ void				PollClass::update_server_pfd(unsigned int index)
 	i = 0;
 	while (i < new_fst_size)
 	{
-		if (this->_pfd_list[offset + i].fd != this->_server_list[index]->get_files()[i].fd)
+		if (this->_pfd_list[offset + i].fd != \
+		this->_server_list[index]->get_files()[i].fd)
 		{
 			if (i < this->_server_data_size[index].second)
 			{
