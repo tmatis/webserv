@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:55:51 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/09 13:28:45 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/09 13:56:35 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,8 @@ class PollClass
 	 * accepted new clients since the last call to polling(). */
 	void			remove_server(server *server);
 	int				polling();
-	int				get_raw_revents(client const &client);
+	int				get_raw_revents(int const &fd, server *server = NULL);
+	int				get_raw_revents(client const &cl, server *server = NULL);
 
 	static pfd		make_pollfd(int fd, int events = POLLIN);
 };

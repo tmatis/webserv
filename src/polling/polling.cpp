@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:03:40 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/09 13:31:16 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/09 13:56:48 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,3 +167,31 @@ void				PollClass::update_pfd()
 	for (unsigned int i = 0 ; i < this->_server_list.size() ; i++)
 		this->update_server_pfd(i);
 }
+
+int					PollClass::get_raw_revents(int const &fd, server *server)
+{
+	unsigned int		offset = 0;
+	unsigned int		i = 0;
+
+	if (server)
+	{
+		offset += this->_server_list.size();
+		while (i < this->_server_list.size() && this->_server_list[i] != server)
+		{
+			offset += this->_server_data_size[i].first + this->_server_data_size[i].second;
+			i++;
+		}
+		if (i == this->_server_list.size())
+			return (-1);
+	}
+	while (offset < this->_pfd_list.size())
+	{
+		if (this->_pfd_list[offset].fd == fd)
+			return (this->_pfd_list[offset].revents);
+		offset++;
+	}
+	return (-1);
+}
+
+int					PollClass::get_raw_revents(client const &cl, server *server)
+{ return (this->get_raw_revents(cl.fd(), server)); }
