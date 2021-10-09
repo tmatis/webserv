@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   TCP_Socket.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:32:57 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/09 03:00:21 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/09 11:32:00 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ TCP_Socket::operator=(const TCP_Socket& rhs)
 	return (*this);
 }
 
-const int
+int
 TCP_Socket::fd(void) const
 {
 	return (_fd);

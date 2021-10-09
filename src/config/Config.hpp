@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 22:36:30 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 22:39:04 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/09 11:41:29 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CONFIG_HPP
 # define CONFIG_HPP
+# include <string>
 
 /*
 ** CONFIGURATION STRUCTURE FOR A SERVER
@@ -22,7 +23,7 @@
 
 typedef	struct Config
 {
-	char*								address;
+	std::string							address;
 	int									port;
 	//const std::string					name;
 	//const std::string					rootdir;

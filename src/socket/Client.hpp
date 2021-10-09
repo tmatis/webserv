@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/09 03:03:58 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/09 11:56:47 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,9 +46,9 @@ class Client : public TCP_Socket
 		operator			pollfd() const;
 
 		// getters
-		const client_state	state(void) const;
+		client_state		state(void) const;
 
-	private:
+	public: //private:
 
 		client_state		_state;
 		client_data			_http;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   TCP_Socket.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:16:14 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/09 03:00:05 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/09 11:56:33 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <unistd.h>
 # include <cstring>
+# include <cerrno>
 # include <fcntl.h>
 # include <sys/types.h>
 # include <sys/socket.h>
@@ -31,10 +32,10 @@ class TCP_Socket
 
 		TCP_Socket&			operator=(const TCP_Socket& rhs);
 
-		const int			fd(void) const;
+		int					fd(void) const;
 		const sockaddr_in&	addr(void) const;
 		
-	protected:
+	public: //protected:
 
 		class CreationFailure : public std::exception
 		{

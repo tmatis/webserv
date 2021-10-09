@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/09 03:02:54 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/09 11:41:58 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
 Server::Server(Config* conf, int n) :
-	_host(Listener(conf[0].address, conf[0].port)) // create listener socket
+	_host(Listener(conf[0].address.c_str(), conf[0].port)) // create listener socket
 {
 	for (int i = 0; i < n; i++)
 		_configs.push_back(conf[n]); // add all configs relative to the same address:port
@@ -57,3 +57,10 @@ Server::flush_clients(void)
 			it++;
 	}
 }
+
+std::vector<Client> const	&Server::get_clients() const
+{ return (this->_clients); }
+std::vector<pollfd> const	&Server::get_files() const
+{ return (this->_files); }
+Listener			const	&Server::get_listener() const
+{ return (this->_host); }

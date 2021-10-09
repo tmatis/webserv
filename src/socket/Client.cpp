@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/09 03:04:16 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/09 11:31:52 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,13 @@ Client::operator pollfd() const
 
 	pfd.fd		= _fd;
 	pfd.events	= 0;
+	if (this->_state == WAITING_ANSWER || this->_state == PENDING_REQUEST)
+		pfd.events = this->_state == PENDING_REQUEST ? POLLIN : POLLOUT;
 	pfd.revents	= 0;
 	return (pfd);
 }
 
-const client_state
+client_state
 Client::state(void) const
 {
 	return (_state);

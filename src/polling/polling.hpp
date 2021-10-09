@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:55:51 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/08 20:43:41 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/09 11:57:24 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include <vector>
 # include <utility>
 # include "poll.h"
+# include "../socket/Server.hpp"
 
 class ServerClass;
 class ClientClass;
@@ -26,12 +27,12 @@ class PollClass
 {
 	public:
 	typedef struct pollfd	pfd;
-	typedef ServerClass		server;
-	typedef ClientClass		client;
+	typedef Server			server;
+	typedef Client			client;
 
-	private:
+	public: //private:
 	unsigned int						_timeout;
-	std::vector<std::pair<int, int> >	_server_data_size;
+	std::vector<std::pair<unsigned int, unsigned int> >	_server_data_size;
 	std::vector<pfd>					_pfd_list;
 	std::vector<server *>				_server_list;
 
@@ -53,6 +54,7 @@ class PollClass
 	 * accepted new clients since the last call to polling(). */
 	void			remove_server(server *server);
 	int				polling();
+	int				get_raw_revents(client const &client);
 
 	static pfd		make_pollfd(int fd, int events = POLLIN);
 };

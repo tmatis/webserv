@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/09 02:55:27 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/09 12:15:02 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,15 +32,22 @@ class Server
 		int		add_new_client(void);
 		void	flush_clients(void);
 
+
+
 		/*
 			following functions may be useful... or not
 			i will add them if they're necessary in the future
 		
 			get hosts ?
 			get clients ?
-		*/
 
-	private:
+			~~~~~ YES they are hehe
+		*/
+		std::vector<Client> const	&get_clients() const;
+		std::vector<pollfd> const	&get_files() const;
+		Listener			const	&get_listener() const;
+
+	public: //private:
 
 		Listener				_host;		// listener socket
 		std::vector<Client>		_clients;	// list of clients connected
