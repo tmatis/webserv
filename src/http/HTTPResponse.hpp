@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 20:01:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 21:29:04 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/09 11:56:20 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ public:
 
 	void clear(void);
 
-	std::string toString(void) const;
+	std::string toString(void);
 
 };
 

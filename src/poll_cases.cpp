@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 17:52:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 22:28:55 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/09 14:00:57 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,6 @@ int event_pollin(std::vector<struct pollfd> &pollfd,
 	else
 	{
 		buffer[read_bytes] = '\0';
-		std::cout << "client " << it - pollfd.begin()
-				  << ": " << buffer;
 		client_datas[it - pollfd.begin() - 1].first.parseChunk(buffer);
 		if (client_datas[it - pollfd.begin() - 1].first.isReady())
 			it->events = POLLOUT; // when we finished read we can write
@@ -65,19 +63,18 @@ int event_pollout(std::vector<struct pollfd> &pollfd,
 				  std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
 				  std::vector<struct pollfd>::iterator it)
 {
-    client_datas[it - pollfd.begin() - 1]
-		.second.getHeader().addValue("Content-Type",
-		std::vector<std::string>(1, "text/plain"));
-	client_datas[it - pollfd.begin() - 1]
-		.second.setBody("your are client: " 
-			+ itoa(it - pollfd.begin()) + "\r\n");
-	client_datas[it - pollfd.begin() - 1]
-		.second.setStatus(OK);
-	client_datas[it - pollfd.begin() - 1]
-		.second.setReady(true);
+	HTTPRequest &request = client_datas[it - pollfd.begin() - 1].first;
+	HTTPResponse &responseRequest = client_datas[it - pollfd.begin() - 1].second;
 
-	std::string response = client_datas[it - pollfd.begin() - 1]
-									.second.toString();
+    responseRequest.getHeader().addValue("Content-Type",
+		std::vector<std::string>(1, "text/plain"));
+	responseRequest.setBody("your are client: "
+		+ itoa(it - pollfd.begin()) + "\r\n"
+		+ "your request: " + request.getMethod() + " " + request.getURI());
+	responseRequest.setStatus(OK);
+	responseRequest.setReady(true);
+
+	std::string response = responseRequest.toString();
 
 	client_datas[it - pollfd.begin() - 1].first.clear();
 	client_datas[it - pollfd.begin() - 1].second.clear();

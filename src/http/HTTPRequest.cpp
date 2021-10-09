@@ -3,6 +3,20 @@
 #include <iostream>
 #include <cstdlib>
 
+HTTPRequest::HTTPRequestException::HTTPRequestException(const char *errinfo)
+	: _info(errinfo)
+{
+}
+
+HTTPRequest::HTTPRequestException::~HTTPRequestException() throw()
+{
+}
+
+const char *HTTPRequest::HTTPRequestException::what() const throw()
+{
+	return (_info.c_str());
+}
+
 HTTPRequest::HTTPRequest(void)
 	: HTTPGeneral(), _method(""), _version(""),
 	  _uri("/"), _is_ready(false), _command_set(false), _header_set(false), _buffer("")
@@ -110,6 +124,8 @@ static std::vector<std::string> parse_request_command(std::string &buffer)
 	return (tokens);
 }
 
+// TODO: weird things happen when the command in not well formed in nginx
+
 void HTTPRequest::parseChunk(std::string const &chunk)
 {
 	_buffer += chunk;
@@ -124,9 +140,13 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 		{
 			_method = tokens[0];
 			_uri = tokens[1];
+			if (_uri[0] != '/')
+				throw HTTPRequestException("URI must start with '/'");
 			_version = tokens[2];
 			_command_set = true;
 		}
+		else
+			throw HTTPRequestException("Command malformed");
 	}
 	if (_command_set && !_header_set)
 	{
@@ -153,8 +173,16 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 		{
 			size_t content_length_value = std::strtoul((*content_length)[0].c_str(), NULL, 10);
 			if (_body.size() + _buffer.size() >= content_length_value)
-				_buffer.resize(content_length_value - _body.size());
-			_body += _buffer;
+			{
+				std::string tmp = _buffer.substr(0, content_length_value - _body.size());
+				_body += tmp;
+				_buffer.erase(0, content_length_value - _body.size());
+			}
+			else
+			{
+				_body += _buffer;
+				_buffer.clear();
+			}
 			if (_body.size() == content_length_value)
 				_is_ready = true;
 		}
@@ -173,4 +201,5 @@ void HTTPRequest::clear(void)
 	_is_ready = false;
 	_command_set = false;
 	_header_set = false;
+	this->parseChunk(_buffer);
 }
