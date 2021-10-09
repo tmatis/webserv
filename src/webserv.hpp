@@ -15,6 +15,11 @@
 # include "http/HTTPHeader.hpp"
 # include "http/HTTPRequest.hpp"
 # include "http/HTTPResponse.hpp"
+# include "polling/polling.hpp"
+# include "socket/Client.hpp"
+# include "socket/Listener.hpp"
+# include "socket/Server.hpp"
+# include "socket/TCP_Socket.hpp"
 
 int event_pollin(std::vector<struct pollfd> &pollfd,
 				 std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
