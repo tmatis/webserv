@@ -6,7 +6,7 @@
 #    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/09 14:16:07 by tmatis           ###   ########.fr        #
+#    Updated: 2021/10/10 17:11:55 by tmatis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -227,7 +227,7 @@ endif
 $(NAME):	${OBJS} ${OBJ_MAIN}
 			@$(call display_progress_bar)
 			@$(call run_and_test,$(CC) $(CFLAGS) $(DFLAGS) -I$(INCLUDE_PATH) -o $@ ${OBJS} ${OBJ_MAIN})
-			@echo "                                                         "
+			@echo "                                                              "
 
 setup:
 	@$(call save_files_changed)
