@@ -151,7 +151,7 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 		else
 			throw HTTPRequestException("Command malformed");
 	}
-	if (_command_set && !_header_set)
+	if (_command_set && !_header_set && _buffer.find("\n") != std::string::npos)
 	{
 		size_t pos;
 
@@ -242,7 +242,6 @@ static std::vector<std::string> split_header_value(std::string const &value)
 			token.erase(0, 1);
 		while (token.size() && token[token.size() - 1] == ' ')
 			token.erase(token.size() - 1, 1);
-		tokens.push_back(token);
 		tokens.push_back(token);
 	}
 	return (tokens);
