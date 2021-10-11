@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/11 16:01:32 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/12 00:29:03 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,16 @@ class Server
 
 		typedef std::vector<Client>::iterator	client_iterator;
 
-		Server(Config* conf, int n);
+		Server(const Config& conf);
 		virtual ~Server(void);
 
+		// handle connections
 		int		add_new_client(void);
 		void	flush_clients(void);
+
+		// handle HTTP messages
+		int		handle_request(Client &client);
+		void	send_response(Client &client);
 
 		// getters
 		const std::vector<Client>&	get_clients(void) const;
@@ -39,10 +44,17 @@ class Server
 
 	private:
 
-		Listener				_host;		// listener socket
-		std::vector<Client>		_clients;	// list of clients connected
-		std::vector<pollfd>		_files;		// files opened
-		std::vector<Config>		_configs;	// configs on the same address:port
+		bool						_read_request(Client &client);
+		int							_resolve_host(HTTPRequest& request);
+		const Route&				_resolve_routes(const std::string& uri);
+		int							_check_request_validity(const Route& rules, HTTPRequest& request);
+
+		Listener					_host;		// listener socket
+		std::vector<Client>			_clients;	// list of clients connected
+		std::vector<pollfd>			_files;		// files opened
+		const Config&				_config;	// configuration of the server
+
+		static const std::string	_all_methods[3]; // methods implemented by the server
 };
 
 #endif

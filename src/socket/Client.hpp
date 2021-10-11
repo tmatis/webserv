@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/09 13:28:40 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/12 00:33:03 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,28 +30,28 @@ typedef	enum e_client_state
 	DISCONNECTED
 }		client_state;
 
-typedef	struct client_data
-{
-	HTTPRequest		request;
-	HTTPResponse	response;
-}		client_data;
-
 class Client : public TCP_Socket
 {
 	public:
 	
 		Client(void);
 		
-		int					connect(int host_fd);
-		operator			pollfd() const;
+		int				connect(int host_fd);
+		operator		pollfd() const;
 
 		// getters
-		client_state		state(void) const;
+		client_state	state(void) const;
+		HTTPRequest&	request(void);
+		HTTPResponse&	response(void);
+
+		// setters
+		void			state(client_state st);
 
 	private:
 
-		client_state		_state;
-		client_data			_http;
+		client_state	_state;
+		HTTPRequest		_request;
+		HTTPResponse	_response;
 };
 
 #endif
