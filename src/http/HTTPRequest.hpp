@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 14:27:06 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/11 18:12:22 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/11 19:29:43 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,12 @@
 #define HTTPREQUEST_HPP
 
 #include "HTTPGeneral.hpp"
+
+enum HTTPConnectionType {
+	HTTP_CONNECTION_CLOSE = false,
+	HTTP_CONNECTION_KEEP_ALIVE = true
+};
+
 
 class HTTPRequest : public HTTPGeneral
 {
@@ -61,8 +67,9 @@ public:
 	void clear(void);
 
 	std::string const &getHost(void) const;
-	void setHost(std::string const &host);
-	
+	std::string const *getUserAgent(void) const;
+	std::vector<std::string> getAccept(void) const;
+	HTTPConnectionType getConnection(void) const;
 };
 
 #endif

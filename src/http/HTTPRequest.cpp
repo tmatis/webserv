@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 
+
 HTTPRequest::HTTPRequestException::HTTPRequestException(const char *errinfo)
 	: _info(errinfo)
 {
@@ -219,4 +220,52 @@ void HTTPRequest::clear(void)
 std::string const &HTTPRequest::getHost(void) const
 {
 	return (_host);
+}
+
+std::string const *HTTPRequest::getUserAgent(void) const
+{
+	const std::string *value = _header.getValue("User-Agent");
+	if (value)
+		return (value);
+	else
+		return (NULL);
+}
+
+static std::vector<std::string> split_header_value(std::string const &value)
+{
+	std::vector<std::string> tokens;
+	std::stringstream ss(value);
+	std::string token;
+	while (std::getline(ss, token, ','))
+	{
+		while (token.size() && token[0] == ' ')
+			token.erase(0, 1);
+		while (token.size() && token[token.size() - 1] == ' ')
+			token.erase(token.size() - 1, 1);
+		tokens.push_back(token);
+		tokens.push_back(token);
+	}
+	return (tokens);
+}
+
+std::vector<std::string> HTTPRequest::getAccept(void) const
+{
+	std::vector<std::string> values;
+	const std::string *value = _header.getValue("Accept");
+	if (value)
+		values = split_header_value(*value);
+	return (values);
+}
+
+HTTPConnectionType HTTPRequest::getConnection(void) const
+{
+	const std::string *value = _header.getValue("Connection");
+	if (value)
+	{
+		if (*value == "keep-alive")
+			return (HTTP_CONNECTION_KEEP_ALIVE);
+		else if (*value == "close")
+			return (HTTP_CONNECTION_CLOSE);
+	}
+	return (HTTP_CONNECTION_CLOSE);
 }
