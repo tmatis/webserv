@@ -91,7 +91,7 @@ void				PollClass::update_server_pfd(unsigned int index)
 	offset += this->_server_list.size();
 	try {
 		if (this->_pfd_list.capacity() < offset + new_cfd_size + new_fst_size)
-			this->_pfd_list.resize(offset + new_cfd_size + new_fst_size);
+			this->_pfd_list.reserve(offset + new_cfd_size + new_fst_size);
 	} catch (std::exception &e) { throw ; }
 	while (i < new_cfd_size)
 	{
