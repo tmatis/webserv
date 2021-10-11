@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 14:27:06 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/09 13:42:07 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/11 20:48:00 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,12 @@
 #define HTTPREQUEST_HPP
 
 #include "HTTPGeneral.hpp"
+
+enum HTTPConnectionType
+{
+	HTTP_CONNECTION_CLOSE = false,
+	HTTP_CONNECTION_KEEP_ALIVE = true
+};
 
 class HTTPRequest : public HTTPGeneral
 {
@@ -25,36 +31,61 @@ private:
 	bool _command_set;
 	bool _header_set;
 	std::string _buffer;
+	void _parseCommand(void);
+	void _parseHeader(void);
+	void _parseBody(void);
+
+	/* headers info */
+	std::string _host;
 
 public:
+/* ****************** EXCEPTION DEFINITIONS ****************** */
+
 	class HTTPRequestException : public std::exception
 	{
 	public:
 		HTTPRequestException(const char *errinfo);
 		virtual ~HTTPRequestException() throw();
 		virtual const char *what(void) const throw();
+
 	private:
-			const std::string	_info;
+		const std::string _info;
 	};
+
+/* ********************** CONSTRUCTORS *********************** */
+
 	HTTPRequest(void);
 	HTTPRequest(const HTTPRequest &src);
-	HTTPRequest &operator=(const HTTPRequest &src);
 	~HTTPRequest(void);
 
-	void setMethod(std::string const &method);
+
+/* ********************** OPERATORS ************************* */
+
+	HTTPRequest &operator=(const HTTPRequest &src);
+
+
+
+/* ************************* GETTERS ************************* */
 	std::string const &getMethod(void) const;
-
-	void setVersion(std::string const &version);
-	std::string const &getVersion(void) const;
-
-	void setURI(std::string const &uri);
 	std::string const &getURI(void) const;
-
+	std::string const &getVersion(void) const;
+	std::string const &getHost(void) const;
+	std::string const *getUserAgent(void) const;
+	std::vector<std::string> getAccept(void) const;
+	HTTPConnectionType getConnection(void) const;
 	bool isReady(void) const;
 
-	void parseChunk(std::string const &chunk);
+/* ************************* SETTERS ************************* */
 
+	void setMethod(std::string const &method);
+	void setVersion(std::string const &version);
+	void setURI(std::string const &uri);
+
+/* ************************* METHODS ************************* */
+
+	void parseChunk(std::string const &chunk);
 	void clear(void);
+
 };
 
 #endif
