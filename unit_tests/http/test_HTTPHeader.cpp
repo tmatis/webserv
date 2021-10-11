@@ -5,18 +5,16 @@ car_test test_parseLine(void)
 	HTTPHeader header;
 
 	header.parseLine("name: value");
-	assert((*header.getValue("name"))[0] == "value");
-	assert(header.getValue("name")->size() == 1);
+	assert((*header.getValue("name")) == "value");
 
 	header.parseLine("name: value1, value2");
-	assert((*header.getValue("name"))[1] == "value2");
-	assert(header.getValue("name")->size() == 2);
+	assert((*header.getValue("name")) == "value1, value2");
 
 	header.parseLine("name: value3\n");
-	assert((*header.getValue("name"))[0] == "value3");
+	assert((*header.getValue("name")) == "value3");
 
 	header.parseLine("name: value4\r\n");
-	assert((*header.getValue("name"))[0] == "value4");
+	assert((*header.getValue("name")) == "value4");
 }
 
 car_test test_toString(void)
