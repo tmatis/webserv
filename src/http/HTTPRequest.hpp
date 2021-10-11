@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 14:27:06 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/09 13:42:07 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/11 18:12:22 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,10 @@ private:
 	bool _command_set;
 	bool _header_set;
 	std::string _buffer;
+
+	/* headers info */
+	std::string _host;
+
 
 public:
 	class HTTPRequestException : public std::exception
@@ -55,6 +59,10 @@ public:
 	void parseChunk(std::string const &chunk);
 
 	void clear(void);
+
+	std::string const &getHost(void) const;
+	void setHost(std::string const &host);
+	
 };
 
 #endif

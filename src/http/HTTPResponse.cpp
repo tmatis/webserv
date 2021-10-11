@@ -151,8 +151,7 @@ std::string HTTPResponse::toString(void)
 {
 	std::string res;
 
-	_header.addValue("Content-Length",
-					 std::vector<std::string>(1, itoa(_body.size())));
+	_header.addValue("Content-Length", itoa(_body.size()));
 	res += "HTTP/1.1 " + itoa(_status) + " " + status_code_to_string(_status) + "\r\n";
 	res += _header.toString();
 	res += "\r\n";

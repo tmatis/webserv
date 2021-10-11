@@ -46,3 +46,8 @@ void HTTPGeneral::clear(void)
 	_header.clear();
 	_body.clear();
 }
+
+size_t HTTPGeneral::getBodySize(void) const
+{
+	return (_body.size());
+}

@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:15:26 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/09 13:49:21 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/11 19:07:36 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@
 class HTTPHeader
 {
 private:
-	std::vector<std::pair<std::string, std::vector<std::string> > > _headers;
+	std::vector<std::pair<std::string, std::string > > _headers;
+	bool _is_valid;
 
 public:
 	class HTTPHeaderException : public std::exception
@@ -41,12 +42,15 @@ public:
 
 	void parseLine(std::string line);
 
-	void addValue(std::string key, std::vector<std::string> const &value);
-	std::vector<std::string> const *getValue(std::string key) const;
+	void addValue(std::string key, std::string const &value);
+	std::string const *getValue(std::string key) const;
 
 	std::string toString(void) const;
 
 	void clear(void);
+
+	bool isValid(void) const;
+
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:12:37 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/08 21:02:31 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/11 19:07:28 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ public:
 	/*  Getters  */
 	HTTPHeader &getHeader(void);
 	std::string const &getBody(void) const;
+	size_t getBodySize(void) const;
 	
 	/*  Setters  */
 	void setHeader(HTTPHeader const &header);

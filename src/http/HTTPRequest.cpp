@@ -19,7 +19,9 @@ const char *HTTPRequest::HTTPRequestException::what() const throw()
 
 HTTPRequest::HTTPRequest(void)
 	: HTTPGeneral(), _method(""), _version(""),
-	  _uri("/"), _is_ready(false), _command_set(false), _header_set(false), _buffer("")
+	  _uri("/"), _is_ready(false), _command_set(false),
+	  _header_set(false), _buffer(""),
+	  _host("")
 {
 }
 
@@ -168,10 +170,10 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 	}
 	if (_header_set && !_is_ready)
 	{
-		const std::vector<std::string> *content_length = _header.getValue("Content-Length");
+		const std::string *content_length = _header.getValue("Content-Length");
 		if (content_length)
 		{
-			size_t content_length_value = std::strtoul((*content_length)[0].c_str(), NULL, 10);
+			size_t content_length_value = std::strtoul(content_length->c_str(), NULL, 10);
 			if (_body.size() + _buffer.size() >= content_length_value)
 			{
 				std::string tmp = _buffer.substr(0, content_length_value - _body.size());
@@ -189,6 +191,16 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 		else
 			_is_ready = true;
 	}
+	if (_is_ready)
+	{
+		if (_header.isValid() == false)
+			throw HTTPRequestException("Invalid header");
+		const std::string *values = _header.getValue("Host");
+		if (values)
+			_host = *values;
+		else
+			throw HTTPRequestException("Host header not found");
+	}
 }
 
 void HTTPRequest::clear(void)
@@ -202,4 +214,9 @@ void HTTPRequest::clear(void)
 	_command_set = false;
 	_header_set = false;
 	this->parseChunk(_buffer);
+}
+
+std::string const &HTTPRequest::getHost(void) const
+{
+	return (_host);
 }

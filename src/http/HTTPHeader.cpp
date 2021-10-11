@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/09 14:03:34 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/11 19:07:39 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,19 +28,22 @@ const char *HTTPHeader::HTTPHeaderException::what() const throw()
 }
 
 HTTPHeader::HTTPHeader(void)
-	: _headers()
+	: _headers(), _is_valid(false)
 {
 }
 
 HTTPHeader::HTTPHeader(HTTPHeader const &src)
-	: _headers(src._headers)
+	: _headers(src._headers), _is_valid(src._is_valid)
 {
 }
 
 HTTPHeader &HTTPHeader::operator=(HTTPHeader const &rhs)
 {
 	if (this != &rhs)
+	{
 		this->_headers = rhs._headers;
+		this->_is_valid = rhs._is_valid;
+	}
 	return (*this);
 }
 
@@ -48,9 +51,9 @@ HTTPHeader::~HTTPHeader(void)
 {
 }
 
-void HTTPHeader::addValue(std::string key, std::vector<std::string> const &value)
+void HTTPHeader::addValue(std::string key, std::string const &value)
 {
-	for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator
+	for (std::vector<std::pair<std::string, std::string > >::iterator
 			 it = _headers.begin();
 		 it != _headers.end(); ++it)
 	{
@@ -63,16 +66,9 @@ void HTTPHeader::addValue(std::string key, std::vector<std::string> const &value
 	_headers.push_back(std::make_pair(key, value));
 }
 
-/* 
-* need to be at the format:
-* title: value, value2; comment, value3
-* ; - > comment
-* , -> value separator
-*/
-
 void HTTPHeader::parseLine(std::string line)
 {
-	std::vector<std::string> tokens;
+	std::string tokens;
 
 	if (!line.empty() && *(line.end() - 1) == '\n')
 		line.resize(line.size() - 1);
@@ -80,28 +76,17 @@ void HTTPHeader::parseLine(std::string line)
 		line.resize(line.size() - 1);
 	size_t pos = line.find(":");
 	if (pos == std::string::npos)
-		throw HTTPHeaderException("Invalid header line");
+		_is_valid = false;
 	std::string title = line.substr(0, pos);
 	std::string value = line.substr(pos + 1);
 	if (value.empty() || title.empty())
-		throw HTTPHeaderException("Invalid header line");
-	// split value by ,
-	std::stringstream ss(value);
-	std::string token;
-	while (std::getline(ss, token, ','))
-	{
-		while (token.size() > 0 && (token[0] == ' '))
-			token.erase(0, 1);
-		while (token.size() > 0 && (token[token.size() - 1] == ' '))
-			token.erase(token.size() - 1, 1);
-		tokens.push_back(token);
-	}
-	this->addValue(title, tokens);
+		_is_valid = false;
+	this->addValue(title, value);
 }
 
-std::vector<std::string> const *HTTPHeader::getValue(std::string key) const
+std::string const *HTTPHeader::getValue(std::string key) const
 {
-	for (std::vector<std::pair<std::string, std::vector<std::string> > >::const_iterator
+	for (std::vector<std::pair<std::string, std::string > >::const_iterator
 			 it = _headers.begin();
 		 it != _headers.end(); ++it)
 	{
@@ -114,24 +99,19 @@ std::vector<std::string> const *HTTPHeader::getValue(std::string key) const
 std::string HTTPHeader::toString(void) const
 {
 	std::string result;
-	for (std::vector<std::pair<std::string, std::vector<std::string> > >::const_iterator
+	for (std::vector<std::pair<std::string, std::string > >::const_iterator
 			 it = _headers.begin();
 		 it != _headers.end(); ++it)
-	{
-		result += it->first + ": ";
-		for (std::vector<std::string>::const_iterator it2 = it->second.begin();
-			 it2 != it->second.end(); ++it2)
-		{
-			result += *it2;
-			if (it2 != it->second.end() - 1)
-				result += ",";
-		}
-		result += "\r\n";
-	}
+		result += it->first + ": " + it->second + "\r\n";
 	return (result);
 }
 
 void HTTPHeader::clear(void)
 {
 	_headers.clear();
+}
+
+bool HTTPHeader::isValid(void) const
+{
+	return (_is_valid);
 }
