@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/09 13:28:21 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/11 16:01:32 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,20 +32,10 @@ class Server
 		int		add_new_client(void);
 		void	flush_clients(void);
 
-
-
-		/*
-			following functions may be useful... or not
-			i will add them if they're necessary in the future
-		
-			get hosts ?
-			get clients ?
-
-			~~~~~ YESSSS they are hehe
-		*/
-		std::vector<Client> const	&get_clients() const;
-		std::vector<pollfd> const	&get_files() const;
-		Listener			const	&get_listener() const;
+		// getters
+		const std::vector<Client>&	get_clients(void) const;
+		const std::vector<pollfd>&	get_files(void) const;
+		const Listener&				get_listener(void) const;
 
 	private:
 
