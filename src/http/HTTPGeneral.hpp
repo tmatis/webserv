@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:12:37 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/11 20:30:26 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/11 20:55:05 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,11 +40,13 @@ public:
 	HTTPGeneral &operator=(HTTPGeneral const &src);
 
 /* ************************* GETTERS ************************* */
+
 	HTTPHeader &getHeader(void);
 	std::string const &getBody(void) const;
 	size_t getBodySize(void) const;
 
 /* ************************* SETTERS ************************* */
+
 	void setHeader(HTTPHeader const &header);
 	void setBody(std::string const &body);
 

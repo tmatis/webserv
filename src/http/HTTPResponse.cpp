@@ -161,6 +161,8 @@ void HTTPResponse::clear(void)
 	_is_ready = false;
 }
 
+// transform response to string ready to be sent
+
 std::string HTTPResponse::toString(void)
 {
 	std::string res;

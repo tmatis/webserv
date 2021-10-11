@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/11 20:33:42 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/11 20:55:54 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ bool HTTPHeader::isValid(void) const
 
 /* ************************* METHODS ************************* */
 
+// replace or add a header
 void HTTPHeader::addValue(std::string key, std::string const &value)
 {
 	for (std::vector<std::pair<std::string, std::string> >::iterator
@@ -79,6 +80,8 @@ void HTTPHeader::addValue(std::string key, std::string const &value)
 	_headers.push_back(std::make_pair(key, value));
 }
 
+
+// parse line at format: key: value
 void HTTPHeader::parseLine(std::string line)
 {
 	std::string tokens;
@@ -104,8 +107,7 @@ void HTTPHeader::parseLine(std::string line)
 	this->addValue(title, value);
 }
 
-
-
+// transform header to string
 std::string HTTPHeader::toString(void) const
 {
 	std::string result;

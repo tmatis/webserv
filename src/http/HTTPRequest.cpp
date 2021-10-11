@@ -192,6 +192,8 @@ std::string const &HTTPRequest::getVersion(void) const
 
 /* ************************* METHODS ************************* */
 
+// parse command if we have a complete request
+
 void HTTPRequest::_parseCommand(void)
 {
 	std::vector<std::string> tokens = parse_request_command(_buffer);
@@ -207,6 +209,8 @@ void HTTPRequest::_parseCommand(void)
 	else
 		throw HTTPRequestException("Command malformed");
 }
+
+// parse header if we have a complete request
 
 void HTTPRequest::_parseHeader(void)
 {
@@ -226,6 +230,8 @@ void HTTPRequest::_parseHeader(void)
 			_header.parseLine(line);
 	}
 }
+
+// add bytes to body and exeding bytes to buffer
 
 void HTTPRequest::_parseBody(void)
 {
@@ -252,7 +258,7 @@ void HTTPRequest::_parseBody(void)
 		_is_ready = true;
 }
 
-// TODO: weird things happen when the command in not well formed in nginx
+// parse a chunk of data so we can have multiple read to form a complete request
 
 void HTTPRequest::parseChunk(std::string const &chunk)
 {
