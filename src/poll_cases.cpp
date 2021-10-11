@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 17:52:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/09 14:00:57 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/11 18:56:36 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,7 @@ int event_pollout(std::vector<struct pollfd> &pollfd,
 	HTTPRequest &request = client_datas[it - pollfd.begin() - 1].first;
 	HTTPResponse &responseRequest = client_datas[it - pollfd.begin() - 1].second;
 
-    responseRequest.getHeader().addValue("Content-Type",
-		std::vector<std::string>(1, "text/plain"));
+    responseRequest.getHeader().addValue("Content-Type", "text/plain");
 	responseRequest.setBody("your are client: "
 		+ itoa(it - pollfd.begin()) + "\r\n"
 		+ "your request: " + request.getMethod() + " " + request.getURI());

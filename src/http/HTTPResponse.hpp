@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 20:01:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/09 11:56:20 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/11 20:54:22 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #define HTTPRESPONSE_HPP
 
 #include "HTTPGeneral.hpp"
+
+/* *********************** UTILITIES ************************* */
 
 enum status_code
 {
@@ -60,21 +62,31 @@ private:
 	bool		_is_ready;
 
 public:
+/* ********************** CONSTRUCTORS *********************** */
 	HTTPResponse(void);
 	HTTPResponse(HTTPResponse const &src);
-	HTTPResponse &operator=(HTTPResponse const &src);
 	~HTTPResponse(void);
 
+/* ********************** OPERATORS ************************* */
+
+	HTTPResponse &operator=(HTTPResponse const &src);
+
+/* *********************** UTILITIES ************************* */
 	static std::string const &status_code_to_string(status_code code);
 	
-	void setStatus(status_code code);
+/* ************************* GETTERS ************************* */
+	
 	status_code getStatus(void) const;
-
-	void setReady(bool b);
 	bool isReady(void) const;
 
-	void clear(void);
+/* ************************* SETTERS ************************* */
 
+	void setStatus(status_code code);
+	void setReady(bool b);
+
+/* ************************* METHODS ************************* */
+
+	void clear(void);
 	std::string toString(void);
 
 };
