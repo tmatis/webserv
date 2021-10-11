@@ -6,12 +6,14 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/11 20:04:11 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/11 20:33:42 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HTTPHeader.hpp"
 #include <sstream>
+
+/* ********************** CONSTRUCTORS *********************** */
 
 HTTPHeader::HTTPHeader(void)
 	: _headers(), _is_valid(true)
@@ -23,6 +25,13 @@ HTTPHeader::HTTPHeader(HTTPHeader const &src)
 {
 }
 
+
+HTTPHeader::~HTTPHeader(void)
+{
+}
+
+/* ********************** OPERATORS ************************* */
+
 HTTPHeader &HTTPHeader::operator=(HTTPHeader const &rhs)
 {
 	if (this != &rhs)
@@ -33,9 +42,27 @@ HTTPHeader &HTTPHeader::operator=(HTTPHeader const &rhs)
 	return (*this);
 }
 
-HTTPHeader::~HTTPHeader(void)
+/* ************************* GETTERS ************************* */
+
+std::string const *HTTPHeader::getValue(std::string key) const
 {
+	for (std::vector<std::pair<std::string, std::string> >::const_iterator
+			 it = _headers.begin();
+		 it != _headers.end(); ++it)
+	{
+		if (it->first == key)
+			return (&it->second);
+	}
+	return (NULL);
 }
+
+
+bool HTTPHeader::isValid(void) const
+{
+	return (_is_valid);
+}
+
+/* ************************* METHODS ************************* */
 
 void HTTPHeader::addValue(std::string key, std::string const &value)
 {
@@ -77,17 +104,7 @@ void HTTPHeader::parseLine(std::string line)
 	this->addValue(title, value);
 }
 
-std::string const *HTTPHeader::getValue(std::string key) const
-{
-	for (std::vector<std::pair<std::string, std::string> >::const_iterator
-			 it = _headers.begin();
-		 it != _headers.end(); ++it)
-	{
-		if (it->first == key)
-			return (&it->second);
-	}
-	return (NULL);
-}
+
 
 std::string HTTPHeader::toString(void) const
 {
@@ -102,9 +119,4 @@ std::string HTTPHeader::toString(void) const
 void HTTPHeader::clear(void)
 {
 	_headers.clear();
-}
-
-bool HTTPHeader::isValid(void) const
-{
-	return (_is_valid);
 }

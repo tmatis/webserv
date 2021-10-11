@@ -1,6 +1,8 @@
 #include "HTTPResponse.hpp"
 #include <sstream>
 
+/* *********************** UTILITIES ************************* */
+
 const short HTTPResponse::_status_code[35] =
 	{
 		100,
@@ -95,6 +97,8 @@ std::string itoa(T value)
 	return os.str();
 }
 
+/* ********************** CONSTRUCTORS *********************** */
+
 HTTPResponse::HTTPResponse(void)
 	: HTTPGeneral(), _status(OK), _is_ready(false)
 {
@@ -104,6 +108,13 @@ HTTPResponse::HTTPResponse(HTTPResponse const &other)
 	: HTTPGeneral(other), _status(other._status), _is_ready(other._is_ready)
 {
 }
+
+HTTPResponse::~HTTPResponse(void)
+{
+}
+
+/* ********************** OPERATORS ************************* */
+
 
 HTTPResponse &HTTPResponse::operator=(HTTPResponse const &other)
 {
@@ -116,8 +127,24 @@ HTTPResponse &HTTPResponse::operator=(HTTPResponse const &other)
 	return *this;
 }
 
-HTTPResponse::~HTTPResponse(void)
+/* ************************* GETTERS ************************* */
+
+bool HTTPResponse::isReady(void) const
 {
+	return _is_ready;
+}
+
+
+status_code HTTPResponse::getStatus(void) const
+{
+	return _status;
+}
+
+/* ************************* SETTERS ************************* */
+
+void HTTPResponse::setReady(bool b)
+{
+	_is_ready = b;
 }
 
 void HTTPResponse::setStatus(status_code code)
@@ -125,20 +152,7 @@ void HTTPResponse::setStatus(status_code code)
 	_status = code;
 }
 
-status_code HTTPResponse::getStatus(void) const
-{
-	return _status;
-}
-
-void HTTPResponse::setReady(bool b)
-{
-	_is_ready = b;
-}
-
-bool HTTPResponse::isReady(void) const
-{
-	return _is_ready;
-}
+/* ************************* METHODS ************************* */
 
 void HTTPResponse::clear(void)
 {
