@@ -6,13 +6,16 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 22:36:30 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 00:25:54 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/12 02:30:01 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CONFIG_HPP
 # define CONFIG_HPP
+
 # include <string>
+# include <map>
+# include <vector>
 
 /*
 ** further comments define possible default values for each field
@@ -20,6 +23,8 @@
 
 typedef struct Route
 {
+	Route(void);
+
 	std::string					location;		// "/"
 	std::vector<std::string>	methods;		// "GET" "POST" "DELETE"
 	std::map<int, std::string>	redirections;	// empty
@@ -32,6 +37,10 @@ typedef struct Route
 
 typedef	struct Config
 {
+	Config(void);
+
+	void						add_default_route(void);
+
 	std::string					address;		// mandatory
 	int							port;			// mandatory
 	std::string					name;			// ""

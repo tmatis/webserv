@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 00:33:55 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/12 02:38:43 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 #define BUFFER_SIZE	1024
 
-const std::string	_all_methods[3] = 
+const std::string	Server::_all_methods[3] = 
 {
 	"GET",
 	"POST",
@@ -64,7 +64,7 @@ Server::flush_clients(void)
 }
 
 int
-Server::handle_request(Client &client)
+Server::handle_request(Client& client)
 {
 	try
 	{
@@ -110,10 +110,12 @@ Server::handle_request(Client &client)
 		// or auto-generated page
 			// in case of error with no pages defined
 			// in case of directory listing
+
+	return (OK);
 }
 
 void
-Server::send_response(Client &client)
+Server::send_response(Client& client)
 {
 	std::string	response = client.response().toString();
 
@@ -123,22 +125,22 @@ Server::send_response(Client &client)
 		client.state(PENDING_REQUEST);
 }
 
-const std::vector<Client>&
-Server::get_clients(void) const
+std::vector<Client>&
+Server::get_clients(void)
 {
-	return (this->_clients);
+	return (_clients);
 }
 
 const std::vector<pollfd>&
 Server::get_files(void) const
 {
-	return (this->_files);
+	return (_files);
 }
 
 const Listener&
 Server::get_listener(void) const
 {
-	return (this->_host);
+	return (_host);
 }
 
 /* ***************** */
@@ -220,7 +222,7 @@ Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 	if (!method)
 		return (NOT_IMPLEMENTED);
 
-	// check that the specified method is allowed by the server
+	// check that the specified method is allowed by the route rules
 	method = false;
 	for (std::vector<std::string>::const_iterator it = rules.methods.begin();
 			it != rules.methods.end();

@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 00:29:03 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/12 01:40:45 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ class Server
 {
 	public:
 
-		typedef std::vector<Client>::iterator	client_iterator;
+		typedef std::vector<Client>::iterator		client_iterator;
 
 		Server(const Config& conf);
 		virtual ~Server(void);
@@ -34,11 +34,11 @@ class Server
 		void	flush_clients(void);
 
 		// handle HTTP messages
-		int		handle_request(Client &client);
-		void	send_response(Client &client);
+		int		handle_request(Client& client);
+		void	send_response(Client& client);
 
 		// getters
-		const std::vector<Client>&	get_clients(void) const;
+		std::vector<Client>&		get_clients(void);
 		const std::vector<pollfd>&	get_files(void) const;
 		const Listener&				get_listener(void) const;
 
