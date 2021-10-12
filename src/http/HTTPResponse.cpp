@@ -185,7 +185,7 @@ void HTTPResponse::setContentType(std::string const &type)
 		|| type == "application/xml"
 		|| type == "application/x-www-form-urlencoded")
 
-		_header.addValue("Content-Type", type + "; charset=utf-8");
+		_header.addValue("Content-Type", type + "; charset=UTF-8");
 	else
 		_header.addValue("Content-Type", type);
 }

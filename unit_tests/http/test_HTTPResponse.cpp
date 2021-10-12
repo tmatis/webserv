@@ -19,7 +19,7 @@ car_test test_response(void)
 
 	std::string expected_toString =
 	"HTTP/1.1 200 OK\r\n";
-	expected_toString += "Content-Type: text/plain; charset=utf-8\r\n";
+	expected_toString += "Content-Type: text/plain; charset=UTF-8\r\n";
 	expected_toString += "Server: Webserv\r\n";
 	expected_toString += "Date: ";
 	expected_toString += date;
