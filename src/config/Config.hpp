@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 22:36:30 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 02:30:01 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/12 13:08:16 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,11 +25,12 @@ typedef struct Route
 {
 	Route(void);
 
+	bool						autoindex;		// false
+	bool						upload_file;
 	std::string					location;		// "/"
 	std::vector<std::string>	methods;		// "GET" "POST" "DELETE"
-	std::map<int, std::string>	redirections;	// empty
+	std::pair<int, std::string>	redirection;	// empty
 	std::string					root;			// "/var/www"
-	bool						autoindex;		// false
 	std::vector<std::string>	default_pages;	// "index.html"
 	std::string					cgi_extension;	// ""
 	std::string					upload_path;	// ""
