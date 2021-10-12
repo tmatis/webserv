@@ -89,6 +89,25 @@ std::string const &HTTPResponse::status_code_to_string(status_code code)
 	return _status_message[0];
 }
 
+
+// date at formatDate: <day-name>, <jour> <mois> <année> <heure>:<minute>:<seconde> GMT
+// "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" or "Sun"
+// day: 01 to 31
+// month: 01 to 12
+// year: 4 digits
+// hour: 00 to 23
+// minute: 00 to 59
+// second: 00 to 59
+// GMT: timezone
+static std::string getDate(void)
+{
+	time_t t = time(NULL);
+	struct tm *tmp = gmtime(&t);
+	char buff[128];
+	strftime(buff, sizeof(buff), "%a, %d %b %Y %H:%M:%S GMT", tmp);
+	return (std::string(buff));
+}
+
 template <typename T>
 std::string itoa(T value)
 {
@@ -152,6 +171,33 @@ void HTTPResponse::setStatus(status_code code)
 	_status = code;
 }
 
+void HTTPResponse::setContentType(std::string const &type)
+{
+	if (type.empty())
+		return;
+	// check if we need to add the charset
+	if (type == "text/html"
+		|| type == "text/plain"
+		|| type == "text/css"
+		|| type == "text/javascript"
+		|| type == "text/xml"
+		|| type == "application/json"
+		|| type == "application/xml"
+		|| type == "application/x-www-form-urlencoded")
+
+		_header.addValue("Content-Type", type + "; charset=UTF-8");
+	else
+		_header.addValue("Content-Type", type);
+}
+
+void HTTPResponse::setConnection(HTTPConnectionType type)
+{
+	if (type == HTTP_CONNECTION_KEEP_ALIVE)
+		_header.addValue("Connection", "keep-alive");
+	else if (type == HTTP_CONNECTION_CLOSE)
+		_header.addValue("Connection", "close");
+}
+
 /* ************************* METHODS ************************* */
 
 void HTTPResponse::clear(void)
@@ -167,7 +213,12 @@ std::string HTTPResponse::toString(void)
 {
 	std::string res;
 
-	_header.addValue("Content-Length", itoa(_body.size()));
+	_header.addValue("Server", "Webserv");
+	_header.addValue("Date", getDate());
+	if (_body.size())
+		_header.addValue("Content-Length", itoa(_body.size()));
+	if (!_header.getValue("Connection"))
+		setConnection(HTTP_CONNECTION_KEEP_ALIVE);
 	res += "HTTP/1.1 " + itoa(_status) + " " + status_code_to_string(_status) + "\r\n";
 	res += _header.toString();
 	res += "\r\n";
