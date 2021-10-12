@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 01:40:45 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/12 15:02:36 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,12 @@
 # include "Listener.hpp"
 # include "Client.hpp"
 # include "../config/Config.hpp"
+
+typedef struct f_pollfd
+{
+	std::string	filename;
+	pollfd		pfd;
+}		f_pollfd;
 
 class Server
 {
@@ -51,7 +57,7 @@ class Server
 
 		Listener					_host;		// listener socket
 		std::vector<Client>			_clients;	// list of clients connected
-		std::vector<pollfd>			_files;		// files opened
+		std::vector<f_pollfd>		_files;		// files opened
 		const Config&				_config;	// configuration of the server
 
 		static const std::string	_all_methods[3]; // methods implemented by the server

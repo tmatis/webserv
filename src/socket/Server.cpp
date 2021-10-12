@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 10:59:44 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/12 15:00:25 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,8 +81,8 @@ Server::handle_request(Client& client)
 	HTTPRequest& req = client.request();
 	
 	// check host
-	if (_resolve_host(req) != OK)
-		return (BAD_REQUEST);
+	//if (_resolve_host(req) != OK)
+	//	return (BAD_REQUEST);
 
 	// find route
 	const Route& route = _resolve_routes(req.getURI());

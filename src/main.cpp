@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 02:27:34 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/12 12:24:01 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,7 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 		POLLNVAL
 	};
 
-	int	fd		= host->get_listener().fd();
+	int	fd		= client.fd();
 	int	revent	= pc.get_raw_revents(fd);
 
 	for (int i = 0; handlers[i]; i++)
@@ -143,6 +143,7 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 		if (revent & events[i])
 			return (handlers[i](host, client));
 	}
+
 	return (0);
 }
 
