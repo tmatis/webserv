@@ -3,47 +3,121 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/10/04 19:57:13 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/09 13:29:26 by nouchata         ###   ########.fr       */
+/*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
+/*   Updated: 2021/10/12 02:27:34 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 
-#define PORT 8080
-
-int setup_welcome_socket(uint16_t port)
+int	main(int argc, char **argv)
 {
-	int welcome_socket;
-	struct sockaddr_in server_address;
+	if (argc != 2)
+	{
+		std::cerr << "webserv: Bad argument\n";
+		std::cerr << "usage: ./webserv path/to/config\n";
+		return (EXIT_FAILURE);
+	}
 
-	welcome_socket = socket(AF_INET, SOCK_STREAM, 0);
-	if (welcome_socket < 0)
-		return (-1);
-	int	enable = 1;
-	setsockopt(welcome_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
+	// create configurations for server
+	std::vector<Config>		confs = read_config_file(argv[1]);
+
+	// create servers
+	std::vector<Server*>	hosts;
+
+	try
+	{
+		for (size_t i = 0; i < confs.size(); i++)
+			hosts.push_back(new Server(confs[i]));
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+		destroy_servers(hosts);
+		return (EXIT_FAILURE);
+	}
 	
-	server_address.sin_family = AF_INET;
-	server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-	server_address.sin_port = htons(port);
-	memset(server_address.sin_zero, 0, sizeof(server_address.sin_zero));
+	// create poll class
+	PollClass			pc(POLL_TIMEOUT);
 
-	if (bind(welcome_socket, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
-		return (-1);
-	if (listen(welcome_socket, SOMAXCONN) < 0)
-		return (-1);
-	return (welcome_socket);
+	for (size_t i = 0 ; i < hosts.size() ; i++)
+	{
+		// add server to poll class
+		pc.add_server(*hosts[i]);
+		
+		// print server listener info
+		std::cout	<< "Listen on "
+					<< inet_ntoa(hosts[i]->get_listener().addr().sin_addr)
+					<< ":"
+					<< ntohs(hosts[i]->get_listener().addr().sin_port)
+					<< "\n";		
+	}
+
+	while (true)
+	{
+		if (pc.polling() == -1)
+			perror("webserv: poll: ");
+
+		// check events for each server
+		for (std::vector<Server*>::iterator h = hosts.begin();
+				h != hosts.end();
+				h++)
+		{
+			// check events for each client
+			for (Server::client_iterator cl = (*h)->get_clients().begin();
+					cl != (*h)->get_clients().end();
+					cl++)
+			{
+				if (handle_events(pc, *h, *cl) == -1)
+					perror("webserv: client event: ");
+			}
+
+			// check connection on server
+			if (handle_events(pc, *h) == -1)
+				perror("webserv: client connection: ");
+
+			// delete disconnected clients
+			(*h)->flush_clients();
+		}
+	}
+	return (0);	
 }
 
-int handle_registered_client(std::vector<struct pollfd> &pollfd,
-		std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_data,
-		std::vector<struct pollfd>::iterator it)
+std::vector<Config> read_config_file(char* filename)
 {
-	typedef int (*event_handlers)(std::vector<struct pollfd> &,
-		std::vector<std::pair<HTTPRequest, HTTPResponse> > &,
-		std::vector<struct pollfd>::iterator);
+	(void)filename;
+
+	std::vector<Config>	confs;
+	Config				config;
+
+	config.add_default_route();
+	config.address	= "127.0.0.1";
+	config.port		= 8080;
+	confs.push_back(config);
+	
+	config.address	= "0.0.0.0";
+	config.port		= 8081;
+	confs.push_back(config);
+
+	return (confs);
+}
+
+int handle_events(PollClass& pc, Server *host)
+{
+	int	fd		= host->get_listener().fd();
+	int	revent	= pc.get_raw_revents(fd);
+
+	if (revent & POLLIN)
+		return (host->add_new_client());
+	return (0);
+}
+
+int handle_events(PollClass& pc, Server *host, Client& client)
+{
+	typedef int (*event_handlers)(Server*, Client&);
+	
 	static event_handlers handlers[] = {
 		event_pollin,
 		event_pollout,
@@ -61,89 +135,21 @@ int handle_registered_client(std::vector<struct pollfd> &pollfd,
 		POLLNVAL
 	};
 
+	int	fd		= host->get_listener().fd();
+	int	revent	= pc.get_raw_revents(fd);
+
 	for (int i = 0; handlers[i]; i++)
 	{
-		if (it->revents & events[i])
-			return (handlers[i](pollfd, client_data, it));
+		if (revent & events[i])
+			return (handlers[i](host, client));
 	}
 	return (0);
 }
 
-int register_new_client(int welcome_socket,
-	std::vector<struct pollfd> &pollfd,
-	std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_data)
+void destroy_servers(std::vector<Server*>& list)
 {
-	struct sockaddr_in client_address;
-	socklen_t client_address_size = sizeof(client_address);
-
-	int client_socket = accept(welcome_socket,
-							   (struct sockaddr *)&client_address, &client_address_size);
-	if (client_socket < 0)
-		return (-1);
-	else
-	{
-		std::cout << "new client: " << inet_ntoa(client_address.sin_addr)
-		<< " (" << pollfd.size() << ")" << std::endl;
-		// we add the new client to the list of pollfd
-		struct pollfd poll_client_socket;
-		poll_client_socket.fd = client_socket;
-		poll_client_socket.events = POLLIN;
-		pollfd.push_back(poll_client_socket);
-		client_data.push_back(std::make_pair(HTTPRequest(), HTTPResponse()));
-	}
-	return (0);
-}
-
-int serve_clients(int welcome_socket)
-{
-	std::vector<struct pollfd> pollfd;
-	std::vector<std::pair<HTTPRequest, HTTPResponse> > client_data;
-
-	// we add welcome socket to the list of pollfd
-	struct pollfd poll_welcome_socket;
-	poll_welcome_socket.fd = welcome_socket;
-	poll_welcome_socket.events = POLLIN;
-	pollfd.push_back(poll_welcome_socket);
-
-	while (true)
-	{
-		int poll_result = poll(&pollfd.front(), pollfd.size(), 2000);
-		if (poll_result < 0)
-			return (-1);
-		if (poll_result == 0)
-			continue;
-		if (pollfd.front().revents & POLLIN)
-		{
-			// we have a new client
-			if (register_new_client(welcome_socket, pollfd, client_data) < 0)
-				std::cerr << "register_new_client failed: "
-					<< strerror(errno) << std::endl;
-			continue ;
-		}
-		for (std::vector<struct pollfd>::iterator it =
-				 (pollfd.begin() + 1);
-			 it != pollfd.end(); it++)
-		{
-			if (handle_registered_client(pollfd, client_data, it))
-				break;
-		}
-	}
-	return (0);
-}
-
-int main(void)
-{
-	int welcome_socket = setup_welcome_socket(PORT);
-	if (welcome_socket < 0)
-	{
-		std::cerr << "Error: " << strerror(errno) << std::endl;
-		return (1);
-	}
-	std::cout << "Server is running on port " << PORT << std::endl;
-	if (serve_clients(welcome_socket) < 0)
-	{
-		std::cerr << "Error: " << strerror(errno) << std::endl;
-		return (1);
-	}
-	return (0);
+	for (std::vector<Server*>::iterator it = list.begin();
+			it != list.end();
+			it++)
+		delete *it;
 }

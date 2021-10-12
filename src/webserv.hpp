@@ -1,44 +1,43 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   webserv.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/10/12 00:40:24 by mamartin          #+#    #+#             */
+/*   Updated: 2021/10/12 01:43:37 by mamartin         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef WEBSERV_HPP
-#define WEBSERV_HPP
+# define WEBSERV_HPP
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <iostream>
-#include <cerrno>
-#include <cstring>
-#include <cstdlib>
-#include <unistd.h>
-#include <vector>
-#include <poll.h>
+# include <iostream>
+# include <cerrno>
+# include <cstdio>
 
-# include "http/HTTPHeader.hpp"
-# include "http/HTTPRequest.hpp"
-# include "http/HTTPResponse.hpp"
 # include "polling/polling.hpp"
-# include "socket/Client.hpp"
-# include "socket/Listener.hpp"
 # include "socket/Server.hpp"
-# include "socket/TCP_Socket.hpp"
 
-int event_pollin(std::vector<struct pollfd> &pollfd,
-				 std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
-				 std::vector<struct pollfd>::iterator it);
+# define POLL_TIMEOUT	30000
 
-int event_pollout(std::vector<struct pollfd> &pollfd,
-				 std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
-				 std::vector<struct pollfd>::iterator it);
+/*** PARSING ******************************************************************/
 
-int event_pollhup(std::vector<struct pollfd> &pollfd,
-				  std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
-				  std::vector<struct pollfd>::iterator it);
+std::vector<Config>	read_config_file(char* filename);
 
-int event_pollerr(std::vector<struct pollfd> &pollfd,
-				  std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
-				  std::vector<struct pollfd>::iterator it);
+/*** POLL *********************************************************************/
 
-int event_pollnval(std::vector<struct pollfd> &pollfd,
-				   std::vector<std::pair<HTTPRequest, HTTPResponse> > &client_datas,
-				   std::vector<struct pollfd>::iterator it);
+int						handle_events(PollClass& pc, Server *host);
+int						handle_events(PollClass& pc, Server *host, Client& client);
+int						event_pollin(Server* host, Client& client);
+int						event_pollout(Server* host, Client& client);
+int						event_pollhup(Server* host, Client& client);
+int						event_pollerr(Server* host, Client& client);
+int						event_pollnval(Server* host, Client& client);
+
+/*** UTILS *******************************************************************/
+
+void					destroy_servers(std::vector<Server*>& list);
 
 #endif
