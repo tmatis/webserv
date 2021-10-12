@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 02:38:43 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/12 10:59:44 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -217,7 +217,10 @@ Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 	for (int i = 0; i < 3; i++)
 	{
 		if (request.getMethod() == _all_methods[i])
-			method = true; break;
+		{
+			method = true;
+			break ;
+		}
 	}
 	if (!method)
 		return (NOT_IMPLEMENTED);
@@ -229,7 +232,10 @@ Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 			it++)
 	{
 		if (*it == request.getMethod())
-			method = true; break ;
+		{
+			method = true;
+			break ;
+		}
 	}
 	if (!method)
 		return (METHOD_NOT_ALLOWED);
