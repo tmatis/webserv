@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 15:00:25 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/12 15:06:18 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,7 @@ Server::get_clients(void)
 	return (_clients);
 }
 
-const std::vector<pollfd>&
+const std::vector<f_pollfd>&
 Server::get_files(void) const
 {
 	return (_files);

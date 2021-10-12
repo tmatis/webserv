@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 15:02:36 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/12 15:06:01 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,9 @@ class Server
 		void	send_response(Client& client);
 
 		// getters
-		std::vector<Client>&		get_clients(void);
-		const std::vector<pollfd>&	get_files(void) const;
-		const Listener&				get_listener(void) const;
+		std::vector<Client>&			get_clients(void);
+		const std::vector<f_pollfd>&	get_files(void) const;
+		const Listener&					get_listener(void) const;
 
 	private:
 
