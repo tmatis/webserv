@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:12:37 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/11 20:55:05 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/12 12:52:52 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,12 @@
 
 # include "HTTPHeader.hpp"
 # include <string>
+
+enum HTTPConnectionType
+{
+	HTTP_CONNECTION_CLOSE = false,
+	HTTP_CONNECTION_KEEP_ALIVE = true
+};
 
 /*
 ** this class is the base class for all the HTTP request and response

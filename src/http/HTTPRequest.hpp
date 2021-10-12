@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 14:27:06 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/11 20:48:00 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/12 12:53:03 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,6 @@
 #define HTTPREQUEST_HPP
 
 #include "HTTPGeneral.hpp"
-
-enum HTTPConnectionType
-{
-	HTTP_CONNECTION_CLOSE = false,
-	HTTP_CONNECTION_KEEP_ALIVE = true
-};
 
 class HTTPRequest : public HTTPGeneral
 {
