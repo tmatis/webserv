@@ -215,7 +215,8 @@ std::string HTTPResponse::toString(void)
 
 	_header.addValue("Server", "Webserv");
 	_header.addValue("Date", getDate());
-	_header.addValue("Content-Length", itoa(_body.size()));
+	if (_body.size())
+		_header.addValue("Content-Length", itoa(_body.size()));
 	if (!_header.getValue("Connection"))
 		setConnection(HTTP_CONNECTION_KEEP_ALIVE);
 	res += "HTTP/1.1 " + itoa(_status) + " " + status_code_to_string(_status) + "\r\n";
