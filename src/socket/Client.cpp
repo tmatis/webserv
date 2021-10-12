@@ -6,14 +6,21 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/11 18:19:02 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/12 22:33:46 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
+f_pollfd::f_pollfd(const std::string& filename, int fd)
+{
+	name		= filename;
+	pfd.fd		= fd;
+	pfd.events	= POLLIN; // fd is read only
+}
+
 Client::Client(void) :
-	_state(PENDING_REQUEST) {}
+	_state(PENDING_REQUEST), _file(NULL) {}
 
 int
 Client::connect(int host_fd)
@@ -39,17 +46,14 @@ Client::operator pollfd() const
 	return (pfd);
 }
 
+/*** GETTERS ******************************************************************/
+
 client_state
 Client::state(void) const
 {
 	return (_state);
 }
 
-void
-Client::state(client_state st)
-{
-	_state = st;
-}
 
 HTTPRequest&
 Client::request(void)
@@ -61,4 +65,24 @@ HTTPResponse&
 Client::response(void)
 {
 	return (_response);
+}
+
+const f_pollfd*
+Client::file(void) const
+{
+	return (_file);
+}
+
+/*** SETTERS ******************************************************************/
+
+void
+Client::state(client_state st)
+{
+	_state = st;
+}
+
+void
+Client::file(const f_pollfd* f_pfd)
+{
+	_file = f_pfd;
 }

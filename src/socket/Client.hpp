@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 00:33:03 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/12 22:33:35 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,14 @@
 
 typedef struct pollfd
 		pollfd;
+
+typedef struct f_pollfd
+{
+	f_pollfd(const std::string& filename, int fd);
+
+	std::string	name;
+	pollfd		pfd;
+}		f_pollfd;
 
 typedef	enum e_client_state
 {
@@ -43,15 +51,18 @@ class Client : public TCP_Socket
 		client_state	state(void) const;
 		HTTPRequest&	request(void);
 		HTTPResponse&	response(void);
+		const f_pollfd*	file(void) const;
 
 		// setters
 		void			state(client_state st);
+		void			file(const f_pollfd* f_pfd);
 
 	private:
 
 		client_state	_state;
 		HTTPRequest		_request;
 		HTTPResponse	_response;
+		const f_pollfd*	_file;
 };
 
 #endif
