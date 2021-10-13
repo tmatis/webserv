@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 14:27:06 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/12 12:53:03 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/13 12:02:25 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,14 @@
 #define HTTPREQUEST_HPP
 
 #include "HTTPGeneral.hpp"
+#include "HTTPURI.hpp"
 
 class HTTPRequest : public HTTPGeneral
 {
 private:
 	std::string _method;
 	std::string _version;
-	std::string _uri;
+	HTTPURI _uri;
 	bool _is_ready;
 	bool _command_set;
 	bool _header_set;
@@ -61,7 +62,7 @@ public:
 
 /* ************************* GETTERS ************************* */
 	std::string const &getMethod(void) const;
-	std::string const &getURI(void) const;
+	HTTPURI const &getURI(void) const;
 	std::string const &getVersion(void) const;
 	std::string const &getHost(void) const;
 	std::string const *getUserAgent(void) const;
@@ -73,7 +74,7 @@ public:
 
 	void setMethod(std::string const &method);
 	void setVersion(std::string const &version);
-	void setURI(std::string const &uri);
+	void setURI(HTTPURI const &uri);
 
 /* ************************* METHODS ************************* */
 
