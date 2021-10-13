@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Listener.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:46:07 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/08 23:25:38 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/13 15:31:32 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 class Listener : public TCP_Socket
 {
 	public:
-		Listener(const char *address, int port);
+		Listener(unsigned int address, unsigned short port);
 };
 
 #endif

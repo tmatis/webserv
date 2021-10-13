@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 11:16:04 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/12 21:47:26 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/13 15:29:29 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,16 +26,21 @@
 # include <stdexcept>
 # include <fstream>
 # include <sstream>
+# include "Config.hpp"
+
+struct Config;
 
 class MasterConfig
 {
-	private:
+	protected:
 	// webserv proper config
 	unsigned long							_flags;
 	bool									_autoindex;
 	int										_max_simultaneous_clients; // need to add a static var to server or client class
 	std::string								_user; // setuid setgid
 	std::ofstream							_error_log;
+	std::streambuf							*_old_cerr;
+	std::string								_root;
 
 	// html proper config
 	std::string								_default_mime;
@@ -43,9 +48,28 @@ class MasterConfig
 	std::set<std::string>					_index_paths;
 	std::map<int, std::string>				_error_pages;
 
+	std::vector<Config>						_configs;
+
 	std::pair<std::string, std::string>		extract_key_value(std::string &line);
+
+	void	set_autoindex(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_max_simultaneous_clients(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_user(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_error_log(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_root(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_index_paths(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_error_pages(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+
 	static void								keep_only_printable_chars(std::string &edit);
 	static bool								is_there_only_digits(std::string const &edit);
+	static void								remove_comments(std::string &edit);
 
 	public:
 	MasterConfig();

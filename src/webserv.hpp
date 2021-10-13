@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:24 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 01:43:37 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/13 15:46:41 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 # include <cstdio>
 
 # include "polling/polling.hpp"
+# include "config/MasterConfig.hpp"
+# include "config/Config.hpp"
 # include "socket/Server.hpp"
 
 # define POLL_TIMEOUT	30000

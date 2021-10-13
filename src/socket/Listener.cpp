@@ -6,13 +6,13 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:52:30 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/09 14:23:11 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/13 15:31:25 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Listener.hpp"
 
-Listener::Listener(const char *address, int port)
+Listener::Listener(unsigned int address, unsigned short port)
 {
 	try
 	{
@@ -23,8 +23,8 @@ Listener::Listener(const char *address, int port)
 
 		// fill address structure for the socket
 		_addr.sin_family		= AF_INET;
-		_addr.sin_port			= htons(port);
-		inet_pton(AF_INET, address, &_addr.sin_addr.s_addr); // better practice
+		_addr.sin_port			= port;
+		_addr.sin_addr.s_addr	= address;
 		memset(_addr.sin_zero, 0, sizeof(_addr.sin_zero));
 
 		// non-blocking fd

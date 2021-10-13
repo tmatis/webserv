@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/12 21:54:09 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/13 15:39:49 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,19 +16,42 @@ MasterConfig::MasterConfig() : _flags(0), _autoindex(false), \
 _max_simultaneous_clients(-1), _user(), _error_log(), \
 _default_mime("application/octet-stream"), _mime_types(), \
 _index_paths(), _error_pages() {}
+MasterConfig::MasterConfig(MasterConfig const &cp) { *this = cp; }
 MasterConfig::~MasterConfig()
 {
 	if (this->_error_log.is_open())
+	{
+		// std::cerr << std::endl;
+		std::cerr.rdbuf(this->_old_cerr);
 		this->_error_log.close();
+	}
+}
+
+MasterConfig			&MasterConfig::operator=(MasterConfig const &rhs)
+{
+	this->_autoindex = rhs._autoindex;
+	this->_max_simultaneous_clients = rhs._max_simultaneous_clients;
+	this->_root = rhs._root;
+	this->_default_mime = rhs._default_mime;
+	this->_mime_types = rhs._mime_types;
+	this->_index_paths = rhs._index_paths;
+	this->_error_pages = rhs._error_pages;
+	return (*this);
 }
 
 void \
 MasterConfig::fill_var(std::pair<std::string, std::string> const &var_pair)
 {
-	unsigned int					i = 0;
+	unsigned long					i = 0;
 	std::vector<std::string>		values;
 	std::string						values_raw = var_pair.second;
-	struct passwd					*psw = NULL;
+
+	std::string		str_args[7] = {"user", "error_log", "max_simultaneous_clients", "index", \
+	"error_page", "root", "autoindex"};
+	void (MasterConfig::*func_args[7])(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values) = {&MasterConfig::set_user, &MasterConfig::set_error_log, \
+	&MasterConfig::set_max_simultaneous_clients, &MasterConfig::set_index_paths, \
+	&MasterConfig::set_error_pages, &MasterConfig::set_root, &MasterConfig::set_autoindex};
 
 	while (!values_raw.empty())
 	{
@@ -38,67 +61,15 @@ MasterConfig::fill_var(std::pair<std::string, std::string> const &var_pair)
 		values.push_back(values_raw.substr(0, i));
 		values_raw.erase(0, i);
 	}
-	if (var_pair.first == "autoindex")
+	for (i = 0 ; i < 7 ; i++)
 	{
-		if (values.size() == 1 && values[0] == "on")
-			this->_autoindex = true;
-		else if (values.size() == 1 && values[0] == "off")
-			this->_autoindex = false;
-		else
-			throw std::invalid_argument("autoindex must be on or off");
-	}
-	else if (var_pair.first == "max_simultaneous_clients")
-	{
-		if (values.size() == 1 && MasterConfig::is_there_only_digits(values[0]))
-			std::istringstream(values[0]) >> this->_max_simultaneous_clients;
-		else
-			throw std::invalid_argument("max simultaneous clients must be a positive number");
-	}
-	else if (var_pair.first == "user")
-	{
-		if (values.size() == 1)
+		if (var_pair.first == str_args[i])
 		{
-			psw = getpwnam(values[0].c_str());
-			if (!psw)
-				throw std::invalid_argument("can't access to the specified user");
-			if (setuid(psw->pw_uid) == -1)
-				throw std::invalid_argument("can't set the given user to current user");
-			this->_user = values[0];
+			(this->*func_args[i])(var_pair, values);
+			return ;
 		}
-		else
-			throw std::invalid_argument("you must provide a user to user param");
 	}
-	else if (var_pair.first == "error_log")
-	{
-		if (values.size())
-		{
-			this->_error_log.open(values_raw, std::ofstream::out | std::ofstream::app);
-			if (!this->_error_log.is_open())
-				throw std::invalid_argument("can't open the provided file");
-			std::cerr.rdbuf(this->_error_log.rdbuf());
-		}
-		else
-			throw std::invalid_argument("you must provide a path for error_log");
-	}
-	else if (var_pair.first == "index")
-	{
-		if (values.size())
-		{
-			for ( ; i < values.size() ; i++)
-				this->_index_paths.insert(values[i]);
-		}
-		else
-			throw std::invalid_argument("you must provide at least one index");
-	}
-	else if (var_pair.first == "error_page")
-	{
-		if (values.size() == 2 && )
-		{
-
-		}
-		else
-			throw std::invalid_argument("you must provide a number and a path for error_page");
-	}
+	std::cerr << "config > \'" << var_pair.first << "\' : this argument doesn't exist in the global scope (ignored)" << std::endl;
 }
 
 void		MasterConfig::construct(std::string const &config_path)
@@ -112,7 +83,7 @@ void		MasterConfig::construct(std::string const &config_path)
 	char												*buffer = NULL;
 
 	try {
-		config_fd.open(config_path, std::ifstream::in);
+		config_fd.open(config_path.c_str(), std::ifstream::in);
 		if (!config_fd.is_open())
 			throw std::invalid_argument("can't open the provided file");
 		config_fd.seekg(0, config_fd.end);
@@ -121,6 +92,7 @@ void		MasterConfig::construct(std::string const &config_path)
 		buffer = new char[length];
 		config_fd.read(buffer, length);
 		config_str = buffer;
+		MasterConfig::remove_comments(config_str);
 		parsing_res = this->extract_key_value(config_str);
 		while (!parsing_res.first.empty())
 		{
@@ -134,6 +106,13 @@ void		MasterConfig::construct(std::string const &config_path)
 				break ;
 			MasterConfig::keep_only_printable_chars(raw_data[i].second);
 			this->fill_var(raw_data[i]);
+			i++;
+		}
+		while (i < raw_data.size())
+		{
+			this->_configs.push_back(Config(*this));
+			this->_configs.back().construct(raw_data[i].second);
+			i++;
 		}
 	} catch (std::exception &e)
 	{
@@ -172,7 +151,7 @@ MasterConfig::extract_key_value(std::string &line)
 			if (braces && line[i] == '}')
 				find_res--;
 
-			if ((!braces) && count && (line[i] == '#' || line[i] == '\n'))
+			if ((!braces) && count && (line[i] == '\n'))
 				break ;
 			if ((!(count % 2) && ((line[i] != '\n') && !isspace(line[i]))) || \
 			(count == 1 && isspace(line[i])) || \
@@ -180,21 +159,10 @@ MasterConfig::extract_key_value(std::string &line)
 			(count == 3 && braces && line[i] == '}' && !find_res))
 				break ;
 		}
-		if (!count && line[i] == '#')
-		{
-			find_res = line.find('\n');
-			if (find_res == std::string::npos)
-				find_res = line.size();
-			else
-				find_res += 1;
-			line.erase(0, find_res);
-			find_res = 0;
-			continue ;
-		}
 		if (i)
 		{
-			if (line[i] == '#' || line[i] == '\n')
-				throw std::invalid_argument("misplaced comment or new line");
+			if (line[i] == '\n')
+				throw std::invalid_argument("misplaced new line");
 			if (count % 2)
 			{
 				if (count == 1)
@@ -212,6 +180,10 @@ MasterConfig::extract_key_value(std::string &line)
 			}
 			line.erase(0, i);
 		}
+		if (count == 3 && !i)
+			throw std::invalid_argument("missing terminaison");
+		if (!count && line.empty())
+			break ;
 		count++;
 	}
 	return (ret);
@@ -232,6 +204,22 @@ void		MasterConfig::keep_only_printable_chars(std::string &edit)
 	}
 }
 
+void		MasterConfig::remove_comments(std::string &edit)
+{
+	unsigned long		i = 0;
+	unsigned long		y = 0;
+
+	i = edit.find('#');
+	while (i != std::string::npos)
+	{
+		y = edit.find('\n', i);
+		if (y == std::string::npos)
+			y = edit.size();
+		edit.erase(i, y - i);
+		i = edit.find('#');
+	}
+}
+
 bool		MasterConfig::is_there_only_digits(std::string const &edit)
 {
 	unsigned int		i = 0;
@@ -243,4 +231,117 @@ bool		MasterConfig::is_there_only_digits(std::string const &edit)
 		i++;
 	}
 	return (true);
+}
+
+void \
+MasterConfig::set_error_pages(std::pair<std::string, std::string> const &var_pair, \
+std::vector<std::string> const &values)
+{
+	unsigned int					i = 0;
+	std::ifstream					error_page;
+	char							*buffer;
+	std::string						path = var_pair.second;
+
+	if (values.size() > 2 && MasterConfig::is_there_only_digits(values[0]))
+	{
+		path.erase(0, values[0].size() + 1);
+		error_page.open(path.c_str(), std::ifstream::in);
+		if (!error_page.is_open())
+			throw std::invalid_argument("can't open the provided error page");
+		error_page.seekg(0, error_page.end);
+		i = error_page.tellg();
+		error_page.seekg(0, error_page.beg);
+		buffer = new char[i];
+		error_page.read(buffer, i);
+		i = 0;
+		std::istringstream(values[0]) >> i;
+		this->_error_pages[i] = buffer;
+		delete[] buffer;
+	}
+	else
+		throw std::invalid_argument("you must provide a number and a path for error_page");
+}
+
+void \
+MasterConfig::set_root(std::pair<std::string, std::string> const &var_pair, \
+std::vector<std::string> const &values)
+{
+	if (values.size())
+		this->_root = var_pair.second;
+	else
+		throw std::invalid_argument("you must provide a number and a path for error_page");
+}
+
+void \
+MasterConfig::set_error_log(std::pair<std::string, std::string> const &var_pair, \
+std::vector<std::string> const &values)
+{
+	if (values.size())
+	{
+		this->_error_log.open(var_pair.second.c_str(), std::ofstream::out | std::ofstream::app);
+		if (!this->_error_log.is_open())
+			throw std::invalid_argument("can't open the provided file");
+		this->_old_cerr = std::cerr.rdbuf(this->_error_log.rdbuf());
+	}
+	else
+		throw std::invalid_argument("you must provide a path for error_log");
+}
+
+void \
+MasterConfig::set_user(std::pair<std::string, std::string> const &var_pair, \
+std::vector<std::string> const &values)
+{
+	struct passwd					*psw = NULL;
+	(void)var_pair;
+
+	if (values.size() == 1)
+	{
+		psw = getpwnam(values[0].c_str());
+		if (!psw)
+			throw std::invalid_argument("can't access to the specified user");
+		if (setuid(psw->pw_uid) == -1)
+			throw std::invalid_argument("can't set the given user to current user");
+		this->_user = values[0];
+	}
+	else
+		throw std::invalid_argument("you must provide a user to user param");
+}
+
+void \
+MasterConfig::set_max_simultaneous_clients(std::pair<std::string, std::string> const &var_pair, \
+std::vector<std::string> const &values)
+{
+	(void)var_pair;
+	if (values.size() == 1 && MasterConfig::is_there_only_digits(values[0]))
+		std::istringstream(values[0]) >> this->_max_simultaneous_clients;
+	else
+		throw std::invalid_argument("max simultaneous clients must be a positive number");
+}
+
+void \
+MasterConfig::set_autoindex(std::pair<std::string, std::string> const &var_pair, \
+std::vector<std::string> const &values)
+{
+	(void)var_pair;
+	if (values.size() == 1 && values[0] == "on")
+		this->_autoindex = true;
+	else if (values.size() == 1 && values[0] == "off")
+		this->_autoindex = false;
+	else
+		throw std::invalid_argument("autoindex value must be on or off");
+}
+
+void \
+MasterConfig::set_index_paths(std::pair<std::string, std::string> const &var_pair, \
+std::vector<std::string> const &values)
+{
+	(void)var_pair;
+	this->_index_paths.clear();
+	if (values.size())
+	{
+		for (unsigned int i = 0 ; i < values.size() ; i++)
+			this->_index_paths.insert(values[i]);
+	}
+	else
+		throw std::invalid_argument("you must provide at least one index");
 }
