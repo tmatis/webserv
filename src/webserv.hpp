@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:24 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 15:10:06 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/13 17:16:28 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 
 # include "polling/polling.hpp"
 # include "socket/Server.hpp"
+
+# include "http/HTTPURI.hpp"
 
 # define POLL_TIMEOUT	30000
 
