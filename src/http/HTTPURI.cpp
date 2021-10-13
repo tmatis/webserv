@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 18:41:58 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/12 21:49:00 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/13 11:19:23 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,12 +139,14 @@ void HTTPURI::_decodeQuery(std::string &uri)
 				}
 
 				std::string value = uri.substr(0, pos);
-				uri.erase(0, pos + 1);
+				uri.erase(0, pos);
 				this->_query[key] = value;
 			}
 			else
 				return;
 			pos = uri.find('&');
+			if (pos != std::string::npos)
+				uri.erase(0, pos + 1);
 		}
 	}
 }
@@ -192,7 +194,6 @@ void HTTPURI::decodeURI(std::string uri)
 
 	// find fragment #*
 	pos = uri.find("#");
-	if (pos == std::string::npos)
-		pos = uri.size();
-	this->_fragment = uri.substr(0, pos);
+	if (pos != std::string::npos)
+		this->_fragment = uri.substr(pos + 1, uri.size());
 }

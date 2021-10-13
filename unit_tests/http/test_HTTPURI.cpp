@@ -19,6 +19,16 @@ car_test test_HTTPURI(void)
 	assert(uri2.getPath() == "/path/to/file.html");
 	assert(uri2.getQuery().size() == 1);
 	assert(*uri2.getQueryValue("query") == "value");
-	std::cout << *uri2.getQueryValue("query") << std::endl;
 	assert(uri2.getFragment() == "fragment");
+
+	HTTPURI uri3("http://www.example.com/path/to/file.html?query=value&query2=yolo#fragment");
+
+	assert(uri3.getScheme() == "http");
+	assert(uri3.getHost() == "www.example.com");
+	assert(uri3.getPort() == 80);
+	assert(uri3.getPath() == "/path/to/file.html");
+	assert(uri3.getQuery().size() == 2);
+	assert(*uri3.getQueryValue("query") == "value");
+	assert(*uri3.getQueryValue("query2") == "yolo");
+	assert(uri3.getFragment() == "fragment");
 }
