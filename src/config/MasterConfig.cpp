@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/13 15:39:49 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/13 20:32:19 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "MasterConfig.hpp"
+# include "Config.hpp"
 
 MasterConfig::MasterConfig() : _flags(0), _autoindex(false), \
 _max_simultaneous_clients(-1), _user(), _error_log(), \

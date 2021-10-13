@@ -3,14 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:51:01 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/13 15:44:28 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/13 20:38:15 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
+#include "MasterConfig.hpp"
+
+Route::Route(void) {} // a def
 
 // Route::Route(void) : root("/var/www"), location("/"), autoindex(false), \
 // cgi_extension(""), upload_path("") {}
@@ -18,6 +21,10 @@
 Config::Config(void) : MasterConfig(), server_names(), body_limit(0) {}
 
 Config::Config(MasterConfig const &master) : MasterConfig(master), body_limit(0) {}
+
+Config::Config(Config const &)  {} // a def
+
+Config::~Config(void) {}
 
 void	Config::construct(std::string &config_str)
 {
