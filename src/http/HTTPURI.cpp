@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 18:41:58 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/13 11:56:34 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/13 12:04:26 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,4 +211,14 @@ void HTTPURI::decodeURI(std::string uri)
 	pos = uri.find("#");
 	if (pos != std::string::npos)
 		this->_fragment = uri.substr(pos + 1, uri.size());
+}
+
+void HTTPURI::clear(void)
+{
+	this->_scheme.clear();
+	this->_host.clear();
+	this->_port = 80;
+	this->_path.clear();
+	this->_query.clear();
+	this->_fragment.clear();
 }
