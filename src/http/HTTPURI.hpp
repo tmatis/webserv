@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 18:21:09 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/12 21:02:37 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/13 11:29:35 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ private:
 	std::string _path;
 	std::map<std::string, std::string> _query;
 	std::string _fragment;
+	void _decodeHost(std::string &uri);
 	void _decodeQuery(std::string &uri);
 
 public:

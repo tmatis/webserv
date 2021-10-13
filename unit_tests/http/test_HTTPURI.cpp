@@ -2,6 +2,7 @@
 
 car_test test_HTTPURI(void)
 {
+	
 	HTTPURI uri("http://www.example.com:8080/");
 	
 	assert(uri.getScheme() == "http");
@@ -31,4 +32,26 @@ car_test test_HTTPURI(void)
 	assert(*uri3.getQueryValue("query") == "value");
 	assert(*uri3.getQueryValue("query2") == "yolo");
 	assert(uri3.getFragment() == "fragment");
+
+	HTTPURI uri4("http://www.example.com/path/to/file.html?query=value&query2=yolo&query3=yola");
+
+	assert(uri4.getScheme() == "http");
+	assert(uri4.getHost() == "www.example.com");
+	assert(uri4.getPort() == 80);
+	assert(uri4.getPath() == "/path/to/file.html");
+	assert(uri4.getQuery().size() == 3);
+	assert(*uri4.getQueryValue("query") == "value");
+	assert(*uri4.getQueryValue("query2") == "yolo");
+	assert(*uri4.getQueryValue("query3") == "yola");
+	assert(uri4.getFragment() == "");
+
+	HTTPURI uri5("http://www.example.com/path/to/file.html#fragment");
+
+	assert(uri5.getScheme() == "http");
+	assert(uri5.getHost() == "www.example.com");
+	assert(uri5.getPort() == 80);
+	assert(uri5.getPath() == "/path/to/file.html");
+	assert(uri5.getQuery().size() == 0);
+
+	assert(uri5.getFragment() == "fragment");
 }

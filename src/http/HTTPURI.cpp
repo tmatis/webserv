@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 18:41:58 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/13 11:19:23 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/13 11:40:03 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,36 @@ std::string const *HTTPURI::getQueryValue(std::string const &key) const
 
 /* ************************* METHODS ************************* */
 
+void HTTPURI::_decodeHost(std::string &uri)
+{
+	size_t pos = uri.find("/");
+	if (pos == std::string::npos)
+	{
+		pos = uri.find("?");
+		if (pos == std::string::npos)
+		{
+			pos = uri.find("#");
+			if (pos == std::string::npos)
+				pos = uri.size();
+		}
+	}
+	std::string host = uri.substr(0, pos);
+	size_t pos2 = host.find(":");
+	if (pos2 != std::string::npos)
+	{
+		this->_host = host.substr(0, pos2);
+		std::string port = host.substr(pos2 + 1, host.size());
+		std::stringstream ss(port);
+		ss >> this->_port;
+	}
+	else
+	{
+		this->_host = host;
+		this->_port = 80;
+	}
+	uri.erase(0, pos);
+}
+
 void HTTPURI::_decodeQuery(std::string &uri)
 {
 	std::string::size_type pos = uri.find('?');
@@ -160,38 +190,23 @@ void HTTPURI::decodeURI(std::string uri)
 	this->_scheme = uri.substr(0, pos);
 	uri.erase(0, pos + 3);
 
-	// find host ://*:*
-	pos = uri.find("/");
-	if (pos == std::string::npos)
-		pos = uri.size();
-	std::string tmp = uri.substr(0, pos);
-	size_t pos2 = tmp.find(":");
-	if (pos2 == std::string::npos)
-	{
-		this->_host = tmp;
-		this->_port = 80;
-	}
-	else
-	{
-		this->_host = tmp.substr(0, pos2);
-		tmp.erase(0, pos2 + 1);
-		if (tmp.empty())
-			this->_port = 80;
-		else
-			std::istringstream(tmp) >> this->_port;
-	}
-	uri.erase(0, pos);
+	// find host ://*:*#|?
+	this->_decodeHost(uri);
 	
 	// find path */*?
 	pos = uri.find("?");
 	if (pos == std::string::npos)
-		pos = uri.size();
+	{
+		pos = uri.find("#");
+		if (pos == std::string::npos)
+			pos = uri.size();
+	}
 	this->_path = uri.substr(0, pos);
 	uri.erase(0, pos);
 
 	// find query ?*
 	this->_decodeQuery(uri);
-
+	
 	// find fragment #*
 	pos = uri.find("#");
 	if (pos != std::string::npos)
