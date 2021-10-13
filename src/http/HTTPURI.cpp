@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 18:41:58 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/13 11:40:03 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/13 11:56:34 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,13 +34,13 @@ const char *HTTPURI::HTTPURIException::what() const throw()
 /* ********************** CONSTRUCTORS *********************** */
 
 HTTPURI::HTTPURI(std::string const &uri)
-	: _scheme(), _host(), _port(0), _path(), _query(), _fragment()
+	: _scheme(), _host(), _port(80), _path(), _query(), _fragment()
 {
 	this->decodeURI(uri);
 }
 
 HTTPURI::HTTPURI(void)
-	: _scheme(), _host(), _port(0), _path(), _query(), _fragment()
+	: _scheme(), _host(), _port(80), _path(), _query(), _fragment()
 {
 }
 
@@ -135,10 +135,7 @@ void HTTPURI::_decodeHost(std::string &uri)
 		ss >> this->_port;
 	}
 	else
-	{
 		this->_host = host;
-		this->_port = 80;
-	}
 	uri.erase(0, pos);
 }
 
@@ -185,14 +182,15 @@ void HTTPURI::decodeURI(std::string uri)
 {
 	// find scheme *://
 	size_t pos = uri.find("://");
-	if (pos == std::string::npos)
-		throw HTTPURIException("Invalid URI scheme");
-	this->_scheme = uri.substr(0, pos);
-	uri.erase(0, pos + 3);
-
+	if (pos != std::string::npos)
+	{
+		this->_scheme = uri.substr(0, pos);
+		uri.erase(0, pos + 3);
+	}
+	
 	// find host ://*:*#|?
 	this->_decodeHost(uri);
-	
+
 	// find path */*?
 	pos = uri.find("?");
 	if (pos == std::string::npos)
@@ -202,11 +200,13 @@ void HTTPURI::decodeURI(std::string uri)
 			pos = uri.size();
 	}
 	this->_path = uri.substr(0, pos);
+	if (this->_path.size() == 0)
+		this->_path = "/";
 	uri.erase(0, pos);
 
 	// find query ?*
 	this->_decodeQuery(uri);
-	
+
 	// find fragment #*
 	pos = uri.find("#");
 	if (pos != std::string::npos)
