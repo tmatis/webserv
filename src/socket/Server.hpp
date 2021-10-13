@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 22:11:01 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/13 00:02:57 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,8 @@ class Server
 		int							_check_request_validity(const Route& rules, HTTPRequest& request);
 		//int							_check_cgi_extension(const Route& rules, const URI& uri);
 		int							_find_resource(const Route& rules, std::string path, std::string& res);
-		int							_generate_autoindex(std::vector<struct dirent>& dir_list);
+		bool						_is_index_file(const Route& rules, struct dirent* file);
+		int							_handle_error(Client& client, int status, bool autogen = false);
 
 		Listener					_host;		// listener socket
 		std::vector<Client>			_clients;	// list of clients connected
