@@ -72,13 +72,11 @@ Server::handle_request(Client& client)
 {
 	try
 	{
-		// read request until complete
-		while (!client.response().isReady())
-		{
-			if (!_read_request(client))
-				return (OK); // client disconnected
+		// read request
+		bool ready = _read_request(client);
+		if (!ready)
+			return (OK); // request is not complete
 		}
-	}
 	catch(const std::exception& e)
 	{
 		return (_handle_error(client, BAD_REQUEST));
@@ -155,16 +153,13 @@ Server::_read_request(Client &client)
 	int		readBytes	= read(client.fd(), &buffer, BUFFER_SIZE);
 
 	if (readBytes <= 0)
-	{
 		client.state(DISCONNECTED);
-		return (false);
-	}
 	else
 	{
 		buffer[readBytes] = '\0';
 		client.request().parseChunk(std::string(buffer));
-		return (true);
 	}
+	return (client.request().isReady());
 }
 
 const Route&
