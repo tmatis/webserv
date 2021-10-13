@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/13 18:34:15 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/13 19:14:50 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ Server::handle_request(Client& client)
 		bool ready = _read_request(client);
 		if (!ready)
 			return (OK); // request is not complete
-		}
+	}
 	catch(const std::exception& e)
 	{
 		return (_handle_error(client, BAD_REQUEST));
