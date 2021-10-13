@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/13 00:02:57 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/13 18:30:23 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 # include "Listener.hpp"
 # include "Client.hpp"
 # include "../config/Config.hpp"
+# include "../http/HTTPURI.hpp"
 
 class Server
 {
@@ -48,12 +49,13 @@ class Server
 	private:
 
 		bool						_read_request(Client &client);
-		const Route&				_resolve_routes(const std::string& uri);
+		const Route&				_resolve_routes(const std::string& uri_path);
 		int							_check_request_validity(const Route& rules, HTTPRequest& request);
-		//int							_check_cgi_extension(const Route& rules, const URI& uri);
-		int							_find_resource(const Route& rules, std::string path, std::string& res);
+		int							_check_cgi_extension(const Route& rules, const std::string& uri_path);
+		int							_find_resource(const Route& rules, std::string path, Client& client);
 		bool						_is_index_file(const Route& rules, struct dirent* file);
 		int							_handle_error(Client& client, int status, bool autogen = false);
+		bool						_file_already_requested(Client& client, std::string filepath);
 
 		Listener					_host;		// listener socket
 		std::vector<Client>			_clients;	// list of clients connected
