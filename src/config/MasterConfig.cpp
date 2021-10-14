@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/14 11:59:16 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/14 12:25:45 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,8 +98,9 @@ void		MasterConfig::construct(std::string const &config_path)
 		config_fd.seekg(0, config_fd.end);
 		length = config_fd.tellg();
 		config_fd.seekg(0, config_fd.beg);
-		buffer = new char[length];
+		buffer = new char[length + 1];
 		config_fd.read(buffer, length);
+		buffer[length] = 0;
 		config_str = buffer;
 		MasterConfig::remove_comments(config_str);
 		parsing_res = this->extract_key_value(config_str);

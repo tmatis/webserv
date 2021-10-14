@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 11:16:04 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/14 11:59:24 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/14 12:37:30 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ struct Config;
 
 class MasterConfig
 {
-	protected:
+	public:
 	// webserv proper config
 	unsigned long							_flags;
 	bool									_autoindex;
@@ -49,7 +49,7 @@ class MasterConfig
 	std::set<std::string>					_index_paths;
 	std::map<int, std::string>				_error_pages;
 
-	std::vector<Config>					_configs;
+	std::vector<Config>						_configs;
 
 	std::pair<std::string, std::string>		extract_key_value(std::string &line);
 

@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:51:01 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 11:57:45 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/14 12:29:40 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,7 @@ std::vector<std::string> const &values)
 			if (values[0].find('.') != std::string::npos)
 			{
 				this->port = htons(80);
-				if (inet_pton(AF_INET, values[0].c_str(), &this->address))
+				if (inet_pton(AF_INET, values[0].c_str(), &this->address_res))
 					return ;
 			}
 			else

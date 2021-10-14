@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 22:36:30 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 11:58:07 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/14 12:19:46 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ struct Route;
 
 typedef	struct Config : public MasterConfig
 {
-	protected:
+	public:
 	Config(void);
 
 	public:
@@ -46,7 +46,7 @@ typedef	struct Config : public MasterConfig
 	std::pair<int, std::string>	redirection;
 	std::set<std::string>		server_names;	// ""
 	size_t						body_limit;		// 0 for none
-	std::vector<Route>		routes;			// if no route is specified with location="/", then create a default one
+	std::vector<Route>			routes;			// if no route is specified with location="/", then create a default one
 
 	protected:
 	void	set_listen(std::pair<std::string, std::string> const &var_pair, \
