@@ -14,7 +14,7 @@ car_test test_parseLine(void)
 	car_assert_cmp((*header.getValue("name")), "value3");
 
 	header.parseLine("name: value4\r\n");
-	car_assert_cmp((*header.getValue("name")), "value5");
+	car_assert_cmp((*header.getValue("name")), "value4");
 }
 
 car_test test_toString(void)
