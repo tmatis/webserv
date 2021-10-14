@@ -6,11 +6,11 @@ car_test test_response(void)
 
 	car_assert(response.isReady() == false);
 	car_assert_cmp(response.getStatus(), 201);
-	car_assert(HTTPResponse::status_code_to_string(response.getStatus()) == "OK");
+	car_assert_cmp(HTTPResponse::status_code_to_string(response.getStatus()), "OK");
 	response.setBody("Hello World!");
 	response.setReady(true);
-	car_assert(response.isReady() == true);
-	car_assert(response.getBody() == "Hello World!");
+	car_assert_cmp(response.isReady(), true);
+	car_assert_cmp(response.getBody(), "Hello World!");
 	response.setContentType("text/plain");
 	char date[128];
 	time_t t = time(NULL);
