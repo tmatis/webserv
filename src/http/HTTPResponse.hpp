@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 20:01:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/11 20:54:22 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/12 12:53:16 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,6 @@ enum status_code
 	HTTP_VERSION_NOT_SUPPORTED = 505
 };
 
-
 class HTTPResponse : public HTTPGeneral
 {
 private:
@@ -63,6 +62,7 @@ private:
 
 public:
 /* ********************** CONSTRUCTORS *********************** */
+
 	HTTPResponse(void);
 	HTTPResponse(HTTPResponse const &src);
 	~HTTPResponse(void);
@@ -83,6 +83,8 @@ public:
 
 	void setStatus(status_code code);
 	void setReady(bool b);
+	void setContentType(std::string const &type);
+	void setConnection(HTTPConnectionType type);
 
 /* ************************* METHODS ************************* */
 

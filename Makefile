@@ -38,7 +38,7 @@ SRCS	= 	poll_cases.cpp http/HTTPHeader.cpp http/HTTPGeneral.cpp \
 			http/HTTPRequest.cpp http/HTTPResponse.cpp \
 			socket/Client.cpp socket/Listener.cpp socket/Server.cpp \
 			socket/TCP_Socket.cpp polling/polling.cpp \
-			config/Config.cpp config/MasterConfig.cpp config/Route.cpp
+			config/Config.cpp config/MasterConfig.cpp config/Route.cpp http/HTTPURI.cpp
 
 MAIN			= main.cpp
 
@@ -57,6 +57,8 @@ DEPS_MAIN			= $(addprefix objs/, ${MAIN:$(FILE_EXTENSION)=.d})
 ################################################################################
 #                                 Makefile logic                               #
 ################################################################################
+
+FILTER = ""
 
 COM_COLOR   = \033[0;34m
 OBJ_COLOR   = \033[0;36m
@@ -250,7 +252,7 @@ re:			fclean all
 
 unit:		all
 			@cd unit_tests && bash CAR.sh ${OBJS}
-			@./bin_test
+			@./bin_test $$FILTER
 
 unit_all: 	all
 			@cd unit_tests && bash CAR.sh ${OBJS}

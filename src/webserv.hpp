@@ -22,6 +22,8 @@
 # include "config/Config.hpp"
 # include "socket/Server.hpp"
 
+# include "http/HTTPURI.hpp"
+
 # define POLL_TIMEOUT	30000
 
 /*** PARSING ******************************************************************/

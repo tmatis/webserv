@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
 /*   Updated: 2021/10/14 11:59:45 by nouchata         ###   ########.fr       */
@@ -85,7 +85,7 @@ Server::handle_request(Client& client)
 		return (BAD_REQUEST);
 
 	// find route
-	const Route& route = _resolve_routes(req.getURI());
+	const Route& route = _resolve_routes(req.getURI().getPath());
 
 	// check request compliance to route rules
 	int code = _check_request_validity(route, req);
@@ -166,7 +166,7 @@ Server::_read_request(Client &client)
 int
 Server::_resolve_host(HTTPRequest& request)
 {
-	const std::string&	uri = request.getURI();
+	const std::string&	uri = request.getURI().getPath();
 	std::string			host;
 	size_t				pos;
 

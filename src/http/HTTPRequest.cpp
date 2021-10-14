@@ -117,7 +117,7 @@ HTTPRequest &HTTPRequest::operator=(HTTPRequest const &rhs)
 
 /* ************************* GETTERS ************************* */
 
-std::string const &HTTPRequest::getURI(void) const
+HTTPURI const &HTTPRequest::getURI(void) const
 {
 	return (_uri);
 }
@@ -165,7 +165,7 @@ HTTPConnectionType HTTPRequest::getConnection(void) const
 
 /* ************************* SETTERS ************************* */
 
-void HTTPRequest::setURI(std::string const &uri)
+void HTTPRequest::setURI(HTTPURI const &uri)
 {
 	_uri = uri;
 }
@@ -200,9 +200,7 @@ void HTTPRequest::_parseCommand(void)
 	if (tokens.size() == 3)
 	{
 		_method = tokens[0];
-		_uri = tokens[1];
-		if (_uri[0] != '/')
-			throw HTTPRequestException("URI must start with '/'");
+		_uri = HTTPURI(tokens[1]);
 		_version = tokens[2];
 		_command_set = true;
 	}
@@ -292,9 +290,11 @@ void HTTPRequest::clear(void)
 	_header.clear();
 	_method = "";
 	_version = "";
-	_uri = "/";
+	_uri.clear();
 	_is_ready = false;
 	_command_set = false;
 	_header_set = false;
-	this->parseChunk(_buffer);
+	std::string tmp = _buffer;
+	_buffer.clear();
+	this->parseChunk(tmp);
 }
