@@ -41,21 +41,18 @@ echo "	test_function *tests[] = {" >> collected.cpp;
 
 
 # Collect all the prototypes of the unit tests
+echo -e -n "${BLUE}Collecting tests modules... ${NC}"
 CPP_FILES=`find . -type f -name "*.cpp"`;
 for file in $CPP_FILES; do
-	echo "Collected file: $file";
 	PROTO=`grep car_test $file`;
 	if [ "$PROTO" != "" ]; then
 		N_PROTO=`echo "$PROTO" | wc -l`;
-		echo $N_PROTO "prototypes founds";
 		IFS=$'\n';
 		for proto in $PROTO; do
 			echo "	$proto; // $file" >> collected.hpp;
 			NAME=`echo $proto | sed 's/	/ /g' | cut -d ' ' -f2 | cut -d '(' -f1`
 			echo "		$NAME," >> collected.cpp;
 		done
-	else
-		echo "No prototype founds";
 	fi
 done
 
@@ -76,9 +73,14 @@ if [ "${OBJS:0:1}" == " " ]; then
 	OBJS="${OBJS:1}";
 fi
 
-echo
+echo -e "${GREEN}done${NC}" 
 
 CPP_FILES=`echo $CPP_FILES`
+echo -e -n "${BLUE}Generating Makefile... ${NC}"
 cat Makefile.template | sed "s@$(echo objs_template | sed 's/\./\\./g')@${OBJS}@g" | sed "s@$(echo srcs_template | sed 's/\./\\./g')@${CPP_FILES}@g" > Makefile;
+echo -e "${GREEN}done${NC}"
+echo -e -n "${BLUE}Compiling... ${NC}"
 make -s
+echo -e "${GREEN}done${NC}"
 rm collected.*
+echo 

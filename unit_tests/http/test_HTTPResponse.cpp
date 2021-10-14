@@ -4,13 +4,13 @@ car_test test_response(void)
 {
 	HTTPResponse response;
 
-	assert(response.isReady() == false);
-	assert(response.getStatus() == 200);
-	assert(HTTPResponse::status_code_to_string(response.getStatus()) == "OK");
+	car_assert(response.isReady() == false);
+	car_assert_cmp(response.getStatus(), 201);
+	car_assert(HTTPResponse::status_code_to_string(response.getStatus()) == "OK");
 	response.setBody("Hello World!");
 	response.setReady(true);
-	assert(response.isReady() == true);
-	assert(response.getBody() == "Hello World!");
+	car_assert(response.isReady() == true);
+	car_assert(response.getBody() == "Hello World!");
 	response.setContentType("text/plain");
 	char date[128];
 	time_t t = time(NULL);
@@ -27,5 +27,5 @@ car_test test_response(void)
 	expected_toString += "Connection: keep-alive\r\n";
 	expected_toString += "\r\n";
 	expected_toString += "Hello World!";
-	assert(response.toString() == expected_toString);
+	car_assert(response.toString() == expected_toString);
 }
