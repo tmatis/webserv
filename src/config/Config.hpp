@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 22:36:30 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/13 20:31:38 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/14 11:58:07 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,38 +23,30 @@
 ** further comments define possible default values for each field
 */
 
-typedef struct Route
-{
-	Route(void);
-
-	bool						autoindex;		// false
-	bool						upload_file;
-	std::string					location;		// "/"
-	std::vector<std::string>	methods;		// "GET" "POST" "DELETE"
-	std::pair<int, std::string>	redirection;	// empty
-	std::string					root;			// "/var/www"
-	std::vector<std::string>	default_pages;	// "index.html"
-	std::string					cgi_extension;	// ""
-	std::string					upload_path;	// ""
-}		Route;
+struct Route;
 
 typedef	struct Config : public MasterConfig
 {
+	protected:
 	Config(void);
+
+	public:
 	Config(MasterConfig const &master);
 	Config(Config const &cp);
 	~Config();
 
-	void				add_default_route(void);
+	Config				&operator=(Config const &rhs);
 	void				construct(std::string &config_str);
-	int					fill_var(std::pair<std::string, std::string> const &var_pair);
+	void				fill_var(std::pair<std::string, std::string> const &var_pair);
 
-	unsigned long				address;		// mandatory
+	std::set<std::string>		methods;
+	std::string					address;
+	unsigned long				address_res;	// mandatory
 	unsigned short				port;			// mandatory
 	std::pair<int, std::string>	redirection;
 	std::set<std::string>		server_names;	// ""
 	size_t						body_limit;		// 0 for none
-	std::vector<Route>			routes;			// if no route is specified with location="/", then create a default one
+	std::vector<Route>		routes;			// if no route is specified with location="/", then create a default one
 
 	protected:
 	void	set_listen(std::pair<std::string, std::string> const &var_pair, \
@@ -64,6 +56,8 @@ typedef	struct Config : public MasterConfig
 	void	set_redirection(std::pair<std::string, std::string> const &var_pair, \
 	std::vector<std::string> const &values);
 	void	set_body_limit(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_methods(std::pair<std::string, std::string> const &var_pair, \
 	std::vector<std::string> const &values);
 }		Config;
 

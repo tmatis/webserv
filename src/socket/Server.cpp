@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/13 15:38:43 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/14 11:59:45 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ const std::string	Server::_all_methods[3] =
 };
 
 Server::Server(const Config& conf) :
-	_host(Listener(conf.address, conf.port)), _config(conf) {}
+	_host(Listener(conf.address_res, conf.port)), _config(conf) {}
 
 Server::~Server(void)
 {
@@ -184,8 +184,8 @@ Server::_resolve_host(HTTPRequest& request)
 	else // get hostname from Host header field
 		host = request.getHost().substr(0, host.find_first_of(':'));
 	
-	// if (host == _config.address || host == _config.name)
-	// 	return (OK);
+	if (host == _config.address || (this->_config.server_names.find(host) != this->_config.server_names.end()))
+		return (OK);
 	return (BAD_REQUEST); // bad hostname
 }
 
@@ -227,7 +227,7 @@ Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 
 	// check that the specified method is allowed by the route rules
 	method = false;
-	for (std::vector<std::string>::const_iterator it = rules.methods.begin();
+	for (std::set<std::string>::const_iterator it = rules.methods.begin();
 			it != rules.methods.end();
 			it++)
 	{

@@ -3,28 +3,37 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:51:01 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/13 20:38:15 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/14 11:57:45 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
 #include "MasterConfig.hpp"
+#include "Route.hpp"
 
-Route::Route(void) {} // a def
+Config::Config(void) : MasterConfig(), \
+methods(this->_methods_supported), server_names(), body_limit(0) {}
+Config::Config(MasterConfig const &master) : MasterConfig(master), \
+methods(this->_methods_supported), body_limit(0) {}
+Config::Config(Config const &cp)  { *this = cp; }
+Config::~Config() {}
 
-// Route::Route(void) : root("/var/www"), location("/"), autoindex(false), \
-// cgi_extension(""), upload_path("") {}
-
-Config::Config(void) : MasterConfig(), server_names(), body_limit(0) {}
-
-Config::Config(MasterConfig const &master) : MasterConfig(master), body_limit(0) {}
-
-Config::Config(Config const &)  {} // a def
-
-Config::~Config(void) {}
+Config					&Config::operator=(Config const &rhs)
+{
+	this->MasterConfig::operator=(rhs);
+	this->address = rhs.address;
+	this->address_res = rhs.address_res;
+	this->port = rhs.port;
+	this->redirection = rhs.redirection;
+	this->server_names = rhs.server_names;
+	this->body_limit = rhs.body_limit;
+	this->routes = rhs.routes;
+	this->methods = rhs.methods;
+	return (*this);
+}
 
 void	Config::construct(std::string &config_str)
 {
@@ -34,6 +43,7 @@ void	Config::construct(std::string &config_str)
 	bool												listen_flag = false;
 
 	try {
+		std::cout << "x" << std::endl;
 		parsing_res = this->extract_key_value(config_str);
 		while (!parsing_res.first.empty())
 		{
@@ -45,53 +55,67 @@ void	Config::construct(std::string &config_str)
 			MasterConfig::keep_only_printable_chars(raw_data[i].first);
 			if (raw_data[i].first == "listen")
 				listen_flag = true;
-			MasterConfig::keep_only_printable_chars(raw_data[i].second);
-			if (!this->fill_var(raw_data[i]))
+			if (raw_data[i].first[0] == '_')
 				break ;
+			MasterConfig::keep_only_printable_chars(raw_data[i].second);
+			this->fill_var(raw_data[i]);
 			i++;
 		}
 		if (!listen_flag)
+		{
+			std::cerr << "config > the \'listen\' instruction is mandatory " << \
+			"for a server (fatal error)" << std::endl;
 			throw std::invalid_argument("missing listen directive in server block");
+		}
+		while (i < raw_data.size())
+		{
+			if (raw_data[i].first.size() == 1 || raw_data[i].first[0] != '_')
+			{
+				std::cerr << "config > \'" << raw_data[i].first << "\' : this " << \
+				"is not a route block (ignored)" << std::endl;
+				i++;
+				continue ;
+			}
+			this->routes.push_back(Route(*this));
+			this->routes.back().construct(raw_data[i]);
+			i++;
+		}
+		if (this->routes.empty())
+			this->routes.push_back(Route(*this));
 	} catch (std::exception &e) { throw ; }
 }
 
-int	Config::fill_var(std::pair<std::string, std::string> const &var_pair)
+void	Config::fill_var(std::pair<std::string, std::string> const &var_pair)
 {
 	unsigned long					i = 0;
 	std::vector<std::string>		values;
 	std::string						values_raw = var_pair.second;
 
-	std::string		str_args[11] = {"index", "error_page", "root", "autoindex", \
-	"listen", "server_name", "redirection", "body_limit", "user", "error_log", \
-	"max_simultaneous_clients"};
-	void (Config::*func_args[8])(std::pair<std::string, std::string> const &var_pair, \
+	std::string		str_args[10] = {"index", "error_page", "root", "autoindex", \
+	"listen", "server_name", "redirection", "body_limit", "upload_files", "methods"};
+	void (Config::*func_args[10])(std::pair<std::string, std::string> const &var_pair, \
 	std::vector<std::string> const &values) = {&Config::set_index_paths, \
 	&Config::set_error_pages, &Config::set_root, &Config::set_autoindex, \
 	&Config::set_listen, &Config::set_server_names, &Config::set_redirection, \
-	&Config::set_body_limit};
+	&Config::set_body_limit, &Config::set_uploadfiles, &Config::set_methods};
 	while (!values_raw.empty())
 	{
 		i = values_raw.find(' ');
 		if (i == std::string::npos)
 			i = values_raw.size();
 		values.push_back(values_raw.substr(0, i));
-		values_raw.erase(0, i);
+		values_raw.erase(0, i + 1);
 	}
-	for (i = 0 ; i < 11 ; i++)
+	for (i = 0 ; i < 10 ; i++)
 	{
 		if (var_pair.first == str_args[i])
 		{
-			if (i > 7)
-			{
-				std::cerr << "config > \'" << var_pair.first << "\' : this \
-				argument doesn't exist in the server scope (ignored)" << std::endl;
-				return (1);
-			}
 			(this->*func_args[i])(var_pair, values);
-			return (1);
+			return ;
 		}
 	}
-	return (0);
+	std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+	"argument doesn't exist in the server scope (ignored)" << std::endl;
 }
 
 void	Config::set_listen(std::pair<std::string, std::string> const &var_pair, \
@@ -112,7 +136,8 @@ std::vector<std::string> const &values)
 			}
 			else
 			{
-				inet_pton(AF_INET, "0.0.0.0", &this->address);
+				inet_pton(AF_INET, "0.0.0.0", &this->address_res);
+				this->address = "0.0.0.0";
 				std::istringstream(values[0]) >> port;
 				if (port >= 0 && port <= 65535)
 				{
@@ -123,9 +148,10 @@ std::vector<std::string> const &values)
 		}
 		else
 		{
-			if (inet_pton(AF_INET, values[0].c_str(), &this->address))
+			if (inet_pton(AF_INET, values[0].c_str(), &this->address_res))
 			{
-				std::istringstream(values[0]) >> port;
+				this->address = values[0];
+				std::istringstream(values[1]) >> port;
 				if (port >= 0 && port <= 65535)
 				{
 					this->port = htons(port);
@@ -134,6 +160,8 @@ std::vector<std::string> const &values)
 			}
 		}
 	}
+	std::cerr << "config > \'" << var_pair.first << "\' : this this " << \
+	"directive must be filled with a valid ip or port or both (fatal error)" << std::endl;
 	throw std::invalid_argument("listen must be filled with either a valid ip or port or both");
 }
 
@@ -148,7 +176,8 @@ std::vector<std::string> const &values)
 			this->server_names.insert(values[i]);
 	}
 	else
-		throw std::invalid_argument("you must provide at least one index");
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs one value (ignored)" << std::endl;
 }
 
 void	Config::set_redirection(std::pair<std::string, std::string> const &var_pair, \
@@ -157,14 +186,15 @@ std::vector<std::string> const &values)
 	int					i = 0;
 	std::string			path = var_pair.second;
 
-	if (values.size() > 2 && MasterConfig::is_there_only_digits(values[0]))
+	if (values.size() >= 2 && MasterConfig::is_there_only_digits(values[0]))
 	{
 		path.erase(0, values[0].size() + 1);
 		std::istringstream(values[0]) >> i;
 		this->redirection = std::make_pair(i, path);
 	}
 	else
-		throw std::invalid_argument("you must provide a number and a path for redirection");
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs a number and a path (ignored)" << std::endl;
 }
 
 void	Config::set_body_limit(std::pair<std::string, std::string> const &var_pair, \
@@ -174,19 +204,34 @@ std::vector<std::string> const &values)
 	if (values.size() == 1 && MasterConfig::is_there_only_digits(values[0]))
 		std::istringstream(values[0]) >> this->body_limit;
 	else
-		throw std::invalid_argument("max simultaneous clients must be a positive number");
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs a positive value (ignored)" << std::endl;
 }
 
-void
-Config::add_default_route(void)
+void \
+Config::set_methods(std::pair<std::string, std::string> const &var_pair, \
+std::vector<std::string> const &values)
 {
-	Route	r;
+	unsigned int i = 0;
+	std::set<std::string>	new_set;
 
-	// set default route values
-	r.methods.push_back("GET");
-	r.methods.push_back("POST");
-	r.methods.push_back("DELETE");
-	r.default_pages.push_back("index.html");
-
-	routes.push_back(r);
+	(void)var_pair;
+	this->_index_paths.clear();
+	if (values.size())
+	{
+		for ( ; i < values.size() ; i++)
+		{
+			if (this->_methods_supported.find(values[i]) == this->_methods_supported.end())
+			{
+				std::cerr << "config > \'" << var_pair.first << "\' : the method \'" << \
+				values[i] << "\' is either misspelled or not supported (ignored)" << std::endl;
+				return ;
+			}
+			new_set.insert(values[i]);
+		}
+		this->methods = new_set;
+	}
+	else
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs at least one method as value (ignored)" << std::endl;
 }

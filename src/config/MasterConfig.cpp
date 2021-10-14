@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/13 20:32:19 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/14 11:59:16 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,14 @@
 # include "Config.hpp"
 
 MasterConfig::MasterConfig() : _flags(0), _autoindex(false), \
-_max_simultaneous_clients(-1), _user(), _error_log(), \
+_uploadfiles(false), _max_simultaneous_clients(-1), _user(), _error_log(), \
 _default_mime("application/octet-stream"), _mime_types(), \
-_index_paths(), _error_pages() {}
+_index_paths(), _error_pages()
+{
+	this->_methods_supported.insert("GET");
+	this->_methods_supported.insert("DELETE");
+	this->_methods_supported.insert("POST");
+}
 MasterConfig::MasterConfig(MasterConfig const &cp) { *this = cp; }
 MasterConfig::~MasterConfig()
 {
@@ -31,12 +36,14 @@ MasterConfig::~MasterConfig()
 MasterConfig			&MasterConfig::operator=(MasterConfig const &rhs)
 {
 	this->_autoindex = rhs._autoindex;
+	this->_uploadfiles = rhs._uploadfiles;
 	this->_max_simultaneous_clients = rhs._max_simultaneous_clients;
 	this->_root = rhs._root;
 	this->_default_mime = rhs._default_mime;
 	this->_mime_types = rhs._mime_types;
 	this->_index_paths = rhs._index_paths;
 	this->_error_pages = rhs._error_pages;
+	this->_methods_supported = rhs._methods_supported;
 	return (*this);
 }
 
@@ -47,12 +54,13 @@ MasterConfig::fill_var(std::pair<std::string, std::string> const &var_pair)
 	std::vector<std::string>		values;
 	std::string						values_raw = var_pair.second;
 
-	std::string		str_args[7] = {"user", "error_log", "max_simultaneous_clients", "index", \
-	"error_page", "root", "autoindex"};
-	void (MasterConfig::*func_args[7])(std::pair<std::string, std::string> const &var_pair, \
+	std::string		str_args[8] = {"user", "error_log", "max_simultaneous_clients", "index", \
+	"error_page", "root", "autoindex", "upload_files"};
+	void (MasterConfig::*func_args[8])(std::pair<std::string, std::string> const &var_pair, \
 	std::vector<std::string> const &values) = {&MasterConfig::set_user, &MasterConfig::set_error_log, \
 	&MasterConfig::set_max_simultaneous_clients, &MasterConfig::set_index_paths, \
-	&MasterConfig::set_error_pages, &MasterConfig::set_root, &MasterConfig::set_autoindex};
+	&MasterConfig::set_error_pages, &MasterConfig::set_root, &MasterConfig::set_autoindex, \
+	&MasterConfig::set_uploadfiles};
 
 	while (!values_raw.empty())
 	{
@@ -60,9 +68,9 @@ MasterConfig::fill_var(std::pair<std::string, std::string> const &var_pair)
 		if (i == std::string::npos)
 			i = values_raw.size();
 		values.push_back(values_raw.substr(0, i));
-		values_raw.erase(0, i);
+		values_raw.erase(0, i + 1);
 	}
-	for (i = 0 ; i < 7 ; i++)
+	for (i = 0 ; i < 8 ; i++)
 	{
 		if (var_pair.first == str_args[i])
 		{
@@ -109,9 +117,15 @@ void		MasterConfig::construct(std::string const &config_path)
 			this->fill_var(raw_data[i]);
 			i++;
 		}
+		if (i == raw_data.size())
+		{
+			std::cerr << "config > a server needs at least one server block to be launched (fatal error)" << std::endl;
+			throw std::invalid_argument("can't launch a server w/out server block");
+		}
 		while (i < raw_data.size())
 		{
 			this->_configs.push_back(Config(*this));
+			std::cout << "x" << std::endl;
 			this->_configs.back().construct(raw_data[i].second);
 			i++;
 		}
@@ -124,8 +138,6 @@ void		MasterConfig::construct(std::string const &config_path)
 	}
 	config_fd.close();
 	delete[] buffer;
-
-
 }
 
 std::pair<std::string, std::string> \
@@ -182,7 +194,7 @@ MasterConfig::extract_key_value(std::string &line)
 			line.erase(0, i);
 		}
 		if (count == 3 && !i)
-			throw std::invalid_argument("missing terminaison");
+			throw std::invalid_argument("missing terminaison i");
 		if (!count && line.empty())
 			break ;
 		count++;
@@ -243,12 +255,16 @@ std::vector<std::string> const &values)
 	char							*buffer;
 	std::string						path = var_pair.second;
 
-	if (values.size() > 2 && MasterConfig::is_there_only_digits(values[0]))
+	if (values.size() >= 2 && MasterConfig::is_there_only_digits(values[0]))
 	{
 		path.erase(0, values[0].size() + 1);
 		error_page.open(path.c_str(), std::ifstream::in);
 		if (!error_page.is_open())
-			throw std::invalid_argument("can't open the provided error page");
+		{
+			std::cerr << "config > \'" << var_pair.first << "\' : error page \'" << values[0] << \
+			"\' - can't open the file \'" << path << "\' (ignored)" << std::endl;
+			return ;
+		}
 		error_page.seekg(0, error_page.end);
 		i = error_page.tellg();
 		error_page.seekg(0, error_page.beg);
@@ -260,7 +276,8 @@ std::vector<std::string> const &values)
 		delete[] buffer;
 	}
 	else
-		throw std::invalid_argument("you must provide a number and a path for error_page");
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs a number and a path (ignored)" << std::endl;
 }
 
 void \
@@ -270,7 +287,8 @@ std::vector<std::string> const &values)
 	if (values.size())
 		this->_root = var_pair.second;
 	else
-		throw std::invalid_argument("you must provide a number and a path for error_page");
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs a path (ignored)" << std::endl;
 }
 
 void \
@@ -279,13 +297,17 @@ std::vector<std::string> const &values)
 {
 	if (values.size())
 	{
-		this->_error_log.open(var_pair.second.c_str(), std::ofstream::out | std::ofstream::app);
+		this->_error_log.open(var_pair.second.c_str(), std::ofstream::out); // | std::ofstream::app);
 		if (!this->_error_log.is_open())
 			throw std::invalid_argument("can't open the provided file");
 		this->_old_cerr = std::cerr.rdbuf(this->_error_log.rdbuf());
 	}
 	else
+	{
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs a path (fatal error)" << std::endl;
 		throw std::invalid_argument("you must provide a path for error_log");
+	}
 }
 
 void \
@@ -299,13 +321,25 @@ std::vector<std::string> const &values)
 	{
 		psw = getpwnam(values[0].c_str());
 		if (!psw)
+		{
+			std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+			"directive needs a correct user (fatal error)" << std::endl;
 			throw std::invalid_argument("can't access to the specified user");
+		}
 		if (setuid(psw->pw_uid) == -1)
+		{
+			std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+			"user can't be set - maybe sudo is needed - (fatal error)" << std::endl;
 			throw std::invalid_argument("can't set the given user to current user");
+		}
 		this->_user = values[0];
 	}
 	else
-		throw std::invalid_argument("you must provide a user to user param");
+	{
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs a correct user (fatal error)" << std::endl;
+		throw std::invalid_argument("you must provide a correct user to user param");
+	}
 }
 
 void \
@@ -316,7 +350,8 @@ std::vector<std::string> const &values)
 	if (values.size() == 1 && MasterConfig::is_there_only_digits(values[0]))
 		std::istringstream(values[0]) >> this->_max_simultaneous_clients;
 	else
-		throw std::invalid_argument("max simultaneous clients must be a positive number");
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs a positive number (ignored)" << std::endl;
 }
 
 void \
@@ -329,20 +364,38 @@ std::vector<std::string> const &values)
 	else if (values.size() == 1 && values[0] == "off")
 		this->_autoindex = false;
 	else
-		throw std::invalid_argument("autoindex value must be on or off");
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs a <on-off> value (ignored)" << std::endl;
+}
+
+void \
+MasterConfig::set_uploadfiles(std::pair<std::string, std::string> const &var_pair, \
+std::vector<std::string> const &values)
+{
+	(void)var_pair;
+	if (values.size() == 1 && values[0] == "on")
+		this->_uploadfiles = true;
+	else if (values.size() == 1 && values[0] == "off")
+		this->_uploadfiles = false;
+	else
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs a <on-off> value (ignored)" << std::endl;
 }
 
 void \
 MasterConfig::set_index_paths(std::pair<std::string, std::string> const &var_pair, \
 std::vector<std::string> const &values)
 {
+	unsigned int i = 0;
+
 	(void)var_pair;
 	this->_index_paths.clear();
 	if (values.size())
 	{
-		for (unsigned int i = 0 ; i < values.size() ; i++)
+		for ( ; i < values.size() ; i++)
 			this->_index_paths.insert(values[i]);
 	}
 	else
-		throw std::invalid_argument("you must provide at least one index");
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs at least one index as value (ignored)" << std::endl;
 }

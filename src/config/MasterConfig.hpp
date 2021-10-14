@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 11:16:04 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/13 20:31:47 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/14 11:59:24 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class MasterConfig
 	// webserv proper config
 	unsigned long							_flags;
 	bool									_autoindex;
+	bool									_uploadfiles;
 	int										_max_simultaneous_clients; // need to add a static var to server or client class
 	std::string								_user; // setuid setgid
 	std::ofstream							_error_log;
@@ -42,16 +43,19 @@ class MasterConfig
 	std::string								_root;
 
 	// html proper config
+	std::set<std::string>					_methods_supported;
 	std::string								_default_mime;
-	std::pair<std::string, int>				_mime_types;
+	std::set<std::string, int>				_mime_types;
 	std::set<std::string>					_index_paths;
 	std::map<int, std::string>				_error_pages;
 
-	std::vector<Config>						_configs;
+	std::vector<Config>					_configs;
 
 	std::pair<std::string, std::string>		extract_key_value(std::string &line);
 
 	void	set_autoindex(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_uploadfiles(std::pair<std::string, std::string> const &var_pair, \
 	std::vector<std::string> const &values);
 	void	set_max_simultaneous_clients(std::pair<std::string, std::string> const &var_pair, \
 	std::vector<std::string> const &values);

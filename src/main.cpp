@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/13 13:23:31 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/14 11:42:21 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,7 @@ int	main(int argc, char **argv)
 	(void)argc;
 	MasterConfig cnf;
 	cnf.construct();
+	std::cout << "y" << std::endl;
 	return (0);	
 }
 

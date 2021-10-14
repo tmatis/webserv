@@ -6,7 +6,7 @@
 #    By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/13 15:44:12 by nouchata         ###   ########.fr        #
+#    Updated: 2021/10/14 08:34:00 by nouchata         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -38,7 +38,7 @@ SRCS	= 	poll_cases.cpp http/HTTPHeader.cpp http/HTTPGeneral.cpp \
 			http/HTTPRequest.cpp http/HTTPResponse.cpp \
 			socket/Client.cpp socket/Listener.cpp socket/Server.cpp \
 			socket/TCP_Socket.cpp polling/polling.cpp \
-			config/Config.cpp config/MasterConfig.cpp
+			config/Config.cpp config/MasterConfig.cpp config/Route.cpp
 
 MAIN			= main.cpp
 
