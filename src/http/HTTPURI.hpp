@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 18:21:09 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/13 12:03:32 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/14 02:03:37 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,11 @@ public:
 	std::string const &getFragment(void) const;
 
 	std::string const *getQueryValue(std::string const &key) const;
+
+	/* ************************** UTILS ************************** */
+
+	static std::string percentDecode(std::string const &str);
+
 
 	/* ************************* METHODS ************************* */
 

@@ -6,7 +6,7 @@
 #    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/12 21:26:29 by tmatis           ###   ########.fr        #
+#    Updated: 2021/10/14 02:13:25 by tmatis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -57,6 +57,8 @@ DEPS_MAIN			= $(addprefix objs/, ${MAIN:$(FILE_EXTENSION)=.d})
 ################################################################################
 #                                 Makefile logic                               #
 ################################################################################
+
+FILTER = ""
 
 COM_COLOR   = \033[0;34m
 OBJ_COLOR   = \033[0;36m
@@ -250,7 +252,7 @@ re:			fclean all
 
 unit:		all
 			@cd unit_tests && bash CAR.sh ${OBJS}
-			@./bin_test
+			@./bin_test $$FILTER
 
 unit_all: 	all
 			@cd unit_tests && bash CAR.sh ${OBJS}

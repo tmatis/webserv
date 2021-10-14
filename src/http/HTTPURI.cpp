@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 18:41:58 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/13 12:04:26 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/14 02:06:19 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <cstdlib>
 
 /* ****************** EXCEPTION DEFINITIONS ****************** */
 
@@ -110,6 +111,34 @@ std::string const *HTTPURI::getQueryValue(std::string const &key) const
 	return (NULL);
 }
 
+/* ************************** UTILS ************************** */
+
+std::string HTTPURI::percentDecode(std::string const &str)
+{
+	std::string res;
+	for (std::string::const_iterator
+		it = str.begin(); it != str.end(); ++it)
+	{
+		if (*it == '+')
+			res += ' ';
+		else if (*it == '%')
+		{
+			it++;
+			if (it == str.end())
+				throw HTTPURI::HTTPURIException("Invalid URI");
+			std::string hex;
+			hex += *it++;
+			if (it == str.end())
+				throw HTTPURI::HTTPURIException("Invalid URI");
+			hex += *it;
+			res += static_cast<char>(std::strtol(hex.c_str(), NULL, 16));
+		}
+		else
+			res += *it;
+	}
+	return (res);
+}	
+
 /* ************************* METHODS ************************* */
 
 void HTTPURI::_decodeHost(std::string &uri)
@@ -155,6 +184,7 @@ void HTTPURI::_decodeQuery(std::string &uri)
 			if (pos != std::string::npos)
 			{
 				key = uri.substr(0, pos);
+				key = percentDecode(key);
 				uri.erase(0, pos + 1);
 				// get the value until the '&'
 				pos = uri.find('&');
@@ -166,6 +196,7 @@ void HTTPURI::_decodeQuery(std::string &uri)
 				}
 
 				std::string value = uri.substr(0, pos);
+				value = percentDecode(value);
 				uri.erase(0, pos);
 				this->_query[key] = value;
 			}
@@ -202,6 +233,8 @@ void HTTPURI::decodeURI(std::string uri)
 	this->_path = uri.substr(0, pos);
 	if (this->_path.size() == 0)
 		this->_path = "/";
+	else
+		this->_path = percentDecode(this->_path);
 	uri.erase(0, pos);
 
 	// find query ?*
@@ -210,7 +243,11 @@ void HTTPURI::decodeURI(std::string uri)
 	// find fragment #*
 	pos = uri.find("#");
 	if (pos != std::string::npos)
+	{
 		this->_fragment = uri.substr(pos + 1, uri.size());
+		this->_fragment = percentDecode(this->_fragment);
+	}
+
 }
 
 void HTTPURI::clear(void)

@@ -164,3 +164,18 @@ car_test test_HTTPURI_relative(void)
 	assert(*uri8.getQueryValue("query") == "value");
 	assert(uri8.getFragment() == "");
 }
+
+car_test	test_percent_decoding(void)
+{
+	assert(HTTPURI::percentDecode("%20") == " ");
+	assert(HTTPURI::percentDecode("%2F") == "/");
+	assert(HTTPURI::percentDecode("%3F") == "?");
+	assert(HTTPURI::percentDecode("+") == " ");
+
+	// multiple percent encoded characters
+
+	assert(HTTPURI::percentDecode("%2520") == "%20");
+	assert(HTTPURI::percentDecode("%252F") == "%2F");
+	assert(HTTPURI::percentDecode("%253F") == "%3F");
+	assert(HTTPURI::percentDecode("%2525+") == "%25 ");
+}
