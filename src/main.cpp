@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 12:37:04 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/14 12:39:37 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ std::vector<Config> read_config_file(char* filename)
 	std::vector<Config>	confs;
 	Config				config;
 
-	config.add_default_route();
+	config.routes.push_back(Route(config));
 	config.address	= "127.0.0.1";
 	config.port		= 8080;
 	confs.push_back(config);
