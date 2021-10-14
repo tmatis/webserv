@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/14 12:25:45 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/14 15:31:59 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,6 @@ void		MasterConfig::construct(std::string const &config_path)
 		while (i < raw_data.size())
 		{
 			this->_configs.push_back(Config(*this));
-			std::cout << "x" << std::endl;
 			this->_configs.back().construct(raw_data[i].second);
 			i++;
 		}

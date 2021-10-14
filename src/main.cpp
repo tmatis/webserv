@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 12:39:37 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/14 17:54:09 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,74 +14,78 @@
 
 int	main(int argc, char **argv)
 {
-	if (argc != 2)
-	{
-		std::cerr << "webserv: Bad argument\n";
-		std::cerr << "usage: ./webserv path/to/config\n";
-		return (EXIT_FAILURE);
-	}
+	// if (argc != 2)
+	// {
+	// 	std::cerr << "webserv: Bad argument\n";
+	// 	std::cerr << "usage: ./webserv path/to/config\n";
+	// 	return (EXIT_FAILURE);
+	// }
 
-	// create configurations for server
-	std::vector<Config>		confs = read_config_file(argv[1]);
+	// // create configurations for server
+	// std::vector<Config>		confs = read_config_file(argv[1]);
 
-	// create servers
-	std::vector<Server*>	hosts;
+	// // create servers
+	// std::vector<Server*>	hosts;
 
-	try
-	{
-		for (size_t i = 0; i < confs.size(); i++)
-			hosts.push_back(new Server(confs[i]));
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-		destroy_servers(hosts);
-		return (EXIT_FAILURE);
-	}
+	// try
+	// {
+	// 	for (size_t i = 0; i < confs.size(); i++)
+	// 		hosts.push_back(new Server(confs[i]));
+	// }
+	// catch(const std::exception& e)
+	// {
+	// 	std::cerr << e.what() << '\n';
+	// 	destroy_servers(hosts);
+	// 	return (EXIT_FAILURE);
+	// }
 	
-	// create poll class
-	PollClass			pc(POLL_TIMEOUT);
+	// // create poll class
+	// PollClass			pc(POLL_TIMEOUT);
 
-	for (size_t i = 0 ; i < hosts.size() ; i++)
-	{
-		// add server to poll class
-		pc.add_server(*hosts[i]);
+	// for (size_t i = 0 ; i < hosts.size() ; i++)
+	// {
+	// 	// add server to poll class
+	// 	pc.add_server(*hosts[i]);
 		
-		// print server listener info
-		std::cout	<< "Listen on "
-					<< inet_ntoa(hosts[i]->get_listener().addr().sin_addr)
-					<< ":"
-					<< ntohs(hosts[i]->get_listener().addr().sin_port)
-					<< "\n";		
-	}
+	// 	// print server listener info
+	// 	std::cout	<< "Listen on "
+	// 				<< inet_ntoa(hosts[i]->get_listener().addr().sin_addr)
+	// 				<< ":"
+	// 				<< ntohs(hosts[i]->get_listener().addr().sin_port)
+	// 				<< "\n";		
+	// }
 
-	while (true)
-	{
-		if (pc.polling() == -1)
-			perror("webserv: poll: ");
+	// while (true)
+	// {
+	// 	if (pc.polling() == -1)
+	// 		perror("webserv: poll: ");
 
-		// check events for each server
-		for (std::vector<Server*>::iterator h = hosts.begin();
-				h != hosts.end();
-				h++)
-		{
-			// check events for each client
-			for (Server::client_iterator cl = (*h)->get_clients().begin();
-					cl != (*h)->get_clients().end();
-					cl++)
-			{
-				if (handle_events(pc, *h, *cl) == -1)
-					perror("webserv: client event: ");
-			}
+	// 	// check events for each server
+	// 	for (std::vector<Server*>::iterator h = hosts.begin();
+	// 			h != hosts.end();
+	// 			h++)
+	// 	{
+	// 		// check events for each client
+	// 		for (Server::client_iterator cl = (*h)->get_clients().begin();
+	// 				cl != (*h)->get_clients().end();
+	// 				cl++)
+	// 		{
+	// 			if (handle_events(pc, *h, *cl) == -1)
+	// 				perror("webserv: client event: ");
+	// 		}
 
-			// check connection on server
-			if (handle_events(pc, *h) == -1)
-				perror("webserv: client connection: ");
+	// 		// check connection on server
+	// 		if (handle_events(pc, *h) == -1)
+	// 			perror("webserv: client connection: ");
 
-			// delete disconnected clients
-			(*h)->flush_clients();
-		}
-	}
+	// 		// delete disconnected clients
+	// 		(*h)->flush_clients();
+	// 	}
+	// }
+	(void)argc;
+	(void)argv;
+	MasterConfig mconfig;
+	mconfig.construct();
 	return (0);	
 }
 

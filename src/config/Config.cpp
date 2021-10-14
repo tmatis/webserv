@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:51:01 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 12:29:40 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/14 17:54:26 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ void	Config::construct(std::string &config_str)
 	bool												listen_flag = false;
 
 	try {
-		std::cout << "x" << std::endl;
 		parsing_res = this->extract_key_value(config_str);
 		while (!parsing_res.first.empty())
 		{
@@ -132,7 +131,10 @@ std::vector<std::string> const &values)
 			{
 				this->port = htons(80);
 				if (inet_pton(AF_INET, values[0].c_str(), &this->address_res))
+				{
+					this->address = values[0];
 					return ;
+				}
 			}
 			else
 			{

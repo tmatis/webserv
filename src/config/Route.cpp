@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:48:00 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/14 10:48:15 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/14 17:55:45 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ Route		&Route::operator=(Route const &rhs)
 	this->location = rhs.location;
 	this->upload_path = rhs.upload_path;
 	this->cgi_extension = rhs.cgi_extension;
-	this->methods = rhs.methods;
+	this->cgi_path = rhs.cgi_path;
 	return (*this);
 }
 
