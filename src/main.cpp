@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/13 23:37:39 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/14 04:01:22 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,8 +78,8 @@ int	main(int argc, char **argv)
 			if (handle_events(pc, *h) == -1)
 				perror("webserv: client connection: ");
 
-			// delete disconnected clients
-			(*h)->flush_clients();
+			(*h)->flush_clients();	// delete disconnected clients
+			(*h)->flush_files();	// delete unused files
 		}
 	}
 	return (0);	
@@ -99,10 +99,13 @@ std::vector<Config> read_config_file(char* filename)
 	confs.push_back(config);
 	
 	route.location 		= "/blablou";
+	route.root			= "/var/www/";
 	route.cgi_extension = ".php";
 	route.autoindex 	= true;
+	route.default_pages.push_back("index.html");
 	route.default_pages.push_back("default.html");
 	route.methods.push_back("GET");
+	route.methods.push_back("POST");
 	config.address		= "0.0.0.0";
 	config.port			= 8081;
 	config.body_limit	= 5;

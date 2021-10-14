@@ -6,11 +6,10 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 02:13:51 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/14 16:48:02 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
 #include "Server.hpp"
 
 #define BUFFER_SIZE	1024
@@ -66,6 +65,32 @@ Server::flush_clients(void)
 	}
 }
 
+void
+Server::flush_files(void)
+{
+	std::vector<f_pollfd>::iterator	f = _files.begin();
+	client_iterator					cl;
+	
+	while (f != _files.end()) // check all files opened
+	{
+		cl = _clients.begin();
+		while (cl != _clients.end())
+		{
+			if (cl->file() == &(*f))
+				break ; // file is requested by a client
+			cl++;
+		}
+
+		if (cl == _clients.end()) // no client request this file anymore
+		{
+			// delete file
+			close(f->pfd.fd);
+			_files.erase(f);
+		}
+		f++;
+	}
+}
+
 /*** HTTP MESSAGES ************************************************************/
 
 int
@@ -91,10 +116,6 @@ Server::handle_request(Client& client)
 	const HTTPURI&	uri		= req.getURI();
 	const Route&	route	= _resolve_routes(uri.getPath());
 
-	std::cout << "uri path: " << req.getURI().getPath() << "\n";
-	std::cout << "location: " << route.location << "\n";
-	std::cout << "root: " << route.root << "\n";
-
 	// check request compliance to route rules
 	int code = _check_request_validity(route, req);
 	if (code != OK)
@@ -105,7 +126,6 @@ Server::handle_request(Client& client)
 	if (_check_cgi_extension(route, uri.getPath()))
 	{
 		// _handle_cgi(uri, client);
-		std::cout << "cgi\n";
 	}
 
 	// search content requested by the client
@@ -113,17 +133,10 @@ Server::handle_request(Client& client)
 	if (code != OK)
 		return (_handle_error(client, code));
 	else if (client.file()) // resource found
-	{
-		std::cout << client.file()->name << "\n";
 		client.state(IDLE);
-	}
 	else // autoindex response has been generated
-	{
-		std::cout << "autoindex\n";
 		client.state(WAITING_ANSWER);
-	}
 
-	std::cout << "OK\n";
 	return (OK);
 }
 
@@ -133,7 +146,10 @@ Server::send_response(Client& client)
 	std::string	response = client.response().toString();
 
 	if (write(client.fd(), response.data(), response.size()) < 0)
+	{
 		client.state(DISCONNECTED);
+		return ;
+	}
 	else
 		client.state(PENDING_REQUEST);
 	client.file(NULL);
@@ -254,10 +270,14 @@ Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 int
 Server::_check_cgi_extension(const Route& rules, const std::string& uri_path)
 {
+	if (rules.cgi_extension.length() == 0)
+		return (false); // no cgi
+
 	// look for cgi_extension in uri path
 	size_t	pos = uri_path.rfind(rules.cgi_extension);
-
-	if (pos == uri_path.length() - rules.cgi_extension.length())
+	if (pos == std::string::npos)
+		return (false);
+	else if (pos == uri_path.length() - rules.cgi_extension.length())
 		return (true); // cgi_extension found at the end of path
 	return (false); // not found or not where it should be
 }
@@ -266,15 +286,12 @@ int
 Server::_find_resource(const Route& rules, std::string path, Client& client)
 {
 	// build path from root dir and uri path
-	if (rules.root[rules.root.length() - 1] == '/') // avoid getting "root/dir//uri/path"
-		path = rules.root.substr(0, rules.root.length() - 1) + path;
-	else
-		path = rules.root + path;
+	path = _append_paths(rules.root, path);
 
 	struct stat	pathinfo;
 	if (stat(path.data(), &pathinfo) == -1)
 	{
-		if (errno == ENOENT)
+		if (errno == ENOENT || errno == ENOTDIR)
 			return (NOT_FOUND); // path doesn't exist
 		else
 			return (INTERNAL_SERVER_ERROR); // other error
@@ -313,9 +330,9 @@ Server::_find_resource(const Route& rules, std::string path, Client& client)
 			return (NOT_FOUND);
 		}
 		else
-			path += file->d_name; // append index file to dir path
+			path = _append_paths(path, file->d_name); // path + filename
 	}
-
+				
 	if (_file_already_requested(client, path))
 		return (OK); // another client asked for the same file
 
@@ -348,7 +365,6 @@ Server::_is_index_file(const Route& rules, struct dirent* file)
 int
 Server::_handle_error(Client& client, int status, bool autogen)
 {
-	std::cout << "error: " << status << "\n";
 	if (!autogen) // find page in configuration
 	{
 		std::map<int, std::string>::const_iterator	errpage;
@@ -379,9 +395,10 @@ Server::_handle_error(Client& client, int status, bool autogen)
 	else // generate page
 	{
 		// client.response() = gen_error_page(status);
-		// client.response().setReady(true); ?
+		client.response().setReady(true); ?
 		client.state(WAITING_ANSWER);
 	}
+
 	return (0);
 }
 
@@ -398,4 +415,17 @@ Server::_file_already_requested(Client& client, std::string filepath)
 		}
 	}
 	return (false);
+}
+
+std::string
+Server::_append_paths(const std::string& str1, const std::string& str2)
+{
+	size_t		last_index = str1.length() - 1;
+	std::string	ret;
+
+	if (str1[last_index] == '/' || str2[0] == '/')
+		ret = str1 + str2;
+	else
+		ret = str1 + "/" + str2;
+	return (ret);
 }

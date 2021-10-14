@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/13 18:30:23 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/14 04:18:28 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ class Server
 		// handle connections
 		int		add_new_client(void);
 		void	flush_clients(void);
+		void	flush_files(void);
 
 		// handle HTTP messages
 		int		handle_request(Client& client);
@@ -56,6 +57,7 @@ class Server
 		bool						_is_index_file(const Route& rules, struct dirent* file);
 		int							_handle_error(Client& client, int status, bool autogen = false);
 		bool						_file_already_requested(Client& client, std::string filepath);
+		std::string					_append_paths(const std::string& str1, const std::string& str2);
 
 		Listener					_host;		// listener socket
 		std::vector<Client>			_clients;	// list of clients connected
