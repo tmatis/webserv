@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 04:18:28 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/14 18:07:58 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class Server
 		// handle HTTP messages
 		int		handle_request(Client& client);
 		void	send_response(Client& client);
+		int		create_file_response(Client& client);
 
 		// getters
 		std::vector<Client>&			get_clients(void);
@@ -58,6 +59,7 @@ class Server
 		int							_handle_error(Client& client, int status, bool autogen = false);
 		bool						_file_already_requested(Client& client, std::string filepath);
 		std::string					_append_paths(const std::string& str1, const std::string& str2);
+		void						_create_response(Client& client, std::string *body = NULL);
 
 		Listener					_host;		// listener socket
 		std::vector<Client>			_clients;	// list of clients connected

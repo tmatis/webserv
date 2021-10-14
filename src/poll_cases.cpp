@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 17:52:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/13 23:33:06 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/14 19:40:45 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,15 @@
 
 int event_pollin(Server* host, Client& client)
 {
+	std::cout << "before | client state " << client.state() << "\n";
 	host->handle_request(client);
+	std::cout << "after | client state " << client.state() << "\n";
 	return (0);
 }
 
 int event_pollout(Server* host, Client& client)
 {
-	//host->send_response(client);
-	(void)host;
-	client.state(PENDING_REQUEST);
+	host->send_response(client);
 	return (0);
 }
 

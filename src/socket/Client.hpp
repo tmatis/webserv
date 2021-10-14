@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/13 19:39:57 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/14 18:04:39 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include "TCP_Socket.hpp"
 # include "../http/HTTPRequest.hpp"
 # include "../http/HTTPResponse.hpp"
+# include "../config/Config.hpp"
 
 typedef struct pollfd
 		pollfd;
@@ -40,6 +41,8 @@ typedef	enum e_client_state
 	DISCONNECTED
 }		client_state;
 
+# define BUFFER_SIZE	1024
+
 class Client : public TCP_Socket
 {
 	public:
@@ -54,10 +57,12 @@ class Client : public TCP_Socket
 		HTTPRequest&	request(void);
 		HTTPResponse&	response(void);
 		const f_pollfd*	file(void) const;
+		const Route*	rules(void) const;
 
 		// setters
 		void			state(client_state st);
 		void			file(const f_pollfd* f_pfd);
+		void			rules(const Route* rules);
 
 	private:
 
@@ -65,6 +70,7 @@ class Client : public TCP_Socket
 		HTTPRequest		_request;
 		HTTPResponse	_response;
 		const f_pollfd*	_file;
+		const Route*	_route;
 };
 
 #endif
