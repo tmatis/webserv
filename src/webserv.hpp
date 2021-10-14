@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:24 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 21:23:10 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/13 15:46:41 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 # include <cstdio>
 
 # include "polling/polling.hpp"
+# include "config/MasterConfig.hpp"
+# include "config/Config.hpp"
 # include "socket/Server.hpp"
 
 # include "http/HTTPURI.hpp"
