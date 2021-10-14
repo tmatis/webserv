@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 22:05:43 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/14 22:56:38 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,6 @@ int	main(int argc, char **argv)
 		if (pc.polling() == -1)
 			perror("webserv: poll: ");
 
-		std::cout << "poll\n";
-
 		// check events for each server
 		for (std::vector<Server*>::iterator h = hosts.begin();
 				h != hosts.end();
@@ -81,7 +79,7 @@ int	main(int argc, char **argv)
 				perror("webserv: client connection: ");
 
 			(*h)->flush_clients();	// delete disconnected clients
-			//(*h)->flush_files();	// delete unused files
+			(*h)->flush_files();	// delete unused files
 		}
 	}
 	return (0);	
@@ -96,9 +94,9 @@ std::vector<Config> read_config_file(char* filename)
 	Route			route;
 
 	config.add_default_route();
-	//config.address	= "127.0.0.1";
-	//config.port		= 8080;
-	//confs.push_back(config);
+	config.address	= "127.0.0.1";
+	config.port		= 8080;
+	confs.push_back(config);
 	
 	route.location 		= "/blablou";
 	route.root			= "/var/www/";
@@ -159,7 +157,8 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 
 	if (client.state() == IDLE) // client has requested a file
 	{
-		if (client.file()->pfd.revents & POLLIN) // file is ready for reading
+		revent	= pc.get_raw_revents(client.file()->pfd.fd);
+		if (revent & POLLIN) // file is ready for reading
 			host->create_file_response(client);
 	}
 

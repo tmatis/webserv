@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 22:02:55 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/14 23:00:35 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,6 @@ Server::flush_clients(void)
 
 	while (it != _clients.end())
 	{
-		it->request().clear();
 		if (it->state() == DISCONNECTED)
 		{
 			close(it->fd());
@@ -86,9 +85,10 @@ Server::flush_files(void)
 		{
 			// delete file
 			close(f->pfd.fd);
-			_files.erase(f);
+			f = _files.erase(f);
 		}
-		f++;
+		else
+			f++;
 	}
 }
 
@@ -135,10 +135,7 @@ Server::handle_request(Client& client)
 	if (code != OK)
 		return (_handle_error(client, code));
 	else if (client.file()) // resource found
-	{
-		std::cout << "found: " << client.file()->name << "\n";
 		client.state(IDLE);
-	}
 
 	return (OK);
 }
@@ -148,8 +145,6 @@ Server::send_response(Client& client)
 {
 	std::string	response = client.response().toString();
 
-	std::cout << "send\n";
-
 	if (write(client.fd(), response.data(), response.size()) < 0)
 	{
 		client.state(DISCONNECTED);
@@ -157,6 +152,7 @@ Server::send_response(Client& client)
 	}
 	else
 		client.state(PENDING_REQUEST);
+	client.request().clear();
 	client.response().clear();
 
 	//if (client.request().isReady())
@@ -169,8 +165,6 @@ Server::create_file_response(Client& client)
 	std::string	file_content;
 	char		buffer[BUFFER_SIZE];
 	int			bytes;
-
-	std::cout << "reading " << client.file()->name << "\n";
 
 	while ((bytes = read(client.file()->pfd.fd, buffer, BUFFER_SIZE)) > 0)
 		file_content += buffer; // load file content
@@ -411,7 +405,6 @@ Server::_handle_error(Client& client, int status, bool autogen)
 			_files.push_back(f_pollfd(errpage->second, fd));
 			client.file(&_files.back());
 			client.response().setStatus((status_code)status);
-			std::cout << "error " << status << "\n";
 			client.state(IDLE);
 			return (0);
 		}
@@ -478,8 +471,6 @@ Server::_create_response(Client& client, std::string *body)
 		Connection is keep-alive by default
 	*/ 
 
-	std::cout << "response creation... body = " << body << "\n";
-
 	HTTPResponse&		response = client.response();
 	HTTPHeader			headers;
 	std::stringstream	ss;
@@ -489,7 +480,7 @@ Server::_create_response(Client& client, std::string *body)
 	ss << response.getBodySize();
 
 	// set headers
-	response.setContentType("text/plain");	// default Content-Type
+	response.setContentType("text/html");	// default Content-Type
 	headers.addValue("Content-Length", ss.str());			// Content-Length
 	if (response.getStatus() == BAD_REQUEST)
 		response.setConnection(HTTP_CONNECTION_CLOSE);		// Connection (nginx behavior)
