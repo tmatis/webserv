@@ -9,7 +9,7 @@ car_test test_HTTPURI_absolute(void)
 	car_assert_cmp(uri.getHost(), "www.example.com");
 	car_assert_cmp(uri.getPort(), 8080);
 	car_assert_cmp(uri.getPath(), "/");
-	car_assert_cmp(uri.getQuery().size(), 0);
+	car_assert_cmp(uri.getQuery().size(), 0u);
 	car_assert_cmp(uri.getFragment(), "");
 
 	HTTPURI uri2("http://www.example.com/path/to/file.html?query=value#fragment");
@@ -18,7 +18,7 @@ car_test test_HTTPURI_absolute(void)
 	car_assert_cmp(uri2.getHost(), "www.example.com");
 	car_assert_cmp(uri2.getPort(), 80);
 	car_assert_cmp(uri2.getPath(), "/path/to/file.html");
-	car_assert_cmp(uri2.getQuery().size(), 1);
+	car_assert_cmp(uri2.getQuery().size(), 1u);
 	car_assert_cmp(*uri2.getQueryValue("query"), "value");
 	car_assert_cmp(uri2.getFragment(), "fragment");
 
@@ -28,7 +28,7 @@ car_test test_HTTPURI_absolute(void)
 	car_assert_cmp(uri3.getHost(), "www.example.com");
 	car_assert_cmp(uri3.getPort(), 80);
 	car_assert_cmp(uri3.getPath(), "/path/to/file.html");
-	car_assert_cmp(uri3.getQuery().size(), 2);
+	car_assert_cmp(uri3.getQuery().size(), 2u);
 	car_assert_cmp(*uri3.getQueryValue("query"), "value");
 	car_assert_cmp(*uri3.getQueryValue("query2"), "yolo");
 	car_assert_cmp(uri3.getFragment(), "fragment");
@@ -39,7 +39,7 @@ car_test test_HTTPURI_absolute(void)
 	car_assert_cmp(uri4.getHost(), "www.example.com");
 	car_assert_cmp(uri4.getPort(), 80);
 	car_assert_cmp(uri4.getPath(), "/path/to/file.html");
-	car_assert_cmp(uri4.getQuery().size(), 3);
+	car_assert_cmp(uri4.getQuery().size(), 3u);
 	car_assert_cmp(*uri4.getQueryValue("query"), "value");
 	car_assert_cmp(*uri4.getQueryValue("query2"), "yolo");
 	car_assert_cmp(*uri4.getQueryValue("query3"), "yola");
@@ -51,7 +51,7 @@ car_test test_HTTPURI_absolute(void)
 	car_assert_cmp(uri5.getHost(), "www.example.com");
 	car_assert_cmp(uri5.getPort(), 80);
 	car_assert_cmp(uri5.getPath(), "/path/to/file.html");
-	car_assert_cmp(uri5.getQuery().size(), 0);
+	car_assert_cmp(uri5.getQuery().size(), 0u);
 	car_assert_cmp(uri5.getFragment(), "fragment");
 
 	HTTPURI uri6("http://www.example.com#fragment");
@@ -60,7 +60,7 @@ car_test test_HTTPURI_absolute(void)
 	car_assert_cmp(uri6.getHost(), "www.example.com");
 	car_assert_cmp(uri6.getPort(), 80);
 	car_assert_cmp(uri6.getPath(), "/");
-	car_assert_cmp(uri6.getQuery().size(), 0);
+	car_assert_cmp(uri6.getQuery().size(), 0u);
 	car_assert_cmp(uri6.getFragment(), "fragment");
 
 	HTTPURI uri7("http://www.example.com/path/to/file.html");
@@ -69,7 +69,7 @@ car_test test_HTTPURI_absolute(void)
 	car_assert_cmp(uri7.getHost(), "www.example.com");
 	car_assert_cmp(uri7.getPort(), 80);
 	car_assert_cmp(uri7.getPath(), "/path/to/file.html");
-	car_assert_cmp(uri7.getQuery().size(), 0);
+	car_assert_cmp(uri7.getQuery().size(), 0u);
 	car_assert_cmp(uri7.getFragment(), "");
 
 	HTTPURI uri8("http://www.example.com/path/to/file.html?query=value");
@@ -78,7 +78,7 @@ car_test test_HTTPURI_absolute(void)
 	car_assert_cmp(uri8.getHost(), "www.example.com");
 	car_assert_cmp(uri8.getPort(), 80);
 	car_assert_cmp(uri8.getPath(), "/path/to/file.html");
-	car_assert_cmp(uri8.getQuery().size(), 1);
+	car_assert_cmp(uri8.getQuery().size(), 1u);
 	car_assert_cmp(*uri8.getQueryValue("query"), "value");
 	car_assert_cmp(uri8.getFragment(), "");
 }
@@ -91,7 +91,7 @@ car_test test_HTTPURI_relative(void)
 	car_assert_cmp(uri.getHost(), "");
 	car_assert_cmp(uri.getPort(), 80);
 	car_assert_cmp(uri.getPath(), "/path/to/file.html");
-	car_assert_cmp(uri.getQuery().size(), 1);
+	car_assert_cmp(uri.getQuery().size(), 1u);
 	car_assert_cmp(*uri.getQueryValue("query"), "value");
 	car_assert_cmp(uri.getFragment(), "fragment");
 
@@ -101,7 +101,7 @@ car_test test_HTTPURI_relative(void)
 	car_assert_cmp(uri2.getHost(), "");
 	car_assert_cmp(uri2.getPort(), 80);
 	car_assert_cmp(uri2.getPath(), "/path/to/file.html");
-	car_assert_cmp(uri2.getQuery().size(), 2);
+	car_assert_cmp(uri2.getQuery().size(), 2u);
 	car_assert_cmp(*uri2.getQueryValue("query"), "value");
 	car_assert_cmp(*uri2.getQueryValue("query2"), "yolo");
 	car_assert_cmp(uri2.getFragment(), "fragment");
@@ -112,7 +112,7 @@ car_test test_HTTPURI_relative(void)
 	car_assert_cmp(uri3.getHost(), "");
 	car_assert_cmp(uri3.getPort(), 80);
 	car_assert_cmp(uri3.getPath(), "/path/to/file.html");
-	car_assert_cmp(uri3.getQuery().size(), 3);
+	car_assert_cmp(uri3.getQuery().size(), 3u);
 	car_assert_cmp(*uri3.getQueryValue("query"), "value");
 	car_assert_cmp(*uri3.getQueryValue("query2"), "yolo");
 	car_assert_cmp(*uri3.getQueryValue("query3"), "yola");
@@ -124,7 +124,7 @@ car_test test_HTTPURI_relative(void)
 	car_assert_cmp(uri4.getHost(), "");
 	car_assert_cmp(uri4.getPort(), 80);
 	car_assert_cmp(uri4.getPath(), "/path/to/file.html");
-	car_assert_cmp(uri4.getQuery().size(), 0);
+	car_assert_cmp(uri4.getQuery().size(), 0u);
 	car_assert_cmp(uri4.getFragment(), "fragment");
 
 	HTTPURI uri5("/#fragment");
@@ -133,7 +133,7 @@ car_test test_HTTPURI_relative(void)
 	car_assert_cmp(uri5.getHost(), "");
 	car_assert_cmp(uri5.getPort(), 80);
 	car_assert_cmp(uri5.getPath(), "/");
-	car_assert_cmp(uri5.getQuery().size(), 0);
+	car_assert_cmp(uri5.getQuery().size(), 0u);
 	car_assert_cmp(uri5.getFragment(), "fragment");
 
 	HTTPURI uri6("/");
@@ -142,7 +142,7 @@ car_test test_HTTPURI_relative(void)
 	car_assert_cmp(uri6.getHost(), "");
 	car_assert_cmp(uri6.getPort(), 80);
 	car_assert_cmp(uri6.getPath(), "/");
-	car_assert_cmp(uri6.getQuery().size(), 0);
+	car_assert_cmp(uri6.getQuery().size(), 0u);
 	car_assert_cmp(uri6.getFragment(), "");
 
 	HTTPURI uri7("/path/to/file.html");
@@ -151,7 +151,7 @@ car_test test_HTTPURI_relative(void)
 	car_assert_cmp(uri7.getHost(), "");
 	car_assert_cmp(uri7.getPort(), 80);
 	car_assert_cmp(uri7.getPath(), "/path/to/file.html");
-	car_assert_cmp(uri7.getQuery().size(), 0);
+	car_assert_cmp(uri7.getQuery().size(), 0u);
 	car_assert_cmp(uri7.getFragment(), "");
 
 	HTTPURI uri8("/path/to/file.html?query=value");
@@ -160,7 +160,7 @@ car_test test_HTTPURI_relative(void)
 	car_assert_cmp(uri8.getHost(), "");
 	car_assert_cmp(uri8.getPort(), 80);
 	car_assert_cmp(uri8.getPath(), "/path/to/file.html");
-	car_assert_cmp(uri8.getQuery().size(), 1);
+	car_assert_cmp(uri8.getQuery().size(), 1u);
 	car_assert_cmp(*uri8.getQueryValue("query"), "value");
 	car_assert_cmp(uri8.getFragment(), "");
 }

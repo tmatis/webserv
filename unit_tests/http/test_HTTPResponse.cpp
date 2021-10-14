@@ -5,7 +5,7 @@ car_test test_response(void)
 	HTTPResponse response;
 
 	car_assert(response.isReady() == false);
-	car_assert_cmp(response.getStatus(), 201);
+	car_assert_cmp(response.getStatus(), 200);
 	car_assert_cmp(HTTPResponse::status_code_to_string(response.getStatus()), "OK");
 	response.setBody("Hello World!");
 	response.setReady(true);
