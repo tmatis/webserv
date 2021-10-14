@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 17:52:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/12 23:10:54 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/13 23:33:06 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,9 @@ int event_pollin(Server* host, Client& client)
 
 int event_pollout(Server* host, Client& client)
 {
-	host->send_response(client);
+	//host->send_response(client);
+	(void)host;
+	client.state(PENDING_REQUEST);
 	return (0);
 }
 

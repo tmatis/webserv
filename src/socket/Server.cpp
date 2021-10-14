@@ -6,10 +6,11 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/13 19:14:50 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/14 02:13:51 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <iostream>
 #include "Server.hpp"
 
 #define BUFFER_SIZE	1024
@@ -73,9 +74,12 @@ Server::handle_request(Client& client)
 	try
 	{
 		// read request
-		bool ready = _read_request(client);
-		if (!ready)
-			return (OK); // request is not complete
+		if (!client.request().isReady())
+		{
+			bool ready = _read_request(client);
+			if (!ready)
+				return (OK); // request is not complete
+		}
 	}
 	catch(const std::exception& e)
 	{
@@ -87,6 +91,10 @@ Server::handle_request(Client& client)
 	const HTTPURI&	uri		= req.getURI();
 	const Route&	route	= _resolve_routes(uri.getPath());
 
+	std::cout << "uri path: " << req.getURI().getPath() << "\n";
+	std::cout << "location: " << route.location << "\n";
+	std::cout << "root: " << route.root << "\n";
+
 	// check request compliance to route rules
 	int code = _check_request_validity(route, req);
 	if (code != OK)
@@ -97,6 +105,7 @@ Server::handle_request(Client& client)
 	if (_check_cgi_extension(route, uri.getPath()))
 	{
 		// _handle_cgi(uri, client);
+		std::cout << "cgi\n";
 	}
 
 	// search content requested by the client
@@ -104,9 +113,17 @@ Server::handle_request(Client& client)
 	if (code != OK)
 		return (_handle_error(client, code));
 	else if (client.file()) // resource found
+	{
+		std::cout << client.file()->name << "\n";
 		client.state(IDLE);
+	}
 	else // autoindex response has been generated
+	{
+		std::cout << "autoindex\n";
 		client.state(WAITING_ANSWER);
+	}
+
+	std::cout << "OK\n";
 	return (OK);
 }
 
@@ -122,6 +139,9 @@ Server::send_response(Client& client)
 	client.file(NULL);
 	client.request().clear();
 	client.response().clear();
+
+	if (client.request().isReady())
+		handle_request(client);
 }
 
 /*** GETTERS ******************************************************************/
@@ -246,7 +266,7 @@ int
 Server::_find_resource(const Route& rules, std::string path, Client& client)
 {
 	// build path from root dir and uri path
-	if (rules.root.back() == '/') // avoid getting "root/dir//uri/path"
+	if (rules.root[rules.root.length() - 1] == '/') // avoid getting "root/dir//uri/path"
 		path = rules.root.substr(0, rules.root.length() - 1) + path;
 	else
 		path = rules.root + path;
@@ -272,7 +292,7 @@ Server::_find_resource(const Route& rules, std::string path, Client& client)
 			return (INTERNAL_SERVER_ERROR);
 
 		errno = 0;
-		while (file = readdir(dirptr)) // read directory entries
+		while ((file = readdir(dirptr))) // read directory entries
 		{
 			if (_is_index_file(rules, file))
 				break ; // index file found !
@@ -328,6 +348,7 @@ Server::_is_index_file(const Route& rules, struct dirent* file)
 int
 Server::_handle_error(Client& client, int status, bool autogen)
 {
+	std::cout << "error: " << status << "\n";
 	if (!autogen) // find page in configuration
 	{
 		std::map<int, std::string>::const_iterator	errpage;

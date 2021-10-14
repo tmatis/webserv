@@ -6,11 +6,13 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 22:33:46 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/13 19:41:07 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
+
+/*** F_POLLFD *****************************************************************/
 
 f_pollfd::f_pollfd(const std::string& filename, int fd)
 {
@@ -18,6 +20,13 @@ f_pollfd::f_pollfd(const std::string& filename, int fd)
 	pfd.fd		= fd;
 	pfd.events	= POLLIN; // fd is read only
 }
+
+f_pollfd::operator pollfd() const
+{
+	return (pfd);
+}
+
+/*** CLIENT *******************************************************************/
 
 Client::Client(void) :
 	_state(PENDING_REQUEST), _file(NULL) {}

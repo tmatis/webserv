@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 22:33:35 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/13 19:39:57 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ typedef struct pollfd
 typedef struct f_pollfd
 {
 	f_pollfd(const std::string& filename, int fd);
+
+	operator pollfd() const;
 
 	std::string	name;
 	pollfd		pfd;

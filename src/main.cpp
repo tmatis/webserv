@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 12:24:01 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/13 23:37:39 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,14 +91,22 @@ std::vector<Config> read_config_file(char* filename)
 
 	std::vector<Config>	confs;
 	Config				config;
+	Route			route;
 
 	config.add_default_route();
 	config.address	= "127.0.0.1";
 	config.port		= 8080;
 	confs.push_back(config);
 	
-	config.address	= "0.0.0.0";
-	config.port		= 8081;
+	route.location 		= "/blablou";
+	route.cgi_extension = ".php";
+	route.autoindex 	= true;
+	route.default_pages.push_back("default.html");
+	route.methods.push_back("GET");
+	config.address		= "0.0.0.0";
+	config.port			= 8081;
+	config.body_limit	= 5;
+	config.routes.push_back(route);
 	confs.push_back(config);
 
 	return (confs);
