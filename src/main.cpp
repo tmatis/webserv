@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 22:56:38 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/15 16:23:21 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,17 @@ int	main(int argc, char **argv)
 	}
 
 	// create configurations for server
-	std::vector<Config>		confs = read_config_file(argv[1]);
+	MasterConfig			mconfig;
+
+	mconfig.construct(argv[1]);
 
 	// create servers
 	std::vector<Server*>	hosts;
 
 	try
 	{
-		for (size_t i = 0; i < confs.size(); i++)
-			hosts.push_back(new Server(confs[i]));
+		for (size_t i = 0; i < mconfig._configs.size(); i++)
+			hosts.push_back(new Server(mconfig._configs[i]));
 	}
 	catch(const std::exception& e)
 	{
@@ -82,37 +84,9 @@ int	main(int argc, char **argv)
 			(*h)->flush_files();	// delete unused files
 		}
 	}
+
+
 	return (0);	
-}
-
-std::vector<Config> read_config_file(char* filename)
-{
-	(void)filename;
-
-	std::vector<Config>	confs;
-	Config				config;
-	Route			route;
-
-	config.add_default_route();
-	config.address	= "127.0.0.1";
-	config.port		= 8080;
-	confs.push_back(config);
-	
-	route.location 		= "/blablou";
-	route.root			= "/var/www/";
-	route.cgi_extension = ".php";
-	route.autoindex 	= true;
-	route.default_pages.push_back("index.html");
-	route.default_pages.push_back("default.html");
-	route.methods.push_back("GET");
-	route.methods.push_back("POST");
-	config.address		= "0.0.0.0";
-	config.port			= 8081;
-	config.body_limit	= 5;
-	config.routes.push_back(route);
-	confs.push_back(config);
-
-	return (confs);
 }
 
 int handle_events(PollClass& pc, Server *host)

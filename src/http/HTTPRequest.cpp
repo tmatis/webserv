@@ -294,5 +294,7 @@ void HTTPRequest::clear(void)
 	_is_ready = false;
 	_command_set = false;
 	_header_set = false;
-	this->parseChunk(_buffer);
+	std::string tmp = _buffer;
+	_buffer.clear();
+	this->parseChunk(tmp);
 }

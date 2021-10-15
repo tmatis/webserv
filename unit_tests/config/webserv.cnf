@@ -1,0 +1,27 @@
+#user						root;
+#error_log					error.log;
+max_simultaneous_clients	666;
+
+index						index.html;
+root						./www/;
+autoindex					on;
+upload_files				off;
+
+server { listen 127.0.0.1; server_name localhost; methods GET; }
+
+server {
+	listen				8080;
+
+	error_page			400 path/to/400_page;
+	root				./server8080/;
+	autoindex			off;
+	body_limit			650;
+
+	_. {
+		cgi				.php path;
+		upload_path		path;
+		# basically same stuff as above except for the first ones
+	}
+
+	_images { upload_files on; upload_path res/images/; }
+}

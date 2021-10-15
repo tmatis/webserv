@@ -6,12 +6,11 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 23:00:35 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/15 18:51:44 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <sstream>
-#include <iostream>
 #include "Server.hpp"
 
 const std::string	Server::_all_methods[3] = 
@@ -22,7 +21,7 @@ const std::string	Server::_all_methods[3] =
 };
 
 Server::Server(const Config& conf) :
-	_host(Listener(conf.address.c_str(), conf.port)), _config(conf) {}
+	_host(Listener(conf.address_res, conf.port)), _config(conf) {}
 
 Server::~Server(void)
 {
@@ -167,7 +166,10 @@ Server::create_file_response(Client& client)
 	int			bytes;
 
 	while ((bytes = read(client.file()->pfd.fd, buffer, BUFFER_SIZE)) > 0)
+	{
+		buffer[bytes] = '\0';
 		file_content += buffer; // load file content
+	}
 	if (bytes == -1)
 	{
 		client.state(DISCONNECTED);
@@ -262,7 +264,7 @@ Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 
 	// check that the specified method is allowed by the route rules
 	method = false;
-	for (std::vector<std::string>::const_iterator it = rules.methods.begin();
+	for (std::set<std::string>::const_iterator it = rules.methods.begin();
 			it != rules.methods.end();
 			it++)
 	{
@@ -303,8 +305,12 @@ Server::_check_cgi_extension(const Route& rules, const std::string& uri_path)
 int
 Server::_find_resource(const Route& rules, std::string path, Client& client)
 {
+
 	// build path from root dir and uri path
-	path = _append_paths(rules.root, path);
+	path.erase(0, rules.location.length());		// location/path/to/file -> /path/to/file
+	path = _append_paths(rules._root, path);	// root/path/to/file
+
+	std::cout << path << "\n";
 
 	struct stat	pathinfo;
 	if (stat(path.data(), &pathinfo) == -1)
@@ -339,7 +345,7 @@ Server::_find_resource(const Route& rules, std::string path, Client& client)
 
 		if (!file) // index file not found...
 		{
-			if (rules.autoindex) // autoindex enabled
+			if (rules._autoindex) // autoindex enabled
 			{
 				// client.response() = gen_autoindex(dirls);
 				client.response().setBody("AUTOINDEX");
@@ -351,7 +357,7 @@ Server::_find_resource(const Route& rules, std::string path, Client& client)
 		else
 			path = _append_paths(path, file->d_name); // path + filename
 	}
-				
+	
 	if (_file_already_requested(client, path))
 		return (OK); // another client asked for the same file
 
@@ -368,8 +374,8 @@ Server::_find_resource(const Route& rules, std::string path, Client& client)
 bool
 Server::_is_index_file(const Route& rules, struct dirent* file)
 {
-	for (std::vector<std::string>::const_iterator it = rules.default_pages.begin();
-			it != rules.default_pages.end();
+	for (std::set<std::string>::const_iterator it = rules._index_paths.begin();
+			it != rules._index_paths.end();
 			it++)
 	{
 		if (file->d_type == DT_REG) // regular file
@@ -384,28 +390,15 @@ Server::_is_index_file(const Route& rules, struct dirent* file)
 int
 Server::_handle_error(Client& client, int status, bool autogen)
 {
-	if (!autogen) // find page in configuration
+	if (!autogen) // search error page in server configuration
 	{
 		std::map<int, std::string>::const_iterator	errpage;
 	
-		errpage = _config.error_pages.find(status);
-		if (errpage != _config.error_pages.end()) // page exists
+		errpage = _config._error_pages.find(status);
+		if (errpage != _config._error_pages.end()) // page exists
 		{
-			int fd = open(errpage->second.data(), O_RDONLY | O_NONBLOCK);
-			if (fd == -1)
-			{
-				if (errno == ENOENT)
-					return (_handle_error(client, NOT_FOUND, true));
-				return (_handle_error(client, INTERNAL_SERVER_ERROR, true));
-			}
-
-			if (_file_already_requested(client, errpage->second))
-				return (0); // error page already opened for another client
-
-			_files.push_back(f_pollfd(errpage->second, fd));
-			client.file(&_files.back());
 			client.response().setStatus((status_code)status);
-			client.state(IDLE);
+			_create_response(client, &errpage->second);
 			return (0);
 		}
 		else // doesn't exist
@@ -416,9 +409,9 @@ Server::_handle_error(Client& client, int status, bool autogen)
 		// client.response() = gen_error_page(status);
 		std::stringstream	ss; ss << status;
 		client.response().setBody("ERROR " + ss.str());
+		client.response().setStatus((status_code)status);
 		_create_response(client);
 	}
-
 	return (0);
 }
 
@@ -451,7 +444,7 @@ Server::_append_paths(const std::string& str1, const std::string& str2)
 }
 
 void
-Server::_create_response(Client& client, std::string *body)
+Server::_create_response(Client& client, const std::string *body)
 {
 	/*
 		no need to set response status here because
@@ -480,7 +473,7 @@ Server::_create_response(Client& client, std::string *body)
 	ss << response.getBodySize();
 
 	// set headers
-	response.setContentType("text/html");	// default Content-Type
+	response.setContentType("text/html");					// default Content-Type
 	headers.addValue("Content-Length", ss.str());			// Content-Length
 	if (response.getStatus() == BAD_REQUEST)
 		response.setConnection(HTTP_CONNECTION_CLOSE);		// Connection (nginx behavior)
@@ -488,8 +481,10 @@ Server::_create_response(Client& client, std::string *body)
 	{
 		std::string	allow_header_val;
 
-		for (size_t i = 0; i < client.rules()->methods.size(); i++)
-			allow_header_val += client.rules()->methods[i];
+		for (std::set<std::string>::iterator it = client.rules()->methods.begin();
+			it != client.rules()->methods.end();
+			it++)
+				allow_header_val += *it;
 		headers.addValue("Allow", allow_header_val);
 	}
 	response.setHeader(headers);

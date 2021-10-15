@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:24 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/13 17:16:28 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/15 16:22:49 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,15 +18,13 @@
 # include <cstdio>
 
 # include "polling/polling.hpp"
+# include "config/MasterConfig.hpp"
+# include "config/Config.hpp"
 # include "socket/Server.hpp"
 
 # include "http/HTTPURI.hpp"
 
 # define POLL_TIMEOUT	30000
-
-/*** PARSING ******************************************************************/
-
-std::vector<Config>		read_config_file(char* filename);
 
 /*** POLL *********************************************************************/
 

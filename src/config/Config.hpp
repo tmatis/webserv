@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 22:36:30 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 02:30:01 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/14 12:19:46 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,37 +16,49 @@
 # include <string>
 # include <map>
 # include <vector>
+# include <arpa/inet.h>
+# include "MasterConfig.hpp"
 
 /*
 ** further comments define possible default values for each field
 */
 
-typedef struct Route
-{
-	Route(void);
+struct Route;
 
-	std::string					location;		// "/"
-	std::vector<std::string>	methods;		// "GET" "POST" "DELETE"
-	std::map<int, std::string>	redirections;	// empty
-	std::string					root;			// "/var/www"
-	bool						autoindex;		// false
-	std::vector<std::string>	default_pages;	// "index.html"
-	std::string					cgi_extension;	// ""
-	std::string					upload_path;	// ""
-}		Route;
-
-typedef	struct Config
+typedef	struct Config : public MasterConfig
 {
+	public:
 	Config(void);
 
-	void						add_default_route(void);
+	public:
+	Config(MasterConfig const &master);
+	Config(Config const &cp);
+	~Config();
 
-	std::string					address;		// mandatory
-	int							port;			// mandatory
-	std::string					name;			// ""
+	Config				&operator=(Config const &rhs);
+	void				construct(std::string &config_str);
+	void				fill_var(std::pair<std::string, std::string> const &var_pair);
+
+	std::set<std::string>		methods;
+	std::string					address;
+	unsigned long				address_res;	// mandatory
+	unsigned short				port;			// mandatory
+	std::pair<int, std::string>	redirection;
+	std::set<std::string>		server_names;	// ""
 	size_t						body_limit;		// 0 for none
-	std::map<int, std::string>	error_pages;	// empty
 	std::vector<Route>			routes;			// if no route is specified with location="/", then create a default one
+
+	protected:
+	void	set_listen(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_server_names(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_redirection(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_body_limit(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_methods(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
 }		Config;
 
 #endif

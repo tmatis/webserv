@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:32:00 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/13 12:05:08 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/14 15:33:09 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,12 @@ car_test test_parseChunk_basic_get()
 
 	req.parseChunk("GET / HTTP/1.1\r\nHost: localhost:8080\r\nUser-Agent: Mozilla/5.0\r\n\r\n");
 
-	assert(req.getMethod() == "GET");
-	assert(req.getURI().getPath() == "/");
-	assert(req.getVersion() == "HTTP/1.1");
-	assert((*req.getHeader().getValue("Host")) == "localhost:8080");
-	assert(req.getBody() == "");
-	assert(req.isReady() == true);
+	car_assert_cmp(req.getMethod(), "GET");
+	car_assert_cmp(req.getURI().getPath(), "/");
+	car_assert_cmp(req.getVersion(), "HTTP/1.1");
+	car_assert_cmp((*req.getHeader().getValue("Host")), "localhost:8080");
+	car_assert_cmp(req.getBody(), "");
+	car_assert_cmp(req.isReady(), true);
 }
 
 car_test test_parseChunk_multiple_chunk_get()
@@ -32,12 +32,12 @@ car_test test_parseChunk_multiple_chunk_get()
 
 	req.parseChunk("GET / HTTP/1.1");
 	req.parseChunk("\r\nHost: localhost:8080\r\nUser-Agent: Mozilla/5.0\r\n\r\n");
-	assert(req.getMethod() == "GET");
-	assert(req.getURI().getPath() == "/");
-	assert(req.getVersion() == "HTTP/1.1");
-	assert((*req.getHeader().getValue("Host")) == "localhost:8080");
-	assert(req.getBody() == "");
-	assert(req.isReady() == true);
+	car_assert_cmp(req.getMethod(), "GET");
+	car_assert_cmp(req.getURI().getPath(), "/");
+	car_assert_cmp(req.getVersion(), "HTTP/1.1");
+	car_assert_cmp((*req.getHeader().getValue("Host")), "localhost:8080");
+	car_assert_cmp(req.getBody(), "");
+	car_assert_cmp(req.isReady(), true);
 }
 
 car_test test_parseChunk_post_empty_body(void)
@@ -46,12 +46,12 @@ car_test test_parseChunk_post_empty_body(void)
 
 	req.parseChunk("POST / HTTP/1.1\r\nHost: localhost:8080\r\nContent-Length: 0\r\n\r\n");
 
-	assert(req.getMethod() == "POST");
-	assert(req.getURI().getPath() == "/");
-	assert(req.getVersion() == "HTTP/1.1");
-	assert((*req.getHeader().getValue("Host")) == "localhost:8080");
-	assert(req.getBody() == "");
-	assert(req.isReady() == true);
+	car_assert_cmp(req.getMethod(), "POST");
+	car_assert_cmp(req.getURI().getPath(), "/");
+	car_assert_cmp(req.getVersion(), "HTTP/1.1");
+	car_assert_cmp((*req.getHeader().getValue("Host")), "localhost:8080");
+	car_assert_cmp(req.getBody(), "");
+	car_assert_cmp(req.isReady(), true);
 }
 
 car_test test_parseChunk_post_body(void)
@@ -62,12 +62,12 @@ car_test test_parseChunk_post_body(void)
 	req.parseChunk("Hello World ");
 	req.parseChunk("!!!!!!!!");
 
-	assert(req.getMethod() == "POST");
-	assert(req.getURI().getPath() == "/");
-	assert(req.getVersion() == "HTTP/1.1");
-	assert((*req.getHeader().getValue("Host")) ==  "localhost:8080");
-	assert(req.getBody() == "Hello World !!!!!!!!");
-	assert(req.isReady() == true);
+	car_assert_cmp(req.getMethod(), "POST");
+	car_assert_cmp(req.getURI().getPath(), "/");
+	car_assert_cmp(req.getVersion(), "HTTP/1.1");
+	car_assert_cmp((*req.getHeader().getValue("Host")),  "localhost:8080");
+	car_assert_cmp(req.getBody(), "Hello World !!!!!!!!");
+	car_assert_cmp(req.isReady(), true);
 }
 
 car_test test_parseChunk_post_body_with_multiple_chunk(void)
@@ -84,14 +84,14 @@ car_test test_parsed_get(void)
 
 	req.parseChunk("GET / HTTP/1.1\r\nHost: localhost:8080\r\nUser-Agent: Mozilla/5.0\r\nAccept: text/html,text/plain\r\nConnection: keep-alive\r\n\r\n");
 	
-	assert(req.getMethod() == "GET");
-	assert(req.getURI().getPath() == "/");
-	assert(req.getVersion() == "HTTP/1.1");
-	assert(req.getHost() == "localhost:8080");
-	assert(*req.getUserAgent() == "Mozilla/5.0");
-	assert(req.getAccept()[0] == "text/html");
-	assert(req.getAccept()[1] == "text/plain");
-	assert(req.getConnection() == HTTP_CONNECTION_KEEP_ALIVE);
-	assert(req.getBody() == "");
-	assert(req.isReady() == true);
+	car_assert_cmp(req.getMethod(), "GET");
+	car_assert_cmp(req.getURI().getPath(), "/");
+	car_assert_cmp(req.getVersion(), "HTTP/1.1");
+	car_assert_cmp(req.getHost(), "localhost:8080");
+	car_assert_cmp(*req.getUserAgent(), "Mozilla/5.0");
+	car_assert_cmp(req.getAccept()[0], "text/html");
+	car_assert_cmp(req.getAccept()[1], "text/plain");
+	car_assert_cmp(req.getConnection(), HTTP_CONNECTION_KEEP_ALIVE);
+	car_assert_cmp(req.getBody(), "");
+	car_assert_cmp(req.isReady(), true);
 }
