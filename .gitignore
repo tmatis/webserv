@@ -9,3 +9,4 @@ webserv
 bin_test
 vscode/
 .vscode/
+*.log

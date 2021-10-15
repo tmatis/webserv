@@ -223,6 +223,7 @@ void HTTPRequest::_parseHeader(void)
 			_header_set = true;
 			if (!_header.getValue("Content-Length"))
 				_is_ready = true;
+			return ;
 		}
 		else
 			_header.parseLine(line);
