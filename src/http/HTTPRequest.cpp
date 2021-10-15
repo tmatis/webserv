@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   HTTPRequest.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/10/15 18:54:45 by tmatis            #+#    #+#             */
+/*   Updated: 2021/10/15 18:55:01 by tmatis           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "HTTPRequest.hpp"
 #include <sstream>
 #include <iostream>
@@ -89,7 +101,8 @@ HTTPRequest::HTTPRequest(void)
 HTTPRequest::HTTPRequest(HTTPRequest const &src)
 	: HTTPGeneral(src), _method(src._method),
 	  _version(src._version), _uri(src._uri),
-	  _is_ready(false), _command_set(src._command_set), _header_set(src._header_set), _buffer(src._buffer)
+	  _is_ready(false), _command_set(src._command_set),
+	  _header_set(src._header_set), _buffer(src._buffer)
 {
 }
 
@@ -190,6 +203,28 @@ std::string const &HTTPRequest::getVersion(void) const
 	return (_version);
 }
 
+bool HTTPRequest::isChunked(void) const
+{
+	const std::string *value = _header.getValue("Transfer-Encoding");
+	if (value)
+	{
+		if (value->find("chunked") != std::string::npos)
+			return (true);
+	}
+	return (false);
+}
+
+std::string const *HTTPRequest::getContentType(void) const
+{
+	const std::string *value = _header.getValue("Content-Type");
+	
+	if (value)
+		return (value);
+	else
+		return (NULL);
+}
+
+
 /* ************************* METHODS ************************* */
 
 // parse command if we have a complete request
@@ -226,7 +261,51 @@ void HTTPRequest::_parseHeader(void)
 			return ;
 		}
 		else
-			_header.parseLine(line);
+		{
+			std::pair<std::string, std::string > const
+				*pair = _header.parseLine(line);
+
+			if (pair && pair->first == "Host")
+				_host = pair->second;
+		}
+	}
+	if (!_header.isValid())
+		throw HTTPRequestException("Header malformed");
+}
+
+// the chunked request look like this:
+// 1F\n <-- chunk size in HEX
+// <chunk>\n <-- chunk
+// 0\n <-- end of chunk
+// note that \n are transformed to \n
+
+void HTTPRequest::_parseBodyChunked(void)
+{
+	size_t pos;
+
+	while ((pos = _buffer.find("\n")) != std::string::npos)
+	{
+		std::string line = get_line_cut(_buffer);
+
+		if (line == "")
+		{
+			_is_ready = true;
+			return ;
+		}
+		else
+		{
+			size_t size = std::strtoul(line.c_str(), NULL, 16);
+			if (size > 0)
+			{
+				_body.append(_buffer.substr(0, size));
+				_buffer.erase(0, size + 2);
+			}
+			else
+			{
+				_is_ready = true;
+				return ;
+			}
+		}
 	}
 }
 
@@ -235,7 +314,10 @@ void HTTPRequest::_parseHeader(void)
 void HTTPRequest::_parseBody(void)
 {
 	const std::string *content_length = _header.getValue("Content-Length");
-	if (content_length)
+
+	if (this->isChunked())
+		_parseBodyChunked();
+	else if (content_length)
 	{
 		size_t content_length_value = std::strtoul(content_length->c_str(), NULL, 10);
 		// if we have more read that the body size we bufferize
@@ -275,10 +357,7 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 	{
 		if (_header.isValid() == false)
 			throw HTTPRequestException("Invalid header");
-		const std::string *values = _header.getValue("Host");
-		if (values)
-			_host = *values;
-		else
+		if (_host == "")
 			throw HTTPRequestException("Host header not found");
 	}
 }

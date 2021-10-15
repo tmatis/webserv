@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:32:00 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/15 18:22:07 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/15 18:41:39 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,4 +127,17 @@ car_test multiple_request_per_chunk(void)
 	car_assert_cmp(req.getConnection(), HTTP_CONNECTION_CLOSE);
 	car_assert_cmp(req.getBody(), "");
 	car_assert_cmp(req.isReady(), true);
+}
+
+car_test chunked_request(void)
+{
+	HTTPRequest req;
+
+	req.parseChunk("POST / HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/plain\r\n");
+	car_assert(req.isReady() == false);
+	car_assert_cmp(req.getMethod(), "POST");
+	car_assert_cmp(req.getURI().getPath(), "/");
+	car_assert_cmp(req.getVersion(), "HTTP/1.1");
+	car_assert_cmp(req.getHost(), "localhost");
+	car_assert_cmp(*req.getContentType(), "text/plain");
 }
