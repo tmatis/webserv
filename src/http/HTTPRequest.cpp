@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/15 18:54:45 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/15 18:55:01 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/15 21:02:25 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,7 +256,7 @@ void HTTPRequest::_parseHeader(void)
 		if (line == "")
 		{
 			_header_set = true;
-			if (!_header.getValue("Content-Length"))
+			if (!_header.getValue("Content-Length") && !this->isChunked())
 				_is_ready = true;
 			return ;
 		}
@@ -274,39 +274,13 @@ void HTTPRequest::_parseHeader(void)
 }
 
 // the chunked request look like this:
-// 1F\n <-- chunk size in HEX
+// <SIZE>\n <-- chunk size in HEX
 // <chunk>\n <-- chunk
 // 0\n <-- end of chunk
-// note that \n are transformed to \n
 
 void HTTPRequest::_parseBodyChunked(void)
 {
-	size_t pos;
-
-	while ((pos = _buffer.find("\n")) != std::string::npos)
-	{
-		std::string line = get_line_cut(_buffer);
-
-		if (line == "")
-		{
-			_is_ready = true;
-			return ;
-		}
-		else
-		{
-			size_t size = std::strtoul(line.c_str(), NULL, 16);
-			if (size > 0)
-			{
-				_body.append(_buffer.substr(0, size));
-				_buffer.erase(0, size + 2);
-			}
-			else
-			{
-				_is_ready = true;
-				return ;
-			}
-		}
-	}
+	
 }
 
 // add bytes to body and exeding bytes to buffer
