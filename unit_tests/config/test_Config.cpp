@@ -35,7 +35,8 @@ car_test test_parseConfig(void)
 	car_assert_cmp(mconfig._configs[1]._root, "./server8080/");
 	car_assert_cmp(mconfig._configs[1].body_limit, static_cast<unsigned long>(650));
 
-	car_assert_cmp(mconfig._configs[1].routes.size(), static_cast<unsigned long>(2));
+	// switch from 2 to 3 since default route "/" was added
+	car_assert_cmp(mconfig._configs[1].routes.size(), static_cast<unsigned long>(3));
 	car_assert_cmp(mconfig._configs[1].routes[0].cgi_extension, ".php");
 	car_assert_cmp(mconfig._configs[1].routes[0].cgi_path, "path");
 	car_assert_cmp(mconfig._configs[1].routes[0].upload_path, "path");

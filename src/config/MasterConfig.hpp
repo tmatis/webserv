@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 11:16:04 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/14 12:37:30 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/16 21:33:10 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ class MasterConfig
 	// html proper config
 	std::set<std::string>					_methods_supported;
 	std::string								_default_mime;
-	std::set<std::string, int>				_mime_types;
+	std::map<std::string, int>				_mime_types;
 	std::set<std::string>					_index_paths;
 	std::map<int, std::string>				_error_pages;
 

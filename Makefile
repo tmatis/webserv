@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+         #
+#    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/15 16:23:55 by mamartin         ###   ########.fr        #
+#    Updated: 2021/10/16 14:50:38 by tmatis           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -241,7 +241,7 @@ objs/%.o: 	$(SRCS_PATH)/%$(FILE_EXTENSION)
 			@$(call run_and_test,$(CC) $(CFLAGS) $(DFLAGS) -c $< -o $@ -I$(INCLUDE_PATH))
 
 clean:		header
-			@rm -rf objs unit_tests/objs unit_tests/collected.*
+			@rm -rf objs unit_tests/objs unit_tests/collected.* unit_errors.log
 			@printf "%-53b%b" "$(COM_COLOR)clean:" "$(OK_COLOR)[✓]$(NO_COLOR)\n"
 
 fclean:		header clean
@@ -252,7 +252,7 @@ re:			fclean all
 
 unit:		all
 			@cd unit_tests && bash CAR.sh ${OBJS}
-			@./bin_test $$FILTER
+			@./bin_test $$FILTER 2> unit_errors.log
 
 unit_all: 	all
 			@cd unit_tests && bash CAR.sh ${OBJS}

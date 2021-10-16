@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:15:26 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/11 20:31:48 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/15 18:53:23 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ public:
 
 /* ************************* METHODS ************************* */
 
-	void parseLine(std::string line);
+	std::pair<std::string, std::string > const *parseLine(std::string line);
 	void addValue(std::string key, std::string const &value);
 	std::string toString(void) const;
 	void clear(void);

@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 18:41:58 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/14 02:06:19 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/16 14:08:37 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -247,7 +247,6 @@ void HTTPURI::decodeURI(std::string uri)
 		this->_fragment = uri.substr(pos + 1, uri.size());
 		this->_fragment = percentDecode(this->_fragment);
 	}
-
 }
 
 void HTTPURI::clear(void)

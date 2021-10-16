@@ -11,4 +11,4 @@ vscode/
 .vscode/
 www
 webserv.cnf
-error.log
+*.log
