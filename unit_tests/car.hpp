@@ -45,7 +45,7 @@ void car_assert_fn(T x, int line, std::string filename, std::string funcname,
 		}
 		std::cout << CYAN << BOLD << " >>> " << RESET
 				  << RED << "[✖] " << BLUE << "Assertion"
-				  << RED << " failed: " << RESET << BOLD "`" << x_str << "`" << RESET << " in " << funcname
+				  << RED << " failed: " << RESET << BOLD << x_str << RESET << " in " << funcname
 				  << "(" << filename << ":" << line << ")" << std::endl;
 		fail_assert++;
 	}
@@ -55,7 +55,7 @@ void car_assert_fn(T x, int line, std::string filename, std::string funcname,
 		if (filter != "" && (filter == "--show-all" || funcname.find(filter) != std::string::npos))
 			std::cout << CYAN << BOLD << " >>> " << RESET
 					  << GREEN << "[✔] " << BLUE << "Assertion"
-					  << GREEN << " passed: " << RESET << BOLD "`" << x_str << "`" << RESET << " in " << funcname
+					  << GREEN << " passed: " << RESET << BOLD << x_str << RESET << " in " << funcname
 					  << "(" << filename << ":" << line << ")" << std::endl;
 	}
 }
@@ -74,11 +74,11 @@ void car_assert_cmp_fn(T1 x, T2 y, int line, std::string filename, std::string f
 		}
 		std::cout << CYAN << BOLD << " >>> " << RESET
 				  << RED << "[✖] " << BLUE << "Assertion"
-				  << RED << " failed: " << RESET << BOLD "`" << x_str << "`" << RESET << " != " << BOLD "`" << y_str << "`" << RESET << " in " << funcname
+				  << RED << " failed: " << RESET << BOLD << x_str << RESET << " != " << BOLD  << y_str << RESET << " in " << funcname
 				  << "(" << filename << ":" << line << ")" << std::endl;
-		std::cout << std::setw(27) << "(" << RED << "`" << x << "`"
+		std::cout << std::setw(27) << "(" << RED << x
 				  << RESET << " != " << GREEN
-				  << "`" << y << "`" << RESET << ")" << std::endl;
+				  << y  << RESET << ")" << std::endl;
 		fail_assert++;
 	}
 	else
@@ -87,7 +87,7 @@ void car_assert_cmp_fn(T1 x, T2 y, int line, std::string filename, std::string f
 		if (filter != "" && (filter == "--show-all" || funcname.find(filter) != std::string::npos))
 			std::cout << CYAN << BOLD << " >>> " << RESET
 					  << GREEN << "[✔] " << BLUE << "Assertion"
-					  << GREEN << " passed: " << RESET << BOLD "`" << x_str << "`" << RESET << " == " << BOLD "`" << y_str << "`" << RESET << " in " << funcname
+					  << GREEN << " passed: " << RESET << BOLD << x_str << RESET << " == " << BOLD<< y_str << RESET << " in " << funcname
 					  << "(" << filename << ":" << line << ")" << std::endl;
 	}
 }

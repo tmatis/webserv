@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 14:27:06 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/13 12:02:25 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/16 12:54:42 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ private:
 	void _parseCommand(void);
 	void _parseHeader(void);
 	void _parseBody(void);
+	void _parseBodyChunked(void);
 
 	/* headers info */
 	std::string _host;
@@ -69,6 +70,8 @@ public:
 	std::vector<std::string> getAccept(void) const;
 	HTTPConnectionType getConnection(void) const;
 	bool isReady(void) const;
+	bool isChunked(void) const;
+	std::string const *getContentType(void) const;
 
 /* ************************* SETTERS ************************* */
 

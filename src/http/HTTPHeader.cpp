@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/11 20:55:54 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/15 18:53:58 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,8 +81,9 @@ void HTTPHeader::addValue(std::string key, std::string const &value)
 }
 
 
-// parse line at format: key: value
-void HTTPHeader::parseLine(std::string line)
+// parse line at format: key: value and return key
+
+std::pair<std::string, std::string > const *HTTPHeader::parseLine(std::string line)
 {
 	std::string tokens;
 
@@ -93,7 +94,7 @@ void HTTPHeader::parseLine(std::string line)
 	size_t pos = line.find(":");
 	if (pos == std::string::npos)
 	{
-		return;
+		return (NULL);
 		_is_valid = false;
 	}
 	std::string title = line.substr(0, pos);
@@ -105,6 +106,7 @@ void HTTPHeader::parseLine(std::string line)
 	if (value.empty() || title.empty())
 		_is_valid = false;
 	this->addValue(title, value);
+	return (&_headers.back());
 }
 
 // transform header to string

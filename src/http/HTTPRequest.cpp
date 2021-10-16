@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   HTTPRequest.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/10/15 18:54:45 by tmatis            #+#    #+#             */
+/*   Updated: 2021/10/16 14:43:56 by tmatis           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "HTTPRequest.hpp"
 #include <sstream>
 #include <iostream>
@@ -21,30 +33,27 @@ const char *HTTPRequest::HTTPRequestException::what() const throw()
 
 /* *********************** UTILITIES ************************* */
 
-static void format_request(std::string &buffer)
+std::pair<size_t, short> find_nl(std::string &buffer)
 {
-	size_t pos = 0;
-	while ((pos = buffer.find("\r\n", pos)) != std::string::npos)
-	{
-		buffer.replace(pos, 2, "\n");
-		pos++;
-	}
-	// replace \r by \n
-	pos = 0;
-	while ((pos = buffer.find("\r", pos)) != std::string::npos)
-	{
-		buffer.replace(pos, 1, "\n");
-		pos++;
-	}
+	size_t pos = buffer.find("\r\n");
+	if (pos != std::string::npos)
+		return (std::make_pair(pos, 2));
+	pos = buffer.find("\n");
+	if (pos != std::string::npos)
+		return (std::make_pair(pos, 1));
+	pos = buffer.find("\r");
+	if (pos != std::string::npos)
+		return (std::make_pair(pos, 1));
+	return (std::make_pair(std::string::npos, 0));
 }
 
 static std::string get_line_cut(std::string &buffer)
 {
-	size_t pos = buffer.find("\n");
-	if (pos == std::string::npos)
+	std::pair<size_t, short> nl_info = find_nl(buffer);
+	if (nl_info.first == std::string::npos)
 		return ("");
-	std::string line = buffer.substr(0, pos);
-	buffer.erase(0, pos + 1);
+	std::string line = buffer.substr(0, nl_info.first);
+	buffer.erase(0, nl_info.first + nl_info.second);
 	return (line);
 }
 
@@ -89,7 +98,8 @@ HTTPRequest::HTTPRequest(void)
 HTTPRequest::HTTPRequest(HTTPRequest const &src)
 	: HTTPGeneral(src), _method(src._method),
 	  _version(src._version), _uri(src._uri),
-	  _is_ready(false), _command_set(src._command_set), _header_set(src._header_set), _buffer(src._buffer)
+	  _is_ready(false), _command_set(src._command_set),
+	  _header_set(src._header_set), _buffer(src._buffer)
 {
 }
 
@@ -190,6 +200,27 @@ std::string const &HTTPRequest::getVersion(void) const
 	return (_version);
 }
 
+bool HTTPRequest::isChunked(void) const
+{
+	const std::string *value = _header.getValue("Transfer-Encoding");
+	if (value)
+	{
+		if (value->find("chunked") != std::string::npos)
+			return (true);
+	}
+	return (false);
+}
+
+std::string const *HTTPRequest::getContentType(void) const
+{
+	const std::string *value = _header.getValue("Content-Type");
+
+	if (value)
+		return (value);
+	else
+		return (NULL);
+}
+
 /* ************************* METHODS ************************* */
 
 // parse command if we have a complete request
@@ -214,18 +245,63 @@ void HTTPRequest::_parseHeader(void)
 {
 	size_t pos;
 
-	while ((pos = _buffer.find("\n")) != std::string::npos)
+	while ((pos = find_nl(_buffer).first) != std::string::npos)
 	{
 		std::string line = get_line_cut(_buffer);
 
 		if (line == "")
 		{
 			_header_set = true;
-			if (!_header.getValue("Content-Length"))
+			if (!_header.getValue("Content-Length") && !this->isChunked())
 				_is_ready = true;
+			return;
 		}
 		else
-			_header.parseLine(line);
+		{
+			std::pair<std::string, std::string> const
+				*pair = _header.parseLine(line);
+
+			if (pair && pair->first == "Host")
+				_host = pair->second;
+		}
+	}
+	if (!_header.isValid())
+		throw HTTPRequestException("Header malformed");
+}
+
+// the chunked request look like this:
+// <SIZE>\r\n <-- chunk size in HEX
+// <chunk>\r\n <-- chunk (could also contain \r\n)
+// 0\n <-- end of chunk
+
+void HTTPRequest::_parseBodyChunked(void)
+{
+	static size_t size = 0;
+	static bool has_size = false;
+
+	while (1)
+	{
+		if (!has_size && find_nl(_buffer).first != std::string::npos)
+		{
+			// check charset : [0-9] [A-F] [a-f]
+			std::string line = get_line_cut(_buffer);
+			if (line.find_first_not_of("0123456789ABCDEFabcdef") != std::string::npos)
+				throw HTTPRequestException("Chunked body malformed");
+			size = std::strtoul(line.c_str(), NULL, 16);
+			has_size = true;
+		}
+		else if (has_size &&
+				 _buffer.size() - 2 >= size && find_nl(_buffer).first != std::string::npos)
+		{
+			if (size == 0)
+				_is_ready = true;
+			_body += _buffer.substr(0, size);
+			_buffer.erase(0, size + 2);
+			has_size = false;
+			size = 0;
+		}
+		else
+			return;
 	}
 }
 
@@ -234,11 +310,14 @@ void HTTPRequest::_parseHeader(void)
 void HTTPRequest::_parseBody(void)
 {
 	const std::string *content_length = _header.getValue("Content-Length");
-	if (content_length)
+
+	if (this->isChunked())
+		_parseBodyChunked();
+	else if (content_length)
 	{
 		size_t content_length_value = std::strtoul(content_length->c_str(), NULL, 10);
 		// if we have more read that the body size we bufferize
-		if (_body.size() + _buffer.size() >= content_length_value) 
+		if (_body.size() + _buffer.size() >= content_length_value)
 		{
 			std::string tmp = _buffer.substr(0, content_length_value - _body.size());
 			_body += tmp;
@@ -261,12 +340,11 @@ void HTTPRequest::_parseBody(void)
 void HTTPRequest::parseChunk(std::string const &chunk)
 {
 	_buffer += chunk;
-	format_request(_buffer);
 
 	// parse headers if not already done
-	if (!_command_set && _buffer.find("\n") != std::string::npos)
+	if (!_command_set && find_nl(_buffer).first != std::string::npos)
 		_parseCommand();
-	if (_command_set && !_header_set && _buffer.find("\n") != std::string::npos)
+	if (_command_set && !_header_set && find_nl(_buffer).first != std::string::npos)
 		_parseHeader();
 	if (_header_set && !_is_ready)
 		_parseBody();
@@ -274,10 +352,7 @@ void HTTPRequest::parseChunk(std::string const &chunk)
 	{
 		if (_header.isValid() == false)
 			throw HTTPRequestException("Invalid header");
-		const std::string *values = _header.getValue("Host");
-		if (values)
-			_host = *values;
-		else
+		if (_host == "")
 			throw HTTPRequestException("Host header not found");
 	}
 }
