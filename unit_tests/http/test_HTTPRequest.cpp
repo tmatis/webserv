@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:32:00 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/16 13:04:06 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/16 13:13:22 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,7 @@ car_test line_return_in_body(void)
 	car_assert_cmp(req.isReady(), true);
 }
 
-void chunked_request(void)
+car_test chunked_request(void)
 {
 	HTTPRequest req;
 
@@ -170,7 +170,7 @@ void chunked_request(void)
 	req.parseChunk("5\r\nHello\r\n");
 	car_assert(req.isChunked() == true);
 	car_assert(req.isReady() == false);
-	req.parseChunk("5\r\n World\r\n");
+	req.parseChunk("6\r\n World\r\n");
 	car_assert(req.isReady() == false);
 	req.parseChunk("0\r\n");
 	car_assert(req.isReady() == true);

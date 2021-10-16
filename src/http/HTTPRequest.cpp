@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/15 18:54:45 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/16 13:02:31 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/16 14:01:42 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -273,13 +273,39 @@ void HTTPRequest::_parseHeader(void)
 }
 
 // the chunked request look like this:
-// <SIZE>\n <-- chunk size in HEX
-// <chunk>\n <-- chunk
+// <SIZE>\r\n <-- chunk size in HEX
+// <chunk>\r\n <-- chunk (could also contain \r\n)
 // 0\n <-- end of chunk
 
 void HTTPRequest::_parseBodyChunked(void)
 {
-	
+	static std::string const end_chunk("0\r\n\r\n");
+	static size_t size = 0;
+	static bool has_size = false;
+
+	if (!has_size && find_nl(_buffer).first != std::string::npos)
+	{
+		// check charset : [0-9] [A-F] [a-f]
+		std::string line = get_line_cut(_buffer);
+		if (line.find_first_not_of("0123456789ABCDEFabcdef") != std::string::npos)
+			throw HTTPRequestException("Chunked body malformed");
+		size = std::strtoul(line.c_str(), NULL, 16);
+		has_size = true;
+		_parseBodyChunked();
+	}
+	else if (has_size &&
+			_buffer.size() - 2 >= size
+			&& find_nl(_buffer).first != std::string::npos)
+	{
+		if (size == 0)
+			_is_ready = true;
+		_body += _buffer.substr(0, size);
+		_buffer.erase(0, size + 2);
+		has_size = false;
+		size = 0;
+		_parseBodyChunked();
+	}
+		
 }
 
 // add bytes to body and exeding bytes to buffer
