@@ -6,19 +6,13 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/15 18:51:44 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/16 02:52:58 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <sstream>
+#include <cerrno>
 #include "Server.hpp"
-
-const std::string	Server::_all_methods[3] = 
-{
-	"GET",
-	"POST",
-	"DELETE"
-};
 
 Server::Server(const Config& conf) :
 	_host(Listener(conf.address_res, conf.port)), _config(conf) {}
@@ -30,8 +24,11 @@ Server::~Server(void)
 	for (client_iterator it = _clients.begin(); it != _clients.end(); it++)
 		close(it->fd());
 
-	// close files ?
-	// delete configs ?
+	// close files
+	for (std::vector<f_pollfd>::iterator it = _files.begin();
+		it != _files.end();
+		it++)
+			close(it->pfd.fd);
 }
 
 /*** CONNECTIONS **************************************************************/
@@ -42,7 +39,10 @@ Server::add_new_client(void)
 	Client	client;
 
 	if (client.connect(_host.fd()) == -1)
+	{
+		std::cerr << "server > client connection failed: " << strerror(errno) << "\n";
 		return (-1);
+	}
 	_clients.push_back(client);
 	return (0);
 }
@@ -144,18 +144,29 @@ Server::send_response(Client& client)
 {
 	std::string	response = client.response().toString();
 
+	client.request().clear();
 	if (write(client.fd(), response.data(), response.size()) < 0)
+	{
+		client.write_trials++;
+		std::cerr << "server > client response: ";
+		perror("write");
+		if (client.write_trials == 5)
+		{
+			std::cerr << "server > client disconnected.\n";
+			client.state(DISCONNECTED);
+		}
+		return ;
+	}
+
+	if (*client.response().getHeader().getValue("Connection") == "close")
 	{
 		client.state(DISCONNECTED);
 		return ;
 	}
-	else
-		client.state(PENDING_REQUEST);
-	client.request().clear();
-	client.response().clear();
 
-	//if (client.request().isReady())
-	//	handle_request(client);
+	client.clear();
+	if (client.request().isReady())
+		handle_request(client); // new request
 }
 
 int
@@ -172,7 +183,10 @@ Server::create_file_response(Client& client)
 	}
 	if (bytes == -1)
 	{
-		client.state(DISCONNECTED);
+		std::cerr << "server > file requested: \n";
+		perror("read");
+		client.file(NULL);
+		_handle_error(client, INTERNAL_SERVER_ERROR);
 		return (-1);
 	}
 	_create_response(client, &file_content);
@@ -208,7 +222,14 @@ Server::_read_request(Client &client)
 	char	buffer[BUFFER_SIZE];
 	int		readBytes	= read(client.fd(), &buffer, BUFFER_SIZE);
 
-	if (readBytes <= 0)
+	if (readBytes < 0)
+	{
+		std::cerr << "server > client request: ";
+		perror("read");
+		_handle_error(client, INTERNAL_SERVER_ERROR);
+		return (false);
+	}
+	else if (readBytes == 0)
 		client.state(DISCONNECTED);
 	else
 	{
@@ -251,9 +272,11 @@ Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 
 	// check that the specified method is implemented by our server
 	bool method = false;
-	for (int i = 0; i < 3; i++)
+	for (std::set<std::string>::iterator it = rules._methods_supported.begin();
+		it != rules._methods_supported.end();
+		it++)
 	{
-		if (request.getMethod() == _all_methods[i])
+		if (*it == request.getMethod())
 		{
 			method = true;
 			break ;
@@ -305,12 +328,9 @@ Server::_check_cgi_extension(const Route& rules, const std::string& uri_path)
 int
 Server::_find_resource(const Route& rules, std::string path, Client& client)
 {
-
 	// build path from root dir and uri path
 	path.erase(0, rules.location.length());		// location/path/to/file -> /path/to/file
 	path = _append_paths(rules._root, path);	// root/path/to/file
-
-	std::cout << path << "\n";
 
 	struct stat	pathinfo;
 	if (stat(path.data(), &pathinfo) == -1)
@@ -318,7 +338,10 @@ Server::_find_resource(const Route& rules, std::string path, Client& client)
 		if (errno == ENOENT || errno == ENOTDIR)
 			return (NOT_FOUND); // path doesn't exist
 		else
+		{
+			std::cerr << "server > stat() failed: " << strerror(errno) << "\n";
 			return (INTERNAL_SERVER_ERROR); // other error
+		}
 	}
 	
 	// path is a directory
@@ -330,7 +353,10 @@ Server::_find_resource(const Route& rules, std::string path, Client& client)
 
 		// open directory
 		if (!(dirptr = opendir(path.data())))
+		{
+			std::cerr << "server > cannot open directory \"" << path << "\": " << strerror(errno) << "\n";
 			return (INTERNAL_SERVER_ERROR);
+		}
 
 		errno = 0;
 		while ((file = readdir(dirptr))) // read directory entries
@@ -341,7 +367,10 @@ Server::_find_resource(const Route& rules, std::string path, Client& client)
 		}
 		closedir(dirptr);
 		if (errno) // readdir failed
+		{
+			std::cerr << "server > cannot read directory \"" << path << "\": " << strerror(errno) << "\n";
 			return (INTERNAL_SERVER_ERROR);
+		}
 
 		if (!file) // index file not found...
 		{
@@ -364,7 +393,10 @@ Server::_find_resource(const Route& rules, std::string path, Client& client)
 	// open file
 	int fd = open(path.data(), O_RDONLY | O_NONBLOCK);
 	if (fd == -1)
+	{
+		std::cerr << "server > cannot open file \"" << path << "\": " << strerror(errno) << "\n";
 		return (INTERNAL_SERVER_ERROR);
+	}
 
 	_files.push_back(f_pollfd(path, fd));
 	client.file(&_files.back());
@@ -476,7 +508,7 @@ Server::_create_response(Client& client, const std::string *body)
 	response.setContentType("text/html");					// default Content-Type
 	headers.addValue("Content-Length", ss.str());			// Content-Length
 	if (response.getStatus() == BAD_REQUEST)
-		response.setConnection(HTTP_CONNECTION_CLOSE);		// Connection (nginx behavior)
+		headers.addValue("Connection", "close");			// Connection (nginx behavior)
 	else if (response.getStatus() == METHOD_NOT_ALLOWED)	// Allow (only for 405 errors)
 	{
 		std::string	allow_header_val;

@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/15 18:44:26 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/15 21:49:39 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,6 @@ class Server
 		std::vector<Client>			_clients;	// list of clients connected
 		std::vector<f_pollfd>		_files;		// files opened
 		const Config&				_config;	// configuration of the server
-
-		static const std::string	_all_methods[3]; // methods implemented by the server
 };
 
 #endif

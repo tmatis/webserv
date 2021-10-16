@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 18:05:06 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/16 02:41:14 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ f_pollfd::operator pollfd() const
 /*** CLIENT *******************************************************************/
 
 Client::Client(void) :
-	_state(PENDING_REQUEST), _file(NULL), _route(NULL) {}
+	write_trials(0), _state(PENDING_REQUEST), _file(NULL), _route(NULL) {}
 
 int
 Client::connect(int host_fd)
@@ -106,4 +106,12 @@ void
 Client::rules(const Route* rules)
 {
 	_route = rules;
+}
+
+void
+Client::clear(void)
+{
+	write_trials	= 0;
+	_state			= PENDING_REQUEST;
+	_response.clear();
 }

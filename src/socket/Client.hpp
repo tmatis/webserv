@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 18:04:39 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/16 02:40:03 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,9 @@ class Client : public TCP_Socket
 		void			state(client_state st);
 		void			file(const f_pollfd* f_pfd);
 		void			rules(const Route* rules);
+		void			clear(void);
+
+		int				write_trials;
 
 	private:
 
