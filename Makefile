@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+         #
+#    By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/14 08:34:00 by nouchata         ###   ########.fr        #
+#    Updated: 2021/10/15 16:23:55 by mamartin         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@
 
 NAME	= webserv
 CC 		= clang++
-CFLAGS	= -Wall -Wextra -Werror -std=c++98
+CFLAGS	= -Wall -Wextra -Werror -std=c++98 -g
 DFLAGS	= -MMD -MF $(@:.o=.d)
 AUTHOR	= tmatis mamartin nouchata
 DATE	= 30/09/2021
@@ -34,11 +34,11 @@ SRCS_PATH		= ./src
 
 INCLUDE_PATH	= ./src
 
-SRCS	= 	poll_cases.cpp http/HTTPHeader.cpp http/HTTPGeneral.cpp \
-			http/HTTPRequest.cpp http/HTTPResponse.cpp \
-			socket/Client.cpp socket/Listener.cpp socket/Server.cpp \
-			socket/TCP_Socket.cpp polling/polling.cpp \
-			config/Config.cpp config/MasterConfig.cpp config/Route.cpp http/HTTPURI.cpp
+SRCS			= poll_cases.cpp http/HTTPHeader.cpp http/HTTPGeneral.cpp \
+					http/HTTPRequest.cpp http/HTTPResponse.cpp \
+					socket/Client.cpp socket/Listener.cpp socket/Server.cpp \
+					socket/TCP_Socket.cpp polling/polling.cpp \
+					config/Config.cpp config/MasterConfig.cpp config/Route.cpp http/HTTPURI.cpp
 
 MAIN			= main.cpp
 

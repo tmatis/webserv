@@ -225,3 +225,115 @@ std::string HTTPResponse::toString(void)
 	res += _body;
 	return (res);
 }
+
+HTTPResponse	&HTTPResponse::gen_error_page(int const &status)
+{
+	unsigned int	i = 0;
+	std::string		tmplate;
+	std::string		error;
+
+	tmplate += "<html>\n<head><title>{error}</title></head>\n<body>\n<center>";
+	tmplate += "<h1>{error}</h1></center>\n<hr><center>webserv du feu <img src=\"h";
+	tmplate += "ttps://i.imgur.com/z81h8VU.gif\"></center>\n</body>\n</html>\n";
+	for ( ; i < sizeof(this->_status_code) / sizeof(this->_status_code[0]); i++)
+		if (this->_status_code[i] == status)
+			break ;
+	if (i == sizeof(this->_status_code) / sizeof(this->_status_code[0]))
+		error = "??? Unknown Error";
+	else
+	{
+		error += itoa(status);
+		error += " ";
+		error += this->_status_message[i];
+	}
+	tmplate.replace(tmplate.find("{error}"), 7, error);
+	tmplate.replace(tmplate.find("{error}"), 7, error);
+	this->_body = tmplate;
+	this->_status = static_cast<status_code>(status);
+	return (*this);
+}
+
+HTTPResponse	&HTTPResponse::gen_autoindex(std::vector<struct dirent> const &files, \
+std::string const &dir)
+{
+	unsigned int									i = 0;
+	std::string										tmplate;
+	std::string										new_entry;
+	std::string										tampon;
+	char											tbuffer[50];
+	struct stat										file_stat;
+	struct tm										*stime;
+	std::set<std::string>							sdir;
+	std::set<std::string>							sfiles;
+	std::set<std::string>::iterator					it;
+
+	tmplate += "<html>\n<head><title>Index of " + dir + "</title></head>\n";
+	tmplate += "<body>\n<h1>Index of " + dir + "</h1>\n<hr>\n<pre>";
+	tmplate += "<a href=\"../\">../</a>\n";
+
+	while (i < files.size())
+	{
+		if (std::string(".") == files[i].d_name || std::string("..") == files[i].d_name)
+		{
+			i++;
+			continue ;
+		}
+		if (files[i].d_type == DT_DIR)
+			sdir.insert(files[i].d_name);
+		else
+			sfiles.insert(files[i].d_name);
+		i++;
+	}
+	for (it = sdir.begin() ; it != sdir.end() ; it++)
+	{
+		i = 1;
+		memset(tbuffer, 0, 50);
+		tampon = dir + "/" + (*it);
+		if (lstat(tampon.c_str(), &file_stat) == -1)
+			i = 0;
+		tampon = (*it) + '/';
+		new_entry = "<a href=\"" + tampon + "\">";
+		if (tampon.size() < 50)
+			new_entry += std::string(tampon + "</a>").append(50 - tampon.size() + 1, ' ');
+		else
+			new_entry += tampon.substr(0, 47).append("..&gt;</a> ");
+		if (i && (stime = localtime(&file_stat.st_mtime)) && \
+		strftime(tbuffer, 49, "%d-%b-%Y %H:%M", stime))
+			new_entry += std::string(tbuffer) + "                   -";
+		else
+			new_entry += "\?\?-\?\?\?-\?\?\?\? \?\?:\?\?                   -";
+		tmplate += new_entry + "\n";
+	}
+	for (it = sfiles.begin() ; it != sfiles.end() ; it++)
+	{
+		i = 1;
+		memset(tbuffer, 0, 50);
+		tampon = dir + "/" + (*it);
+		if (lstat(tampon.c_str(), &file_stat) == -1)
+			i = 0;
+		tampon = (*it);
+		new_entry = "<a href=\"" + tampon + "\">";
+		if (tampon.size() < 50)
+			new_entry += std::string(tampon + "</a>").append(50 - tampon.size() + 1, ' ');
+		else
+			new_entry += tampon.substr(0, 47).append("..&gt;</a> ");
+		if (i && (stime = localtime(&file_stat.st_mtime)) && \
+		strftime(tbuffer, 49, "%d-%b-%Y %H:%M", stime))
+			new_entry += std::string(tbuffer);
+		else
+			new_entry += "\?\?-\?\?\?-\?\?\?\? \?\?:\?\?";
+		if (i)
+		{
+			tampon = itoa(file_stat.st_size);
+			new_entry.append(20 - tampon.size(), ' ').append(tampon);
+		}
+		else
+			new_entry += "                   ?";
+		tmplate += new_entry + "\n";
+	}
+	tmplate += "</pre><hr><center>webserv du feu <img src=\"h";
+	tmplate += "ttps://i.imgur.com/z81h8VU.gif\"></center>\n</body>\n</html>\n";
+	this->_body = tmplate;
+	this->_status = static_cast<status_code>(200);
+	return (*this);
+}

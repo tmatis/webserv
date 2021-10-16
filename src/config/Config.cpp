@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:51:01 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 17:54:26 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/15 18:11:32 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ void	Config::construct(std::string &config_str)
 	std::pair<std::string, std::string>					parsing_res;
 	unsigned int										i = 0;
 	bool												listen_flag = false;
+	bool												default_route_flag = false;
 
 	try {
 		parsing_res = this->extract_key_value(config_str);
@@ -77,9 +78,11 @@ void	Config::construct(std::string &config_str)
 			}
 			this->routes.push_back(Route(*this));
 			this->routes.back().construct(raw_data[i]);
+			if (this->routes.back().location == "/")
+    			default_route_flag = true;
 			i++;
 		}
-		if (this->routes.empty())
+		if (this->routes.empty() || !default_route_flag)
 			this->routes.push_back(Route(*this));
 	} catch (std::exception &e) { throw ; }
 }
@@ -218,7 +221,6 @@ std::vector<std::string> const &values)
 	std::set<std::string>	new_set;
 
 	(void)var_pair;
-	this->_index_paths.clear();
 	if (values.size())
 	{
 		for ( ; i < values.size() ; i++)

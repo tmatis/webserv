@@ -3,23 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/14 11:59:45 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/16 14:04:04 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <sstream>
+#include <cerrno>
 #include "Server.hpp"
-
-#define BUFFER_SIZE	1024
-
-const std::string	Server::_all_methods[3] = 
-{
-	"GET",
-	"POST",
-	"DELETE"
-};
 
 Server::Server(const Config& conf) :
 	_host(Listener(conf.address_res, conf.port)), _config(conf) {}
@@ -31,9 +24,14 @@ Server::~Server(void)
 	for (client_iterator it = _clients.begin(); it != _clients.end(); it++)
 		close(it->fd());
 
-	// close files ?
-	// delete configs ?
+	// close files
+	for (std::vector<f_pollfd>::iterator it = _files.begin();
+		it != _files.end();
+		it++)
+			close(it->pfd.fd);
 }
+
+/*** CONNECTIONS **************************************************************/
 
 int
 Server::add_new_client(void)
@@ -41,7 +39,10 @@ Server::add_new_client(void)
 	Client	client;
 
 	if (client.connect(_host.fd()) == -1)
+	{
+		std::cerr << "server > client connection failed: " << strerror(errno) << "\n";
 		return (-1);
+	}
 	_clients.push_back(client);
 	return (0);
 }
@@ -63,53 +64,77 @@ Server::flush_clients(void)
 	}
 }
 
+void
+Server::flush_files(void)
+{
+	std::vector<f_pollfd>::iterator	f = _files.begin();
+	client_iterator					cl;
+	
+	while (f != _files.end()) // check all files opened
+	{
+		cl = _clients.begin();
+		while (cl != _clients.end())
+		{
+			if (cl->file() == &(*f))
+				break ; // file is requested by a client
+			cl++;
+		}
+
+		if (cl == _clients.end()) // no client request this file anymore
+		{
+			// delete file
+			close(f->pfd.fd);
+			f = _files.erase(f);
+		}
+		else
+			f++;
+	}
+}
+
+/*** HTTP MESSAGES ************************************************************/
+
 int
 Server::handle_request(Client& client)
 {
 	try
 	{
 		// read request
-		bool ready = _read_request(client);
-		if (!ready)
-			return (OK);
+		if (!client.request().isReady())
+		{
+			bool ready = _read_request(client);
+			if (!ready)
+				return (OK); // request is not complete
+		}
 	}
 	catch(const std::exception& e)
 	{
-		return (BAD_REQUEST);
+		return (_handle_error(client, BAD_REQUEST));
 	}
 	
-	HTTPRequest& req = client.request();
-	
-	// check host
-	if (_resolve_host(req) != OK)
-		return (BAD_REQUEST);
-
-	// find route
-	const Route& route = _resolve_routes(req.getURI().getPath());
+	// find correct route
+	HTTPRequest&	req		= client.request();
+	const HTTPURI&	uri		= req.getURI();
+	const Route&	route	= _resolve_routes(uri.getPath());
+	client.rules(&route);
 
 	// check request compliance to route rules
 	int code = _check_request_validity(route, req);
 	if (code != OK)
-		return (code);
+		return (_handle_error(client, code));
 
-	// identify ressource
-		// if cgi
-			// handle it
-		// else find resource
-			// build path from root dir
-			// if directory
-				// search for a default page
-				// if no default and autoindex is on
-					// generate a list of files
-		// if not found
-			// 404
+	// redirection ?
 
-	// generate response
-		// based on cgi output
-		// or resource specified
-		// or auto-generated page
-			// in case of error with no pages defined
-			// in case of directory listing
+	if (_check_cgi_extension(route, uri.getPath()))
+	{
+		// _handle_cgi(uri, client);
+	}
+
+	// search content requested by the client
+	code = _find_resource(route, uri.getPath(), client);
+	if (code != OK)
+		return (_handle_error(client, code));
+	else if (client.file()) // resource found
+		client.state(IDLE);
 
 	return (OK);
 }
@@ -119,11 +144,57 @@ Server::send_response(Client& client)
 {
 	std::string	response = client.response().toString();
 
+	client.request().clear();
 	if (write(client.fd(), response.data(), response.size()) < 0)
+	{
+		client.write_trials++;
+		std::cerr << "server > client response: ";
+		perror("write");
+		if (client.write_trials == 5)
+		{
+			std::cerr << "server > client disconnected.\n";
+			client.state(DISCONNECTED);
+		}
+		return ;
+	}
+
+	if (*client.response().getHeader().getValue("Connection") == "close")
+	{
 		client.state(DISCONNECTED);
-	else
-		client.state(PENDING_REQUEST);
+		return ;
+	}
+
+	client.clear();
+	if (client.request().isReady())
+		handle_request(client); // new request
 }
+
+int
+Server::create_file_response(Client& client)
+{
+	std::string	file_content;
+	char		buffer[BUFFER_SIZE];
+	int			bytes;
+
+	while ((bytes = read(client.file()->pfd.fd, buffer, BUFFER_SIZE)) > 0)
+	{
+		buffer[bytes] = '\0';
+		file_content += buffer; // load file content
+	}
+	if (bytes == -1)
+	{
+		std::cerr << "server > file requested: \n";
+		perror("read");
+		client.file(NULL);
+		_handle_error(client, INTERNAL_SERVER_ERROR);
+		return (-1);
+	}
+	_create_response(client, &file_content);
+	client.file(NULL);
+	return (0);
+}
+
+/*** GETTERS ******************************************************************/
 
 std::vector<Client>&
 Server::get_clients(void)
@@ -131,7 +202,7 @@ Server::get_clients(void)
 	return (_clients);
 }
 
-const std::vector<pollfd>&
+const std::vector<f_pollfd>&
 Server::get_files(void) const
 {
 	return (_files);
@@ -143,9 +214,7 @@ Server::get_listener(void) const
 	return (_host);
 }
 
-/* ***************** */
-/* PRIVATE FUNCTIONS */
-/* ***************** */
+/*** PRIVATE FUNCTIONS ********************************************************/
 
 bool
 Server::_read_request(Client &client)
@@ -153,7 +222,14 @@ Server::_read_request(Client &client)
 	char	buffer[BUFFER_SIZE];
 	int		readBytes	= read(client.fd(), &buffer, BUFFER_SIZE);
 
-	if (readBytes <= 0)
+	if (readBytes < 0)
+	{
+		std::cerr << "server > client request: ";
+		perror("read");
+		_handle_error(client, INTERNAL_SERVER_ERROR);
+		return (false);
+	}
+	else if (readBytes == 0)
 		client.state(DISCONNECTED);
 	else
 	{
@@ -163,34 +239,8 @@ Server::_read_request(Client &client)
 	return (client.request().isReady());
 }
 
-int
-Server::_resolve_host(HTTPRequest& request)
-{
-	const std::string&	uri = request.getURI().getPath();
-	std::string			host;
-	size_t				pos;
-
-	if (uri.find("http", 0) != std::string::npos) // absolute URI (section 19.6.1.1 rfc2616)
-	{
-		// hostname starts after "http://" (7 characters)
-		for (pos = 7; uri[pos] != '\0'; pos++)
-		{
-			if (uri[pos] == ':' || uri[pos] == '/')
-				break ; // end of hostname
-		}
-		// substract hostname from uri
-		host = uri.substr(7, pos - 7);
-	}
-	else // get hostname from Host header field
-		host = request.getHost().substr(0, host.find_first_of(':'));
-	
-	if (host == _config.address || (this->_config.server_names.find(host) != this->_config.server_names.end()))
-		return (OK);
-	return (BAD_REQUEST); // bad hostname
-}
-
 const Route&
-Server::_resolve_routes(const std::string& uri)
+Server::_resolve_routes(const std::string& uri_path)
 {
 	const Route* matching = NULL;
 
@@ -198,7 +248,7 @@ Server::_resolve_routes(const std::string& uri)
 			it != _config.routes.end();
 			it++)
 	{
-		if (uri.find(it->location) == 0) // prefix found in uri
+		if (uri_path.find(it->location) == 0) // prefix found in uri
 		{
 			if (!matching)
 				matching = &(*it); // first prefix matching
@@ -212,11 +262,21 @@ Server::_resolve_routes(const std::string& uri)
 int
 Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 {
+	// check HTTP protocol version
+	if (request.getVersion() != "HTTP/1.1")
+		return (HTTP_VERSION_NOT_SUPPORTED);
+
+	// check host header field
+	if (!request.getHost().length())
+		return (BAD_REQUEST);
+
 	// check that the specified method is implemented by our server
 	bool method = false;
-	for (int i = 0; i < 3; i++)
+	for (std::set<std::string>::iterator it = rules._methods_supported.begin();
+		it != rules._methods_supported.end();
+		it++)
 	{
-		if (request.getMethod() == _all_methods[i])
+		if (*it == request.getMethod())
 		{
 			method = true;
 			break ;
@@ -241,11 +301,223 @@ Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 		return (METHOD_NOT_ALLOWED);
 
 	// a body limit of 0 means unlimited
-	if (_config.body_limit && request.getBody().length() > _config.body_limit)
+	if (_config.body_limit && request.getBodySize() > _config.body_limit)
 		return (PAYLOAD_TOO_LARGE);
 
 	// POST requests MUST have a Content-Length header
 	if (request.getMethod() == "POST" && !request.getHeader().getValue("Content-Length"))
 		return (LENGTH_REQUIRED);
 	return (OK);
+}
+
+int
+Server::_check_cgi_extension(const Route& rules, const std::string& uri_path)
+{
+	if (rules.cgi_extension.length() == 0)
+		return (false); // no cgi
+
+	// look for cgi_extension in uri path
+	size_t	pos = uri_path.rfind(rules.cgi_extension);
+	if (pos == std::string::npos)
+		return (false);
+	else if (pos == uri_path.length() - rules.cgi_extension.length())
+		return (true); // cgi_extension found at the end of path
+	return (false); // not found or not where it should be
+}
+
+int
+Server::_find_resource(const Route& rules, std::string path, Client& client)
+{
+	// build path from root dir and uri path
+	path.erase(0, rules.location.length());		// location/path/to/file -> /path/to/file
+	path = _append_paths(rules._root, path);	// root/path/to/file
+
+	struct stat	pathinfo;
+	if (stat(path.data(), &pathinfo) == -1)
+	{
+		if (errno == ENOENT || errno == ENOTDIR)
+			return (NOT_FOUND); // path doesn't exist
+		else
+		{
+			std::cerr << "server > stat() failed: " << strerror(errno) << "\n";
+			return (INTERNAL_SERVER_ERROR); // other error
+		}
+	}
+	
+	// path is a directory
+	if (pathinfo.st_mode & S_IFDIR)
+	{
+		DIR*						dirptr;
+		struct dirent*				file;
+		std::vector<struct dirent>	dirls;
+
+		// open directory
+		if (!(dirptr = opendir(path.data())))
+		{
+			std::cerr << "server > cannot open directory \"" << path << "\": " << strerror(errno) << "\n";
+			return (INTERNAL_SERVER_ERROR);
+		}
+
+		errno = 0;
+		while ((file = readdir(dirptr))) // read directory entries
+		{
+			if (_is_index_file(rules, file))
+				break ; // index file found !
+			dirls.push_back(*file);
+		}
+		closedir(dirptr);
+		if (errno) // readdir failed
+		{
+			std::cerr << "server > cannot read directory \"" << path << "\": " << strerror(errno) << "\n";
+			return (INTERNAL_SERVER_ERROR);
+		}
+
+		if (!file) // index file not found...
+		{
+			if (rules._autoindex) // autoindex enabled
+			{
+				client.response().gen_autoindex(dirls, path);
+				_create_response(client);
+				return (OK);
+			}
+			return (NOT_FOUND);
+		}
+		else
+			path = _append_paths(path, file->d_name); // path + filename
+	}
+	
+	if (_file_already_requested(client, path))
+		return (OK); // another client asked for the same file
+
+	// open file
+	int fd = open(path.data(), O_RDONLY | O_NONBLOCK);
+	if (fd == -1)
+	{
+		std::cerr << "server > cannot open file \"" << path << "\": " << strerror(errno) << "\n";
+		return (INTERNAL_SERVER_ERROR);
+	}
+
+	_files.push_back(f_pollfd(path, fd));
+	client.file(&_files.back());
+	return (OK);
+}
+
+bool
+Server::_is_index_file(const Route& rules, struct dirent* file)
+{
+	for (std::set<std::string>::const_iterator it = rules._index_paths.begin();
+			it != rules._index_paths.end();
+			it++)
+	{
+		if (file->d_type == DT_REG) // regular file
+		{
+			if (*it == file->d_name)
+				return (true); // file is an index file
+		}
+	}
+	return (false); // not an index file
+}
+
+int
+Server::_handle_error(Client& client, int status, bool autogen)
+{
+	if (!autogen) // search error page in server configuration
+	{
+		std::map<int, std::string>::const_iterator	errpage;
+	
+		errpage = _config._error_pages.find(status);
+		if (errpage != _config._error_pages.end()) // page exists
+		{
+			client.response().setStatus((status_code)status);
+			_create_response(client, &errpage->second);
+			return (0);
+		}
+		else // doesn't exist
+			return (_handle_error(client, status, true)); // retry with auto-generation enabled
+	}
+	else // generate page
+	{
+		client.response().gen_error_page(status);
+		_create_response(client);
+	}
+	return (0);
+}
+
+bool
+Server::_file_already_requested(Client& client, std::string filepath)
+{
+	for (size_t i = 0; i < _files.size(); i++)
+	{
+		if (_files[i].name == filepath) // file already in server's list
+		{
+			// assign file to the client
+			client.file(&_files[i]);
+			return (true);
+		}
+	}
+	return (false);
+}
+
+std::string
+Server::_append_paths(const std::string& str1, const std::string& str2)
+{
+	size_t		last_index = str1.length() - 1;
+	std::string	ret;
+
+	if (str1[last_index] == '/' || str2[0] == '/')
+		ret = str1 + str2;
+	else
+		ret = str1 + "/" + str2;
+	return (ret);
+}
+
+void
+Server::_create_response(Client& client, const std::string *body)
+{
+	/*
+		no need to set response status here because
+			it's either 200 (default value)
+			or already set by Server::_handle_error()
+
+		Body is either sent by create_file_response() -> body pointer
+			or generated by Server::_handle_error() and Server::_find_resource()
+
+		Location header is not set because
+			redirections and uploads are not yet implemented
+		If you want more headers I can add them
+			retry-after and last-modified are some examples
+		Content-Type is always text/html
+			it will be changed when configuration will includes
+			a map of MIME types
+		Connection is keep-alive by default
+	*/ 
+
+	HTTPResponse&		response = client.response();
+	HTTPHeader			headers;
+	std::stringstream	ss;
+	
+	if (body)
+		response.setBody(*body);
+	ss << response.getBodySize();
+
+	// set headers
+	response.setContentType("text/html");					// default Content-Type
+	headers.addValue("Content-Length", ss.str());			// Content-Length
+	if (response.getStatus() == BAD_REQUEST)
+		headers.addValue("Connection", "close");			// Connection (nginx behavior)
+	else if (response.getStatus() == METHOD_NOT_ALLOWED)	// Allow (only for 405 errors)
+	{
+		std::string	allow_header_val;
+
+		for (std::set<std::string>::iterator it = client.rules()->methods.begin();
+			it != client.rules()->methods.end();
+			it++)
+				allow_header_val += *it;
+		headers.addValue("Allow", allow_header_val);
+	}
+	response.setHeader(headers);
+
+	response.setReady(true);
+	client.rules(NULL);
+	client.state(WAITING_ANSWER);
 }
