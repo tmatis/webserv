@@ -9,3 +9,6 @@ webserv
 bin_test
 vscode/
 .vscode/
+www
+webserv.cnf
+error.log
