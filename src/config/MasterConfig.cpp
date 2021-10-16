@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/14 15:31:59 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/16 21:29:55 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ MasterConfig::~MasterConfig()
 	}
 }
 
-MasterConfig			&MasterConfig::operator=(MasterConfig const &rhs)
+MasterConfig	&MasterConfig::operator=(MasterConfig const &rhs)
 {
 	this->_autoindex = rhs._autoindex;
 	this->_uploadfiles = rhs._uploadfiles;
