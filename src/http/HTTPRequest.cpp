@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/15 18:54:45 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/16 14:01:42 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/16 14:43:56 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,8 +84,6 @@ static std::vector<std::string> split_header_value(std::string const &value)
 	}
 	return (tokens);
 }
-
-
 
 /* ********************** CONSTRUCTORS *********************** */
 
@@ -216,13 +214,12 @@ bool HTTPRequest::isChunked(void) const
 std::string const *HTTPRequest::getContentType(void) const
 {
 	const std::string *value = _header.getValue("Content-Type");
-	
+
 	if (value)
 		return (value);
 	else
 		return (NULL);
 }
-
 
 /* ************************* METHODS ************************* */
 
@@ -257,11 +254,11 @@ void HTTPRequest::_parseHeader(void)
 			_header_set = true;
 			if (!_header.getValue("Content-Length") && !this->isChunked())
 				_is_ready = true;
-			return ;
+			return;
 		}
 		else
 		{
-			std::pair<std::string, std::string > const
+			std::pair<std::string, std::string> const
 				*pair = _header.parseLine(line);
 
 			if (pair && pair->first == "Host")
@@ -279,33 +276,33 @@ void HTTPRequest::_parseHeader(void)
 
 void HTTPRequest::_parseBodyChunked(void)
 {
-	static std::string const end_chunk("0\r\n\r\n");
 	static size_t size = 0;
 	static bool has_size = false;
 
-	if (!has_size && find_nl(_buffer).first != std::string::npos)
+	while (1)
 	{
-		// check charset : [0-9] [A-F] [a-f]
-		std::string line = get_line_cut(_buffer);
-		if (line.find_first_not_of("0123456789ABCDEFabcdef") != std::string::npos)
-			throw HTTPRequestException("Chunked body malformed");
-		size = std::strtoul(line.c_str(), NULL, 16);
-		has_size = true;
-		_parseBodyChunked();
+		if (!has_size && find_nl(_buffer).first != std::string::npos)
+		{
+			// check charset : [0-9] [A-F] [a-f]
+			std::string line = get_line_cut(_buffer);
+			if (line.find_first_not_of("0123456789ABCDEFabcdef") != std::string::npos)
+				throw HTTPRequestException("Chunked body malformed");
+			size = std::strtoul(line.c_str(), NULL, 16);
+			has_size = true;
+		}
+		else if (has_size &&
+				 _buffer.size() - 2 >= size && find_nl(_buffer).first != std::string::npos)
+		{
+			if (size == 0)
+				_is_ready = true;
+			_body += _buffer.substr(0, size);
+			_buffer.erase(0, size + 2);
+			has_size = false;
+			size = 0;
+		}
+		else
+			return;
 	}
-	else if (has_size &&
-			_buffer.size() - 2 >= size
-			&& find_nl(_buffer).first != std::string::npos)
-	{
-		if (size == 0)
-			_is_ready = true;
-		_body += _buffer.substr(0, size);
-		_buffer.erase(0, size + 2);
-		has_size = false;
-		size = 0;
-		_parseBodyChunked();
-	}
-		
 }
 
 // add bytes to body and exeding bytes to buffer
@@ -320,7 +317,7 @@ void HTTPRequest::_parseBody(void)
 	{
 		size_t content_length_value = std::strtoul(content_length->c_str(), NULL, 10);
 		// if we have more read that the body size we bufferize
-		if (_body.size() + _buffer.size() >= content_length_value) 
+		if (_body.size() + _buffer.size() >= content_length_value)
 		{
 			std::string tmp = _buffer.substr(0, content_length_value - _body.size());
 			_body += tmp;
@@ -343,7 +340,7 @@ void HTTPRequest::_parseBody(void)
 void HTTPRequest::parseChunk(std::string const &chunk)
 {
 	_buffer += chunk;
-	
+
 	// parse headers if not already done
 	if (!_command_set && find_nl(_buffer).first != std::string::npos)
 		_parseCommand();

@@ -82,5 +82,4 @@ echo -e "${GREEN}done${NC}"
 echo -e -n "${BLUE}Compiling... ${NC}"
 make -s
 echo -e "${GREEN}done${NC}"
-rm collected.*
 echo 
