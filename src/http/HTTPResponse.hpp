@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HTTPResponse.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 20:01:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/12 12:53:16 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/16 14:05:49 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,14 @@
 #define HTTPRESPONSE_HPP
 
 #include "HTTPGeneral.hpp"
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <set>
 
 /* *********************** UTILITIES ************************* */
 
@@ -90,6 +98,9 @@ public:
 
 	void clear(void);
 	std::string toString(void);
+	HTTPResponse &gen_error_page(int const &status);
+	HTTPResponse &gen_autoindex(std::vector<struct dirent> const &files, \
+	std::string const &dir);
 
 };
 

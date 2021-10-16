@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/16 02:52:58 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/16 14:04:04 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -376,8 +376,7 @@ Server::_find_resource(const Route& rules, std::string path, Client& client)
 		{
 			if (rules._autoindex) // autoindex enabled
 			{
-				// client.response() = gen_autoindex(dirls);
-				client.response().setBody("AUTOINDEX");
+				client.response().gen_autoindex(dirls, path);
 				_create_response(client);
 				return (OK);
 			}
@@ -438,10 +437,7 @@ Server::_handle_error(Client& client, int status, bool autogen)
 	}
 	else // generate page
 	{
-		// client.response() = gen_error_page(status);
-		std::stringstream	ss; ss << status;
-		client.response().setBody("ERROR " + ss.str());
-		client.response().setStatus((status_code)status);
+		client.response().gen_error_page(status);
 		_create_response(client);
 	}
 	return (0);
