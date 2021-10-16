@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   polling.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:03:40 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/09 13:56:48 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/13 19:57:55 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,7 +137,7 @@ void				PollClass::update_server_pfd(unsigned int index)
 	while (i < new_fst_size)
 	{
 		if (this->_pfd_list[offset + i].fd != \
-		this->_server_list[index]->get_files()[i].fd)
+		this->_server_list[index]->get_files()[i].pfd.fd)
 		{
 			if (i < this->_server_data_size[index].second)
 			{

@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/12 00:33:03 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/16 02:40:03 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,20 @@
 # include "TCP_Socket.hpp"
 # include "../http/HTTPRequest.hpp"
 # include "../http/HTTPResponse.hpp"
+# include "../config/Config.hpp"
 
 typedef struct pollfd
 		pollfd;
+
+typedef struct f_pollfd
+{
+	f_pollfd(const std::string& filename, int fd);
+
+	operator pollfd() const;
+
+	std::string	name;
+	pollfd		pfd;
+}		f_pollfd;
 
 typedef	enum e_client_state
 {
@@ -29,6 +40,8 @@ typedef	enum e_client_state
 	PENDING_REQUEST,
 	DISCONNECTED
 }		client_state;
+
+# define BUFFER_SIZE	1024
 
 class Client : public TCP_Socket
 {
@@ -43,15 +56,24 @@ class Client : public TCP_Socket
 		client_state	state(void) const;
 		HTTPRequest&	request(void);
 		HTTPResponse&	response(void);
+		const f_pollfd*	file(void) const;
+		const Route*	rules(void) const;
 
 		// setters
 		void			state(client_state st);
+		void			file(const f_pollfd* f_pfd);
+		void			rules(const Route* rules);
+		void			clear(void);
+
+		int				write_trials;
 
 	private:
 
 		client_state	_state;
 		HTTPRequest		_request;
 		HTTPResponse	_response;
+		const f_pollfd*	_file;
+		const Route*	_route;
 };
 
 #endif
