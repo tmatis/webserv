@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/16 02:52:58 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/16 19:03:54 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,8 +148,7 @@ Server::send_response(Client& client)
 	if (write(client.fd(), response.data(), response.size()) < 0)
 	{
 		client.write_trials++;
-		std::cerr << "server > client response: ";
-		perror("write");
+		std::cerr << "server > sending client response failed: " << strerror(errno) << "\n";
 		if (client.write_trials == 5)
 		{
 			std::cerr << "server > client disconnected.\n";
@@ -183,8 +182,7 @@ Server::create_file_response(Client& client)
 	}
 	if (bytes == -1)
 	{
-		std::cerr << "server > file requested: \n";
-		perror("read");
+		std::cerr << "server > reading file requested failed: " << strerror(errno) << "\n";
 		client.file(NULL);
 		_handle_error(client, INTERNAL_SERVER_ERROR);
 		return (-1);
@@ -224,8 +222,7 @@ Server::_read_request(Client &client)
 
 	if (readBytes < 0)
 	{
-		std::cerr << "server > client request: ";
-		perror("read");
+		std::cerr << "server > reading client request failed: " << strerror(errno) << "\n";
 		_handle_error(client, INTERNAL_SERVER_ERROR);
 		return (false);
 	}
