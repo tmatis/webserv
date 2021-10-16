@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:32:00 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/15 20:21:06 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/16 13:04:06 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,25 @@ car_test multiple_request_per_chunk(void)
 	car_assert_cmp(req.isReady(), true);
 }
 
-car_test chunked_request(void)
+car_test line_return_in_body(void)
+{
+	HTTPRequest req;
+
+	req.parseChunk("POST / HTTP/1.1\r\nHost: localhost:8080\r\nUser-Agent: Mozilla/5.0\r\nAccept: text/html,text/plain\r\nConnection: keep-alive\r\nContent-Length: 14\r\n\r\nHello\r\nWorld\r\n");
+
+	car_assert_cmp(req.getMethod(), "POST");
+	car_assert_cmp(req.getURI().getPath(), "/");
+	car_assert_cmp(req.getVersion(), "HTTP/1.1");
+	car_assert_cmp(req.getHost(), "localhost:8080");
+	car_assert_cmp(*req.getUserAgent(), "Mozilla/5.0");
+	car_assert_cmp(req.getAccept()[0], "text/html");
+	car_assert_cmp(req.getAccept()[1], "text/plain");
+	car_assert_cmp(req.getConnection(), HTTP_CONNECTION_KEEP_ALIVE);
+	car_assert_cmp(req.getBody(), "Hello\r\nWorld\r\n");
+	car_assert_cmp(req.isReady(), true);
+}
+
+void chunked_request(void)
 {
 	HTTPRequest req;
 

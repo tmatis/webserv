@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/15 18:54:45 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/15 21:02:25 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/16 13:02:31 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,30 +33,27 @@ const char *HTTPRequest::HTTPRequestException::what() const throw()
 
 /* *********************** UTILITIES ************************* */
 
-static void format_request(std::string &buffer)
+std::pair<size_t, short> find_nl(std::string &buffer)
 {
-	size_t pos = 0;
-	while ((pos = buffer.find("\r\n", pos)) != std::string::npos)
-	{
-		buffer.replace(pos, 2, "\n");
-		pos++;
-	}
-	// replace \r by \n
-	pos = 0;
-	while ((pos = buffer.find("\r", pos)) != std::string::npos)
-	{
-		buffer.replace(pos, 1, "\n");
-		pos++;
-	}
+	size_t pos = buffer.find("\r\n");
+	if (pos != std::string::npos)
+		return (std::make_pair(pos, 2));
+	pos = buffer.find("\n");
+	if (pos != std::string::npos)
+		return (std::make_pair(pos, 1));
+	pos = buffer.find("\r");
+	if (pos != std::string::npos)
+		return (std::make_pair(pos, 1));
+	return (std::make_pair(std::string::npos, 0));
 }
 
 static std::string get_line_cut(std::string &buffer)
 {
-	size_t pos = buffer.find("\n");
-	if (pos == std::string::npos)
+	std::pair<size_t, short> nl_info = find_nl(buffer);
+	if (nl_info.first == std::string::npos)
 		return ("");
-	std::string line = buffer.substr(0, pos);
-	buffer.erase(0, pos + 1);
+	std::string line = buffer.substr(0, nl_info.first);
+	buffer.erase(0, nl_info.first + nl_info.second);
 	return (line);
 }
 
@@ -87,6 +84,8 @@ static std::vector<std::string> split_header_value(std::string const &value)
 	}
 	return (tokens);
 }
+
+
 
 /* ********************** CONSTRUCTORS *********************** */
 
@@ -249,7 +248,7 @@ void HTTPRequest::_parseHeader(void)
 {
 	size_t pos;
 
-	while ((pos = _buffer.find("\n")) != std::string::npos)
+	while ((pos = find_nl(_buffer).first) != std::string::npos)
 	{
 		std::string line = get_line_cut(_buffer);
 
@@ -318,12 +317,11 @@ void HTTPRequest::_parseBody(void)
 void HTTPRequest::parseChunk(std::string const &chunk)
 {
 	_buffer += chunk;
-	format_request(_buffer);
-
+	
 	// parse headers if not already done
-	if (!_command_set && _buffer.find("\n") != std::string::npos)
+	if (!_command_set && find_nl(_buffer).first != std::string::npos)
 		_parseCommand();
-	if (_command_set && !_header_set && _buffer.find("\n") != std::string::npos)
+	if (_command_set && !_header_set && find_nl(_buffer).first != std::string::npos)
 		_parseHeader();
 	if (_header_set && !_is_ready)
 		_parseBody();
