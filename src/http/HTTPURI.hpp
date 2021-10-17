@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 18:21:09 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/14 02:03:37 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/17 12:08:04 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ public:
 	class HTTPURIException : public std::exception
 	{
 	public:
-		HTTPURIException(const char *errinfo);
+		explicit HTTPURIException(const char *errinfo);
 		virtual ~HTTPURIException() throw();
 		virtual const char *what(void) const throw();
 
@@ -45,7 +45,7 @@ public:
 
 	/* ********************** CONSTRUCTORS *********************** */
 
-	HTTPURI(std::string const &uri);
+	explicit HTTPURI(std::string const &uri);
 	HTTPURI(void);
 	HTTPURI(HTTPURI const &src);
 	~HTTPURI();

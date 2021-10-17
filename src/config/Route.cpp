@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Route.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:48:00 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/14 17:55:45 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/17 12:58:39 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ void		Route::construct(std::pair<std::string, std::string> &config_str)
 {
 	std::vector<std::pair<std::string, std::string> >	raw_data;
 	std::pair<std::string, std::string>					parsing_res;
-	unsigned int										i = 0;
 
 	try {
 		this->location = config_str.first.substr(1);
@@ -46,6 +45,7 @@ void		Route::construct(std::pair<std::string, std::string> &config_str)
 			raw_data.push_back(parsing_res);
 			parsing_res = this->extract_key_value(config_str.second);
 		}
+		unsigned int i = 0;
 		while (i < raw_data.size())
 		{
 			MasterConfig::keep_only_printable_chars(raw_data[i].first);
@@ -62,13 +62,18 @@ void		Route::fill_var(std::pair<std::string, std::string> const &var_pair)
 	std::vector<std::string>		values;
 	std::string						values_raw = var_pair.second;
 
-	std::string		str_args[10] = {"index", "error_page", "root", "autoindex", \
+	std::string	const str_args[10] = {"index", "error_page", "root", "autoindex", \
 	"redirection", "body_limit", "upload_files", "methods", "cgi", "upload_path"};
-	void (Route::*func_args[10])(std::pair<std::string, std::string> const &var_pair, \
-	std::vector<std::string> const &values) = {&Route::set_index_paths, \
+
+	typedef void (Route::*func_setter)
+					(std::pair<std::string, std::string> const &var_pair,
+					std::vector<std::string> const &values);
+					
+	func_setter const func_args[10] = {&Route::set_index_paths, \
 	&Route::set_error_pages, &Route::set_root, &Route::set_autoindex, \
 	&Route::set_redirection, &Route::set_body_limit, &Route::set_uploadfiles, \
 	&Route::set_methods, &Route::set_cgi, &Route::set_upload_path};
+
 	while (!values_raw.empty())
 	{
 		i = values_raw.find(' ');

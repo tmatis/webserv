@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   TCP_Socket.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:16:14 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/09 13:28:32 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/17 12:07:53 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ class TCP_Socket
 		class CreationFailure : public std::exception
 		{
 			public:
-				CreationFailure(const char* errinfo);
+				explicit CreationFailure(const char* errinfo);
 				virtual ~CreationFailure() throw();
 				virtual const char*	what(void) const throw();
 			private:

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Route.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:46:26 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/14 09:38:52 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/17 12:08:21 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ struct Config;
 
 typedef struct Route : public Config
 {
-	Route(Config const &base);
+	explicit Route(Config const &base);
 	Route(Route const &cp);
 	~Route();
 
