@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/16 23:48:49 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/17 04:00:12 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -512,7 +512,14 @@ Server::_create_response(Client& client, const std::string *body)
 		headers.addValue("Allow", allow_header_val);
 	}
 	else if (response.getStatus() / 100 == 3) // status indicates a redirection
-		headers.addValue("Location", client.rules()->redirection.second);
+	{
+		const std::string&	new_url = client.rules()->redirection.second;
+
+		// add a Location header with the new url
+		// url may contain variables like $host for exemple
+		// we need to replace them by their actual values
+		headers.addValue("Location", _replace_conf_vars(client, new_url));
+	}
 	response.setHeader(headers);
 
 	response.setReady(true);
@@ -529,4 +536,41 @@ Server::_handle_redirection(Client& client, const Route& rules)
 	client.response().setStatus((status_code)rules.redirection.first);
 	_create_response(client);
 	return (true);
+}
+
+std::string
+Server::_replace_conf_vars(Client& client, const std::string& redirection)
+{
+	std::string	url = redirection;
+	std::string	port;
+	size_t		pos;
+
+ 	// replace "$host" placeholder by real hostname
+	pos = url.find("$host");
+	if (pos != std::string::npos)
+	{
+		std::string	host		= client.request().getHost();
+		size_t		port_pos	= host.rfind(":");
+
+		// remove port segment if any
+		if (port_pos != std::string::npos) 
+			host.erase(port_pos, host.length() - port_pos);
+		url.replace(pos, 5, host);
+	}
+
+ 	// replace "$server_port"
+	pos = url.find("$server_port");
+	if (pos != std::string::npos)
+	{
+		std::stringstream	ss;
+
+		ss << ntohs(_config.port);
+		url.replace(pos, 12, ss.str());
+	}
+
+ 	// replace "$uri"
+	pos = url.find("$uri");
+	if (pos != std::string::npos)
+		url.replace(pos, 4, client.request().getURI().getPath());
+	return (url);
 }
