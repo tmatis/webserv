@@ -284,7 +284,7 @@ std::string const &dir)
 			sfiles.insert(files[i].d_name);
 		i++;
 	}
-	for (it = sdir.begin() ; it != sdir.end() ; it++)
+	for (it = sdir.begin() ; it != sdir.end() ; ++it)
 	{
 		i = 1;
 		memset(tbuffer, 0, 50);
@@ -304,7 +304,7 @@ std::string const &dir)
 			new_entry += "\?\?-\?\?\?-\?\?\?\? \?\?:\?\?                   -";
 		tmplate += new_entry + "\n";
 	}
-	for (it = sfiles.begin() ; it != sfiles.end() ; it++)
+	for (it = sfiles.begin() ; it != sfiles.end() ; ++it)
 	{
 		i = 1;
 		memset(tbuffer, 0, 50);

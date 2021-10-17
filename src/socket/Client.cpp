@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/16 02:41:14 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/17 13:01:18 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 /*** F_POLLFD *****************************************************************/
 
 f_pollfd::f_pollfd(const std::string& filename, int fd)
+	: name(filename)
 {
-	name		= filename;
 	pfd.fd		= fd;
 	pfd.events	= POLLIN; // fd is read only
 }

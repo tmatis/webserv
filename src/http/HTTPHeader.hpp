@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:15:26 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/15 18:53:23 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/17 12:59:40 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,13 +37,13 @@ public:
 
 /* ************************* GETTERS ************************* */
 
-	std::string const *getValue(std::string key) const;
+	std::string const *getValue(std::string const &key) const;
 	bool isValid(void) const;
 
 /* ************************* METHODS ************************* */
 
 	std::pair<std::string, std::string > const *parseLine(std::string line);
-	void addValue(std::string key, std::string const &value);
+	void addValue(std::string const &key, std::string const &value);
 	std::string toString(void) const;
 	void clear(void);
 

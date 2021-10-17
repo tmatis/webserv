@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/16 21:29:55 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/17 12:54:04 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,10 +54,14 @@ MasterConfig::fill_var(std::pair<std::string, std::string> const &var_pair)
 	std::vector<std::string>		values;
 	std::string						values_raw = var_pair.second;
 
-	std::string		str_args[8] = {"user", "error_log", "max_simultaneous_clients", "index", \
+	std::string const str_args[8] = {"user", "error_log", "max_simultaneous_clients", "index", \
 	"error_page", "root", "autoindex", "upload_files"};
-	void (MasterConfig::*func_args[8])(std::pair<std::string, std::string> const &var_pair, \
-	std::vector<std::string> const &values) = {&MasterConfig::set_user, &MasterConfig::set_error_log, \
+
+	typedef void (MasterConfig::*func_setter)
+					(std::pair<std::string, std::string> const &var_pair,
+					std::vector<std::string> const &values);
+
+	func_setter const func_args[8] = {&MasterConfig::set_user, &MasterConfig::set_error_log, \
 	&MasterConfig::set_max_simultaneous_clients, &MasterConfig::set_index_paths, \
 	&MasterConfig::set_error_pages, &MasterConfig::set_root, &MasterConfig::set_autoindex, \
 	&MasterConfig::set_uploadfiles};
@@ -88,7 +92,6 @@ void		MasterConfig::construct(std::string const &config_path)
 	std::string											config_str;
 	std::pair<std::string, std::string>					parsing_res;
 	int													length = 0;
-	unsigned int										i = 0;
 	char												*buffer = NULL;
 
 	try {
@@ -109,6 +112,7 @@ void		MasterConfig::construct(std::string const &config_path)
 			raw_data.push_back(parsing_res);
 			parsing_res = this->extract_key_value(config_str);
 		}
+		unsigned int i = 0;
 		while (i < raw_data.size())
 		{
 			MasterConfig::keep_only_printable_chars(raw_data[i].first);
@@ -145,15 +149,14 @@ MasterConfig::extract_key_value(std::string &line)
 {
 	std::pair<std::string, std::string>		ret;
 	bool									braces = false;
-	unsigned int							i = 0;
-	int										find_res = 0;
+	int										find_res;
 	unsigned char							count = 0;
 
 	if (line.empty())
 		return (ret);
 	while (count < 4)
 	{
-		i = 0;
+		unsigned int i = 0;
 		find_res = 0;
 		if (count == 3 && line[i] == '{')
 			braces = true;
@@ -219,13 +222,11 @@ void		MasterConfig::keep_only_printable_chars(std::string &edit)
 
 void		MasterConfig::remove_comments(std::string &edit)
 {
-	unsigned long		i = 0;
-	unsigned long		y = 0;
-
-	i = edit.find('#');
+	unsigned long i = edit.find('#');
+	
 	while (i != std::string::npos)
 	{
-		y = edit.find('\n', i);
+		unsigned long y = edit.find('\n', i);
 		if (y == std::string::npos)
 			y = edit.size();
 		edit.erase(i, y - i);
@@ -250,7 +251,6 @@ void \
 MasterConfig::set_error_pages(std::pair<std::string, std::string> const &var_pair, \
 std::vector<std::string> const &values)
 {
-	unsigned int					i = 0;
 	std::ifstream					error_page;
 	char							*buffer;
 	std::string						path = var_pair.second;
@@ -266,7 +266,7 @@ std::vector<std::string> const &values)
 			return ;
 		}
 		error_page.seekg(0, error_page.end);
-		i = error_page.tellg();
+		unsigned int i = error_page.tellg();
 		error_page.seekg(0, error_page.beg);
 		buffer = new char[i];
 		error_page.read(buffer, i);
@@ -386,13 +386,11 @@ void \
 MasterConfig::set_index_paths(std::pair<std::string, std::string> const &var_pair, \
 std::vector<std::string> const &values)
 {
-	unsigned int i = 0;
-
 	(void)var_pair;
 	this->_index_paths.clear();
 	if (values.size())
 	{
-		for ( ; i < values.size() ; i++)
+		for (size_t i = 0 ; i < values.size() ; i++)
 			this->_index_paths.insert(values[i]);
 	}
 	else

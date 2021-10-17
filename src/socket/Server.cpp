@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/16 14:04:04 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/17 13:03:37 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ Server::~Server(void)
 	// close files
 	for (std::vector<f_pollfd>::iterator it = _files.begin();
 		it != _files.end();
-		it++)
+		++it)
 			close(it->pfd.fd);
 }
 
@@ -60,7 +60,7 @@ Server::flush_clients(void)
 			it = _clients.erase(it);
 		}
 		else
-			it++;
+			++it;
 	}
 }
 
@@ -77,7 +77,7 @@ Server::flush_files(void)
 		{
 			if (cl->file() == &(*f))
 				break ; // file is requested by a client
-			cl++;
+			++cl;
 		}
 
 		if (cl == _clients.end()) // no client request this file anymore
@@ -87,7 +87,7 @@ Server::flush_files(void)
 			f = _files.erase(f);
 		}
 		else
-			f++;
+			++f;
 	}
 }
 
@@ -246,7 +246,7 @@ Server::_resolve_routes(const std::string& uri_path)
 
 	for (std::vector<Route>::const_iterator it = _config.routes.begin();
 			it != _config.routes.end();
-			it++)
+			++it)
 	{
 		if (uri_path.find(it->location) == 0) // prefix found in uri
 		{
@@ -274,7 +274,7 @@ Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 	bool method = false;
 	for (std::set<std::string>::iterator it = rules._methods_supported.begin();
 		it != rules._methods_supported.end();
-		it++)
+		++it)
 	{
 		if (*it == request.getMethod())
 		{
@@ -289,7 +289,7 @@ Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 	method = false;
 	for (std::set<std::string>::const_iterator it = rules.methods.begin();
 			it != rules.methods.end();
-			it++)
+			++it)
 	{
 		if (*it == request.getMethod())
 		{
@@ -407,7 +407,7 @@ Server::_is_index_file(const Route& rules, struct dirent* file)
 {
 	for (std::set<std::string>::const_iterator it = rules._index_paths.begin();
 			it != rules._index_paths.end();
-			it++)
+			++it)
 	{
 		if (file->d_type == DT_REG) // regular file
 		{
@@ -444,7 +444,7 @@ Server::_handle_error(Client& client, int status, bool autogen)
 }
 
 bool
-Server::_file_already_requested(Client& client, std::string filepath)
+Server::_file_already_requested(Client& client, std::string const &filepath)
 {
 	for (size_t i = 0; i < _files.size(); i++)
 	{
@@ -511,7 +511,7 @@ Server::_create_response(Client& client, const std::string *body)
 
 		for (std::set<std::string>::iterator it = client.rules()->methods.begin();
 			it != client.rules()->methods.end();
-			it++)
+			++it)
 				allow_header_val += *it;
 		headers.addValue("Allow", allow_header_val);
 	}
