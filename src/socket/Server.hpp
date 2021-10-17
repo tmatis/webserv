@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 18:34:32 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/17 20:58:53 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ class Server
 
 		typedef std::vector<Client>::iterator		client_iterator;
 
-		Server(const Config& conf);
+		explicit Server(const Config& conf);
 		virtual ~Server(void);
 
 		// handle connections
@@ -58,7 +58,7 @@ class Server
 		int							_find_resource(const Route& rules, std::string path, Client& client);
 		bool						_is_index_file(const Route& rules, struct dirent* file);
 		int							_handle_error(Client& client, int status, bool autogen = false);
-		bool						_file_already_requested(Client& client, std::string filepath);
+		bool						_file_already_requested(Client& client, std::string const &filepath);
 		std::string					_append_paths(const std::string& str1, const std::string& str2);
 		void						_create_response(Client& client, const std::string *body = NULL);
 		bool						_handle_redirection(Client& client, const Route& rules);

@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/15 18:54:45 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/16 14:43:56 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/17 19:13:29 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ const char *HTTPRequest::HTTPRequestException::what() const throw()
 
 /* *********************** UTILITIES ************************* */
 
-std::pair<size_t, short> find_nl(std::string &buffer)
+std::pair<size_t, short> find_nl(std::string const &buffer)
 {
 	size_t pos = buffer.find("\r\n");
 	if (pos != std::string::npos)
@@ -60,7 +60,6 @@ static std::string get_line_cut(std::string &buffer)
 static std::vector<std::string> parse_request_command(std::string &buffer)
 {
 	std::string line = get_line_cut(buffer);
-
 	std::stringstream ss(line);
 	std::vector<std::string> tokens;
 	std::string token;
@@ -227,6 +226,8 @@ std::string const *HTTPRequest::getContentType(void) const
 
 void HTTPRequest::_parseCommand(void)
 {
+	if (find_nl(_buffer).first == 0)
+		return ;
 	std::vector<std::string> tokens = parse_request_command(_buffer);
 	if (tokens.size() == 3)
 	{
@@ -317,11 +318,12 @@ void HTTPRequest::_parseBody(void)
 	{
 		size_t content_length_value = std::strtoul(content_length->c_str(), NULL, 10);
 		// if we have more read that the body size we bufferize
-		if (_body.size() + _buffer.size() >= content_length_value)
+		if (_body.size() + _buffer.size() > content_length_value)
 		{
-			std::string tmp = _buffer.substr(0, content_length_value - _body.size());
+			size_t size = content_length_value - _body.size();
+			std::string tmp = _buffer.substr(0, size);
 			_body += tmp;
-			_buffer.erase(0, content_length_value - _body.size());
+			_buffer.erase(0, size);
 		}
 		else
 		{

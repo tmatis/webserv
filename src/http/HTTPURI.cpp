@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 18:41:58 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/16 14:08:37 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/17 13:00:44 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,7 @@ std::string HTTPURI::percentDecode(std::string const &str)
 			res += ' ';
 		else if (*it == '%')
 		{
-			it++;
+			++it;
 			if (it == str.end())
 				throw HTTPURI::HTTPURIException("Invalid URI");
 			std::string hex;

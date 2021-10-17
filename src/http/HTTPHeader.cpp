@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/15 18:53:58 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/17 12:59:52 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ HTTPHeader &HTTPHeader::operator=(HTTPHeader const &rhs)
 
 /* ************************* GETTERS ************************* */
 
-std::string const *HTTPHeader::getValue(std::string key) const
+std::string const *HTTPHeader::getValue(std::string const &key) const
 {
 	for (std::vector<std::pair<std::string, std::string> >::const_iterator
 			 it = _headers.begin();
@@ -65,7 +65,7 @@ bool HTTPHeader::isValid(void) const
 /* ************************* METHODS ************************* */
 
 // replace or add a header
-void HTTPHeader::addValue(std::string key, std::string const &value)
+void HTTPHeader::addValue(std::string const &key, std::string const &value)
 {
 	for (std::vector<std::pair<std::string, std::string> >::iterator
 			 it = _headers.begin();
@@ -85,8 +85,6 @@ void HTTPHeader::addValue(std::string key, std::string const &value)
 
 std::pair<std::string, std::string > const *HTTPHeader::parseLine(std::string line)
 {
-	std::string tokens;
-
 	if (!line.empty() && *(line.end() - 1) == '\n')
 		line.resize(line.size() - 1);
 	if (!line.empty() && *(line.end() - 1) == '\r')
@@ -94,8 +92,8 @@ std::pair<std::string, std::string > const *HTTPHeader::parseLine(std::string li
 	size_t pos = line.find(":");
 	if (pos == std::string::npos)
 	{
-		return (NULL);
 		_is_valid = false;
+		return (NULL);
 	}
 	std::string title = line.substr(0, pos);
 	std::string value = line.substr(pos + 1);

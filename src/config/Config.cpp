@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:51:01 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/15 18:11:32 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/17 12:37:57 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,15 @@
 #include "Route.hpp"
 
 Config::Config(void) : MasterConfig(), \
-methods(this->_methods_supported), server_names(), body_limit(0) {}
+	methods(this->_methods_supported), address(), address_res(),
+	port(), redirection(), server_names(), body_limit(0), routes() {}
+
 Config::Config(MasterConfig const &master) : MasterConfig(master), \
-methods(this->_methods_supported), body_limit(0) {}
+	methods(this->_methods_supported), address(), address_res(),
+	port(), redirection(), server_names(), body_limit(0), routes() {}
+
 Config::Config(Config const &cp)  { *this = cp; }
+
 Config::~Config() {}
 
 Config					&Config::operator=(Config const &rhs)
@@ -39,9 +44,6 @@ void	Config::construct(std::string &config_str)
 {
 	std::vector<std::pair<std::string, std::string> >	raw_data;
 	std::pair<std::string, std::string>					parsing_res;
-	unsigned int										i = 0;
-	bool												listen_flag = false;
-	bool												default_route_flag = false;
 
 	try {
 		parsing_res = this->extract_key_value(config_str);
@@ -50,6 +52,8 @@ void	Config::construct(std::string &config_str)
 			raw_data.push_back(parsing_res);
 			parsing_res = this->extract_key_value(config_str);
 		}
+		bool listen_flag = false;
+		unsigned int i = 0;
 		while (i < raw_data.size())
 		{
 			MasterConfig::keep_only_printable_chars(raw_data[i].first);
@@ -67,6 +71,7 @@ void	Config::construct(std::string &config_str)
 			"for a server (fatal error)" << std::endl;
 			throw std::invalid_argument("missing listen directive in server block");
 		}
+		bool default_route_flag = false;
 		while (i < raw_data.size())
 		{
 			if (raw_data[i].first.size() == 1 || raw_data[i].first[0] != '_')
@@ -89,17 +94,23 @@ void	Config::construct(std::string &config_str)
 
 void	Config::fill_var(std::pair<std::string, std::string> const &var_pair)
 {
-	unsigned long					i = 0;
 	std::vector<std::string>		values;
 	std::string						values_raw = var_pair.second;
 
-	std::string		str_args[10] = {"index", "error_page", "root", "autoindex", \
+	std::string const str_args[10] = {"index", "error_page", "root", "autoindex", \
 	"listen", "server_name", "redirection", "body_limit", "upload_files", "methods"};
-	void (Config::*func_args[10])(std::pair<std::string, std::string> const &var_pair, \
-	std::vector<std::string> const &values) = {&Config::set_index_paths, \
+	
+	typedef void (Config::*func_setter)
+					(std::pair<std::string, std::string> const &var_pair,
+					std::vector<std::string> const &values);
+
+	func_setter const func_args[10] = {&Config::set_index_paths, \
 	&Config::set_error_pages, &Config::set_root, &Config::set_autoindex, \
 	&Config::set_listen, &Config::set_server_names, &Config::set_redirection, \
 	&Config::set_body_limit, &Config::set_uploadfiles, &Config::set_methods};
+	
+	unsigned long i = 0;
+
 	while (!values_raw.empty())
 	{
 		i = values_raw.find(' ');
@@ -124,8 +135,7 @@ void	Config::set_listen(std::pair<std::string, std::string> const &var_pair, \
 std::vector<std::string> const &values)
 {
 	(void)var_pair;
-	long int		port = 0;
-
+	
 	if (values.size() && values.size() < 3)
 	{
 		if (values.size() == 1)
@@ -143,10 +153,11 @@ std::vector<std::string> const &values)
 			{
 				inet_pton(AF_INET, "0.0.0.0", &this->address_res);
 				this->address = "0.0.0.0";
-				std::istringstream(values[0]) >> port;
-				if (port >= 0 && port <= 65535)
+				long int port_readed = 0;
+				std::istringstream(values[0]) >> port_readed;
+				if (port_readed >= 0 && port_readed <= 65535)
 				{
-					this->port = htons(port);
+					this->port = htons(port_readed);
 					return ;
 				}
 			}
@@ -156,10 +167,11 @@ std::vector<std::string> const &values)
 			if (inet_pton(AF_INET, values[0].c_str(), &this->address_res))
 			{
 				this->address = values[0];
-				std::istringstream(values[1]) >> port;
-				if (port >= 0 && port <= 65535)
+				long int port_readed = 0;
+				std::istringstream(values[0]) >> port_readed;
+				if (port_readed >= 0 && port_readed <= 65535)
 				{
-					this->port = htons(port);
+					this->port = htons(port_readed);
 					return ;
 				}
 			}
@@ -188,12 +200,12 @@ std::vector<std::string> const &values)
 void	Config::set_redirection(std::pair<std::string, std::string> const &var_pair, \
 std::vector<std::string> const &values)
 {
-	int					i = 0;
 	std::string			path = var_pair.second;
 
 	if (values.size() >= 2 && MasterConfig::is_there_only_digits(values[0]))
 	{
 		path.erase(0, values[0].size() + 1);
+		int	i = 0;
 		std::istringstream(values[0]) >> i;
 		this->redirection = std::make_pair(i, path);
 	}
@@ -217,12 +229,12 @@ void \
 Config::set_methods(std::pair<std::string, std::string> const &var_pair, \
 std::vector<std::string> const &values)
 {
-	unsigned int i = 0;
 	std::set<std::string>	new_set;
 
 	(void)var_pair;
 	if (values.size())
 	{
+		unsigned int i = 0;
 		for ( ; i < values.size() ; i++)
 		{
 			if (this->_methods_supported.find(values[i]) == this->_methods_supported.end())

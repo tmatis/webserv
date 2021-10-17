@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 14:27:06 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/16 12:54:42 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/17 12:08:10 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ public:
 	class HTTPRequestException : public std::exception
 	{
 	public:
-		HTTPRequestException(const char *errinfo);
+		explicit HTTPRequestException(const char *errinfo);
 		virtual ~HTTPRequestException() throw();
 		virtual const char *what(void) const throw();
 

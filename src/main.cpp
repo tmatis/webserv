@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/15 16:23:21 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/17 12:09:47 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,12 +65,12 @@ int	main(int argc, char **argv)
 		// check events for each server
 		for (std::vector<Server*>::iterator h = hosts.begin();
 				h != hosts.end();
-				h++)
+				++h)
 		{
 			// check events for each client
 			for (Server::client_iterator cl = (*h)->get_clients().begin();
 					cl != (*h)->get_clients().end();
-					cl++)
+					++cl)
 			{
 				if (handle_events(pc, *h, *cl) == -1)
 					perror("webserv: client event: ");
@@ -103,7 +103,7 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 {
 	typedef int (*event_handlers)(Server*, Client&);
 	
-	static event_handlers handlers[] = {
+	static event_handlers const handlers[] = {
 		event_pollin,
 		event_pollout,
 		event_pollhup,
@@ -112,7 +112,7 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 		NULL
 	};
 	
-	static short events[] = {
+	 static short const events[] = {
 		POLLIN,
 		POLLOUT,
 		POLLHUP,
@@ -143,6 +143,6 @@ void destroy_servers(std::vector<Server*>& list)
 {
 	for (std::vector<Server*>::iterator it = list.begin();
 			it != list.end();
-			it++)
+			++it)
 		delete *it;
 }
