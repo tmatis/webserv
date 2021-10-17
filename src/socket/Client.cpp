@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/16 02:41:14 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/17 18:30:24 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,11 @@
 
 /*** F_POLLFD *****************************************************************/
 
-f_pollfd::f_pollfd(const std::string& filename, int fd)
+f_pollfd::f_pollfd(const std::string& filename, int fd, int event)
 {
 	name		= filename;
 	pfd.fd		= fd;
-	pfd.events	= POLLIN; // fd is read only
+	pfd.events	= event; // fd is read only
 }
 
 f_pollfd::operator pollfd() const

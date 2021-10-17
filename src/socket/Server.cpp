@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 04:00:12 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/17 18:44:27 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,6 +130,9 @@ Server::handle_request(Client& client)
 		// _handle_cgi(uri, client);
 	}
 
+	if (_handle_upload(client, route) == true)
+		return (OK); // file uploaded, waiting for write permission
+
 	// search content requested by the client
 	code = _find_resource(route, uri.getPath(), client);
 	if (code != OK)
@@ -232,6 +235,7 @@ Server::_read_request(Client &client)
 	else
 	{
 		buffer[readBytes] = '\0';
+		std::cout << buffer << "\n";
 		client.request().parseChunk(std::string(buffer));
 	}
 	return (client.request().isReady());
@@ -573,4 +577,15 @@ Server::_replace_conf_vars(Client& client, const std::string& redirection)
 	if (pos != std::string::npos)
 		url.replace(pos, 4, client.request().getURI().getPath());
 	return (url);
+}
+
+bool
+Server::_handle_upload(Client& client, const Route& rules)
+{
+	if (client.request().getMethod() != "POST")
+		return (false); // uploads use POST method only
+
+	(void)rules;
+
+	return (false);
 }
