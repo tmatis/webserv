@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 13:02:33 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/17 13:09:01 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,8 @@ class Server
 		bool						_file_already_requested(Client& client, std::string const &filepath);
 		std::string					_append_paths(const std::string& str1, const std::string& str2);
 		void						_create_response(Client& client, const std::string *body = NULL);
+		bool						_handle_redirection(Client& client, const Route& rules);
+		std::string					_replace_conf_vars(Client& client, const std::string& redirection);
 
 		Listener					_host;		// listener socket
 		std::vector<Client>			_clients;	// list of clients connected
