@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 11:16:04 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/16 21:33:10 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/18 03:10:20 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,9 +45,10 @@ class MasterConfig
 	// html proper config
 	std::set<std::string>					_methods_supported;
 	std::string								_default_mime;
-	std::map<std::string, int>				_mime_types;
+	std::map<std::string, std::string>		_mime_types;
 	std::set<std::string>					_index_paths;
 	std::map<int, std::string>				_error_pages;
+	unsigned int							_upload_rights;
 
 	std::vector<Config>						_configs;
 
@@ -69,6 +70,10 @@ class MasterConfig
 	std::vector<std::string> const &values);
 	void	set_error_pages(std::pair<std::string, std::string> const &var_pair, \
 	std::vector<std::string> const &values);
+	void	set_mime_types(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_upload_rights(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
 
 	static void								keep_only_printable_chars(std::string &edit);
 	static bool								is_there_only_digits(std::string const &edit);
@@ -76,7 +81,6 @@ class MasterConfig
 
 	public:
 	MasterConfig();
-	// get mime type
 	MasterConfig(MasterConfig const &cp);
 	~MasterConfig();
 
@@ -84,7 +88,7 @@ class MasterConfig
 	void					construct(std::string const &config_path = "webserv.cnf");
 	void					fill_var(std::pair<std::string, std::string> const &var_pair);
 	void					server_construct(std::string &server_data);
-	
+	std::string				find_mime_type(std::string const &content, bool is_filename = true);
 
 
 	class ErrorAtLine : public std::exception
