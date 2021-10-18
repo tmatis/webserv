@@ -254,7 +254,7 @@ HTTPResponse	&HTTPResponse::gen_error_page(int const &status)
 }
 
 HTTPResponse	&HTTPResponse::gen_autoindex(std::vector<struct dirent> const &files, \
-std::string const &dir)
+std::string const &dir, std::string const &uri_path)
 {
 	unsigned int									i = 0;
 	std::string										tmplate;
@@ -268,7 +268,7 @@ std::string const &dir)
 	std::set<std::string>::iterator					it;
 
 	tmplate += "<html>\n<head><title>Index of " + dir + "</title></head>\n";
-	tmplate += "<body>\n<h1>Index of " + dir + "</h1>\n<hr>\n<pre>";
+	tmplate += "<body>\n<h1>Index of " + uri_path + "</h1>\n<hr>\n<pre>";
 	tmplate += "<a href=\"../\">../</a>\n";
 
 	while (i < files.size())
@@ -291,8 +291,9 @@ std::string const &dir)
 		tampon = dir + "/" + (*it);
 		if (lstat(tampon.c_str(), &file_stat) == -1)
 			i = 0;
-		tampon = (*it) + '/';
+		tampon = uri_path + "/" + (*it) + '/';
 		new_entry = "<a href=\"" + tampon + "\">";
+		tampon = *it + "/";
 		if (tampon.size() < 50)
 			new_entry += std::string(tampon + "</a>").append(50 - tampon.size() + 1, ' ');
 		else
@@ -311,8 +312,9 @@ std::string const &dir)
 		tampon = dir + "/" + (*it);
 		if (lstat(tampon.c_str(), &file_stat) == -1)
 			i = 0;
-		tampon = (*it);
+		tampon = uri_path + "/" + (*it);
 		new_entry = "<a href=\"" + tampon + "\">";
+		tampon = *it;
 		if (tampon.size() < 50)
 			new_entry += std::string(tampon + "</a>").append(50 - tampon.size() + 1, ' ');
 		else
