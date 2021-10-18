@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+         #
+#    By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/16 14:50:38 by tmatis           ###   ########.fr        #
+#    Updated: 2021/10/18 03:23:28 by mamartin         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -38,7 +38,11 @@ SRCS			= poll_cases.cpp http/HTTPHeader.cpp http/HTTPGeneral.cpp \
 					http/HTTPRequest.cpp http/HTTPResponse.cpp \
 					socket/Client.cpp socket/Listener.cpp socket/Server.cpp \
 					socket/TCP_Socket.cpp polling/polling.cpp \
-					config/Config.cpp config/MasterConfig.cpp config/Route.cpp http/HTTPURI.cpp
+					config/Config.cpp config/MasterConfig.cpp config/Route.cpp http/HTTPURI.cpp \
+					socket/server_impl/serv_get.cpp socket/server_impl/serv_post.cpp \
+					socket/server_impl/serv_delete.cpp socket/server_impl/serv_request.cpp \
+					socket/server_impl/serv_response.cpp socket/server_impl/serv_cgi.cpp \
+					socket/server_impl/serv_redirection.cpp
 
 MAIN			= main.cpp
 
