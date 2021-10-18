@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:51:01 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 12:37:57 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/18 03:18:44 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,15 +97,15 @@ void	Config::fill_var(std::pair<std::string, std::string> const &var_pair)
 	std::vector<std::string>		values;
 	std::string						values_raw = var_pair.second;
 
-	std::string const str_args[10] = {"index", "error_page", "root", "autoindex", \
-	"listen", "server_name", "redirection", "body_limit", "upload_files", "methods"};
+	std::string const str_args[12] = {"upload_rights", "mime_types", "index", "error_page", "root", \
+	"autoindex", "listen", "server_name", "redirection", "body_limit", "upload_files", "methods"};
 	
 	typedef void (Config::*func_setter)
 					(std::pair<std::string, std::string> const &var_pair,
 					std::vector<std::string> const &values);
 
-	func_setter const func_args[10] = {&Config::set_index_paths, \
-	&Config::set_error_pages, &Config::set_root, &Config::set_autoindex, \
+	func_setter const func_args[12] = {&Config::set_upload_rights, &Config::set_mime_types, \
+	&Config::set_index_paths, &Config::set_error_pages, &Config::set_root, &Config::set_autoindex, \
 	&Config::set_listen, &Config::set_server_names, &Config::set_redirection, \
 	&Config::set_body_limit, &Config::set_uploadfiles, &Config::set_methods};
 	
@@ -119,7 +119,7 @@ void	Config::fill_var(std::pair<std::string, std::string> const &var_pair)
 		values.push_back(values_raw.substr(0, i));
 		values_raw.erase(0, i + 1);
 	}
-	for (i = 0 ; i < 10 ; i++)
+	for (i = 0 ; i < 12 ; i++)
 	{
 		if (var_pair.first == str_args[i])
 		{
