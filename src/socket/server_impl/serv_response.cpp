@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 20:43:19 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/18 21:02:38 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,18 +41,16 @@ void
 Server::_create_response(Client& client, const std::string *body)
 {
 	HTTPResponse&		response = client.response();
-	HTTPHeader			headers;
 	std::stringstream	ss;
 	
 	if (body)
 		response.setBody(*body);
-	ss << response.getBodySize();
 
 	// set headers
-	response.setContentType("text/html");					// default Content-Type
-	headers.setValue("Content-Length", ss.str());			// Content-Length
+	// response.setContentType("text/html");					// default Content-Type set of not in response.toString()
+	//headers.setValue("Content-Length", ss.str());			// Content-Length calculated in response.toString()
 	if (response.getStatus() == BAD_REQUEST)
-		headers.setValue("Connection", "close");			// Connection (nginx behavior)
+		response.setConnection(HTTP_CONNECTION_CLOSE);			// Connection (nginx behavior)
 	else if (response.getStatus() == METHOD_NOT_ALLOWED)	// Allow (only for 405 errors)
 	{
 		std::string	allow_header_val;
@@ -61,7 +59,7 @@ Server::_create_response(Client& client, const std::string *body)
 			it != client.rules()->methods.end();
 			++it)
 				allow_header_val += *it;
-		headers.setValue("Allow", allow_header_val);
+		response.setAllow(allow_header_val);
 	}
 	else if (response.getStatus() / 100 == 3) // status indicates a redirection
 	{
@@ -70,15 +68,14 @@ Server::_create_response(Client& client, const std::string *body)
 		// add a Location header with the new url
 		// url may contain variables like $host for exemple
 		// we need to replace them by their actual values
-		headers.setValue("Location", _replace_conf_vars(client, new_url));
+		response.setLocation(_replace_conf_vars(client, new_url));
 	}
 	else if (response.getStatus() == CREATED)
 	{
 		std::string ref = _get_uri_reference(client.file()->name);
 		if (ref.length()) // new file can be referenced as an uri
-			headers.setValue("Location", ref); // add this uri reference to the response
+			response.setLocation(ref); // add this uri reference to the response
 	}
-	response.setHeader(headers);
 
 	response.setReady(true);
 	client.rules(NULL);
