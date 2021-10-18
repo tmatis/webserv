@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 04:10:19 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/18 04:36:09 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,8 @@ Server::_handle_post(Client &client, const Route& rules, const HTTPURI& uri)
 bool
 Server::_handle_upload(Client& client, const Route& rules)
 {
-	if (client.request().getMethod() != "POST")
-		return (false); // uploads use POST method only
-
-	(void)rules;
+	if (!rules._uploadfiles)
+		return (false);
 
 	const std::string*	content_type	= client.request().getContentType();
 	std::string			mime_type		= "application/octet-stream"; // default content-type if not provided
