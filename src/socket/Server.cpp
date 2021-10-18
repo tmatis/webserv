@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 01:25:36 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/18 02:29:38 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,13 @@ Server::handle_request(Client& client)
 
 	if (_handle_redirection(client, route) == true)
 		return (OK); // redirection response has been created, ready to send
+
+	// delete specified file
+	if (req.getMethod() == "DELETE")
+	{
+		_delete_file(client, route, uri.getPath());
+		return (OK);
+	}
 
 	if (_check_cgi_extension(route, uri.getPath()))
 	{
@@ -549,6 +556,12 @@ Server::_create_response(Client& client, const std::string *body)
 		// we need to replace them by their actual values
 		headers.addValue("Location", _replace_conf_vars(client, new_url));
 	}
+	else if (response.getStatus() == CREATED)
+	{
+		std::string ref = _get_uri_reference(client.file()->name);
+		if (ref.length()) // new file can be referenced as an uri
+			headers.addValue("Location", ref); // add this uri reference to the response
+	}
 	response.setHeader(headers);
 
 	response.setReady(true);
@@ -651,7 +664,7 @@ Server::_create_file(const std::string& filename, const std::string& data)
 	int	fd;
 
 	// open file (read only, non blocking fd, create it if it doesn't already exist)
-	fd = open(filename.data(), O_WRONLY | O_CREAT | O_NONBLOCK, mode);
+	fd = open(filename.data(), O_WRONLY | O_CREAT | O_NONBLOCK | O_APPEND, mode);
 	if (fd == -1)
 	{
 		std::cerr << "server > cannot open file \"" << filename << "\": " << strerror(errno) << "\n";
@@ -660,4 +673,49 @@ Server::_create_file(const std::string& filename, const std::string& data)
 
 	_files.push_back(f_pollfd(filename, fd, POLLOUT, data));
 	return (&_files.back());
+}
+
+std::string
+Server::_get_uri_reference(const std::string& filename)
+{
+	std::string	ref = filename;
+
+	for (std::vector<Route>::const_iterator it = _config.routes.begin();
+			it != _config.routes.end();
+			++it)
+	{
+		if (filename.find(it->_root) == 0) // root path found in filename
+		{
+			// replace root by location in filename
+			ref.erase(0, it->_root.length());
+			ref = _append_paths(it->location, ref);
+			return (ref); // return uri reference to filename
+		}
+	}
+	return (""); // filename cannot be referenced as an uri
+}
+
+void
+Server::_delete_file(Client& client, const Route& rules, const std::string& uri_path)
+{
+	std::string path = uri_path;
+
+	// build path from root dir and uri path
+	path.erase(0, rules.location.length());		// location/path/to/file -> /path/to/file
+	path = _append_paths(rules._root, path);	// root/path/to/file
+
+	if (remove(path.data()) == -1)
+	{
+		std::cerr << "server > deletion of \"" << path << "\" failed: " << strerror(errno) << "\n";
+		if (errno == EACCES || errno == EROFS || errno == EPERM)
+			_handle_error(client, FORBIDDEN);
+		else if (errno == ENOENT || errno == ENOTDIR)
+			_handle_error(client, NOT_FOUND);
+		else
+			_handle_error(client, INTERNAL_SERVER_ERROR);
+		return ;
+	}
+		
+	client.response().setStatus(NO_CONTENT);
+	_create_response(client);
 }

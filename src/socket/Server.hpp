@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 23:26:01 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/18 02:25:33 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,8 @@ class Server
 		std::string					_replace_conf_vars(Client& client, const std::string& redirection);
 		bool						_handle_upload(Client& client, const Route& rules);
 		f_pollfd*					_create_file(const std::string& filename, const std::string& data);
+		std::string					_get_uri_reference(const std::string& filename);
+		void						_delete_file(Client& client, const Route& rules, const std::string& path);
 
 		Listener					_host;		// listener socket
 		std::vector<Client>			_clients;	// list of clients connected
