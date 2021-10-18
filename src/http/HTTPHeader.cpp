@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/17 12:59:52 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/18 20:44:17 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ bool HTTPHeader::isValid(void) const
 /* ************************* METHODS ************************* */
 
 // replace or add a header
-void HTTPHeader::addValue(std::string const &key, std::string const &value)
+void HTTPHeader::setValue(std::string const &key, std::string const &value)
 {
 	for (std::vector<std::pair<std::string, std::string> >::iterator
 			 it = _headers.begin();
@@ -80,6 +80,10 @@ void HTTPHeader::addValue(std::string const &key, std::string const &value)
 	_headers.push_back(std::make_pair(key, value));
 }
 
+void HTTPHeader::addValue(std::string const &key, std::string const &value)
+{
+	_headers.push_back(std::make_pair(key, value));
+}
 
 // parse line at format: key: value and return key
 
@@ -103,7 +107,7 @@ std::pair<std::string, std::string > const *HTTPHeader::parseLine(std::string li
 		value.erase(value.size() - 1, 1);
 	if (value.empty() || title.empty())
 		_is_valid = false;
-	this->addValue(title, value);
+	this->setValue(title, value);
 	return (&_headers.back());
 }
 

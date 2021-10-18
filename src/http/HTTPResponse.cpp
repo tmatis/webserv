@@ -185,17 +185,17 @@ void HTTPResponse::setContentType(std::string const &type)
 		|| type == "application/xml"
 		|| type == "application/x-www-form-urlencoded")
 
-		_header.addValue("Content-Type", type + "; charset=UTF-8");
+		_header.setValue("Content-Type", type + "; charset=UTF-8");
 	else
-		_header.addValue("Content-Type", type);
+		_header.setValue("Content-Type", type);
 }
 
 void HTTPResponse::setConnection(HTTPConnectionType type)
 {
 	if (type == HTTP_CONNECTION_KEEP_ALIVE)
-		_header.addValue("Connection", "keep-alive");
+		_header.setValue("Connection", "keep-alive");
 	else if (type == HTTP_CONNECTION_CLOSE)
-		_header.addValue("Connection", "close");
+		_header.setValue("Connection", "close");
 }
 
 /* ************************* METHODS ************************* */
@@ -213,10 +213,10 @@ std::string HTTPResponse::toString(void)
 {
 	std::string res;
 
-	_header.addValue("Server", "Webserv");
-	_header.addValue("Date", getDate());
+	_header.setValue("Server", "Webserv");
+	_header.setValue("Date", getDate());
 	if (_body.size())
-		_header.addValue("Content-Length", itoa(_body.size()));
+		_header.setValue("Content-Length", itoa(_body.size()));
 	if (!_header.getValue("Connection"))
 		setConnection(HTTP_CONNECTION_KEEP_ALIVE);
 	res += "HTTP/1.1 " + itoa(_status) + " " + status_code_to_string(_status) + "\r\n";
