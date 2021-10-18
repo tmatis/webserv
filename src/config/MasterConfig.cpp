@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/17 12:54:04 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/18 03:17:38 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 MasterConfig::MasterConfig() : _flags(0), _autoindex(false), \
 _uploadfiles(false), _max_simultaneous_clients(-1), _user(), _error_log(), \
 _default_mime("application/octet-stream"), _mime_types(), \
-_index_paths(), _error_pages()
+_index_paths(), _error_pages(), _upload_rights(600)
 {
 	this->_methods_supported.insert("GET");
 	this->_methods_supported.insert("DELETE");
@@ -44,6 +44,7 @@ MasterConfig	&MasterConfig::operator=(MasterConfig const &rhs)
 	this->_index_paths = rhs._index_paths;
 	this->_error_pages = rhs._error_pages;
 	this->_methods_supported = rhs._methods_supported;
+	this->_upload_rights = rhs._upload_rights;
 	return (*this);
 }
 
@@ -54,17 +55,17 @@ MasterConfig::fill_var(std::pair<std::string, std::string> const &var_pair)
 	std::vector<std::string>		values;
 	std::string						values_raw = var_pair.second;
 
-	std::string const str_args[8] = {"user", "error_log", "max_simultaneous_clients", "index", \
-	"error_page", "root", "autoindex", "upload_files"};
+	std::string const str_args[10] = {"upload_rights", "user", "error_log", "max_simultaneous_clients", "index", \
+	"error_page", "root", "autoindex", "upload_files", "mime_types"};
 
 	typedef void (MasterConfig::*func_setter)
 					(std::pair<std::string, std::string> const &var_pair,
 					std::vector<std::string> const &values);
 
-	func_setter const func_args[8] = {&MasterConfig::set_user, &MasterConfig::set_error_log, \
-	&MasterConfig::set_max_simultaneous_clients, &MasterConfig::set_index_paths, \
+	func_setter const func_args[10] = {&MasterConfig::set_upload_rights, &MasterConfig::set_user, \
+	&MasterConfig::set_error_log, &MasterConfig::set_max_simultaneous_clients, &MasterConfig::set_index_paths, \
 	&MasterConfig::set_error_pages, &MasterConfig::set_root, &MasterConfig::set_autoindex, \
-	&MasterConfig::set_uploadfiles};
+	&MasterConfig::set_uploadfiles, &MasterConfig::set_mime_types};
 
 	while (!values_raw.empty())
 	{
@@ -74,7 +75,7 @@ MasterConfig::fill_var(std::pair<std::string, std::string> const &var_pair)
 		values.push_back(values_raw.substr(0, i));
 		values_raw.erase(0, i + 1);
 	}
-	for (i = 0 ; i < 8 ; i++)
+	for (i = 0 ; i < 10 ; i++)
 	{
 		if (var_pair.first == str_args[i])
 		{
@@ -268,8 +269,9 @@ std::vector<std::string> const &values)
 		error_page.seekg(0, error_page.end);
 		unsigned int i = error_page.tellg();
 		error_page.seekg(0, error_page.beg);
-		buffer = new char[i];
+		buffer = new char[i + 1];
 		error_page.read(buffer, i);
+		buffer[i] = 0;
 		i = 0;
 		std::istringstream(values[0]) >> i;
 		this->_error_pages[i] = buffer;
@@ -396,4 +398,93 @@ std::vector<std::string> const &values)
 	else
 		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
 		"directive needs at least one index as value (ignored)" << std::endl;
+}
+
+void \
+MasterConfig::set_mime_types(std::pair<std::string, std::string> const &var_pair, \
+std::vector<std::string> const &values)
+{
+	std::ifstream						mime_types;
+	std::map<std::string, std::string>	new_mime_tab;
+	std::pair<std::string, std::string>	pair;
+	char								*buffer;
+	std::string							tampon = var_pair.second;
+	std::string							tampon2;
+
+	if (values.size() >= 1)
+	{
+		mime_types.open(tampon.c_str(), std::ifstream::in);
+		if (!mime_types.is_open())
+		{
+			std::cerr << "config > \'" << var_pair.first << "\' : " << \
+			"can't open the file \'" << tampon << "\' (ignored)" << std::endl;
+			return ;
+		}
+		mime_types.seekg(0, mime_types.end);
+		unsigned long i = mime_types.tellg();
+		mime_types.seekg(0, mime_types.beg);
+		buffer = new char[i + 1];
+		mime_types.read(buffer, i);
+		buffer[i] = 0;
+		i = 0;
+		tampon = buffer;
+		delete[] buffer;
+		while (!tampon.empty())
+		{
+			i = tampon.find('\n');
+			if (i == std::string::npos)
+				break ;
+			tampon2 = tampon.substr(0, i);
+			tampon.erase(0, i + 1);
+			if (tampon2.empty() || tampon2.find(' ') == std::string::npos)
+			{
+				if (!tampon2.empty())
+					std::cerr << "config > \'" << var_pair.first << "\' : " << \
+					"\'" << tampon2 << "\' syntax error in the file \'" << var_pair.second << \
+					"\' (continued)" << std::endl;
+				continue ;
+			}
+			new_mime_tab[tampon2.substr(0, tampon2.find(' '))] = tampon2.erase(0, tampon2.find(' ') + 1);
+		}
+	}
+	else
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs a path (ignored)" << std::endl;
+}
+
+std::string		MasterConfig::find_mime_type(std::string const &content, bool is_filename)
+{
+	std::string										extension;
+	std::map<std::string, std::string>::iterator	it;
+	unsigned int									i = 0;
+
+	if (is_filename && content.find('.') != std::string::npos)
+	{
+		extension = content.substr(content.rfind('.'), content.size());
+		it = this->_mime_types.find(extension);
+		if (it != this->_mime_types.end())
+			return ((*it).second);
+	}
+	if (!is_filename)
+	{
+		for (i = 0 ; i < content.size() ; i++)
+			if (!std::isprint(content[i]) && !std::isspace(content[i]))
+				break ;
+		if (i == content.size())
+			return ("text/plain");
+	}
+	return (this->_default_mime);
+}
+
+void \
+MasterConfig::set_upload_rights(std::pair<std::string, std::string> const &var_pair, \
+std::vector<std::string> const &values)
+{
+	(void)var_pair;
+	if (values.size() == 1 && MasterConfig::is_there_only_digits(values[0]) \
+	&& values[0].size() == 3)
+		std::istringstream(values[0]) >> this->_upload_rights;
+	else
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive must be a 3-digits positive number (ignored)" << std::endl;
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Route.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:48:00 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/17 12:58:39 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/18 03:19:40 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,14 +62,15 @@ void		Route::fill_var(std::pair<std::string, std::string> const &var_pair)
 	std::vector<std::string>		values;
 	std::string						values_raw = var_pair.second;
 
-	std::string	const str_args[10] = {"index", "error_page", "root", "autoindex", \
-	"redirection", "body_limit", "upload_files", "methods", "cgi", "upload_path"};
+	std::string	const str_args[11] = {"upload_rights", "index", "error_page", "root", \
+	"autoindex", "redirection", "body_limit", "upload_files", "methods", "cgi", \
+	"upload_path"};
 
 	typedef void (Route::*func_setter)
 					(std::pair<std::string, std::string> const &var_pair,
 					std::vector<std::string> const &values);
 					
-	func_setter const func_args[10] = {&Route::set_index_paths, \
+	func_setter const func_args[11] = {&Route::set_upload_rights, &Route::set_index_paths, \
 	&Route::set_error_pages, &Route::set_root, &Route::set_autoindex, \
 	&Route::set_redirection, &Route::set_body_limit, &Route::set_uploadfiles, \
 	&Route::set_methods, &Route::set_cgi, &Route::set_upload_path};
@@ -82,7 +83,7 @@ void		Route::fill_var(std::pair<std::string, std::string> const &var_pair)
 		values.push_back(values_raw.substr(0, i));
 		values_raw.erase(0, i + 1);
 	}
-	for (i = 0 ; i < 10 ; i++)
+	for (i = 0 ; i < 11 ; i++)
 	{
 		if (var_pair.first == str_args[i])
 		{
