@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 04:05:56 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/18 17:46:01 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ class Server
 		int				_handle_post(Client &client, const Route& rules, const HTTPURI& uri);
 		int				_handle_delete(Client &client, const Route& rules, const HTTPURI& uri);
 		/*** GET **************************************************************/
-		int				_find_resource(const Route& rules, std::string path, Client& client);
+		int				_find_resource(const Route& rules, const std::string& uri_path, Client& client);
 		bool			_is_index_file(const Route& rules, struct dirent* file);
 		bool			_file_already_requested(Client& client, std::string const &filepath);
 		/*** POST *************************************************************/

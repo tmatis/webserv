@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HTTPResponse.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 20:01:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/16 14:05:49 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/18 18:02:27 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ public:
 	std::string toString(void);
 	HTTPResponse &gen_error_page(int const &status);
 	HTTPResponse &gen_autoindex(std::vector<struct dirent> const &files, \
-	std::string const &dir);
+	std::string const &dir, std::string const &uri_path);
 
 };
 
