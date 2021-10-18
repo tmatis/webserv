@@ -6,14 +6,15 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/18 03:17:38 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/18 18:02:58 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "MasterConfig.hpp"
 # include "Config.hpp"
 
-MasterConfig::MasterConfig() : _flags(0), _autoindex(false), \
+MasterConfig::MasterConfig() : _server_name_version("firewebserv/0.0"), \
+ _flags(0), _autoindex(false), \
 _uploadfiles(false), _max_simultaneous_clients(-1), _user(), _error_log(), \
 _default_mime("application/octet-stream"), _mime_types(), \
 _index_paths(), _error_pages(), _upload_rights(600)
@@ -22,7 +23,8 @@ _index_paths(), _error_pages(), _upload_rights(600)
 	this->_methods_supported.insert("DELETE");
 	this->_methods_supported.insert("POST");
 }
-MasterConfig::MasterConfig(MasterConfig const &cp) { *this = cp; }
+MasterConfig::MasterConfig(MasterConfig const &cp) : \
+_server_name_version("firewebserv/0.0") { *this = cp; }
 MasterConfig::~MasterConfig()
 {
 	if (this->_error_log.is_open())

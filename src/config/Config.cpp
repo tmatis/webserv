@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:51:01 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 03:18:44 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/18 18:59:47 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,11 @@
 #include "Route.hpp"
 
 Config::Config(void) : MasterConfig(), \
-	methods(this->_methods_supported), address(), address_res(),
+	methods(this->_methods_supported), address(), port_str(), address_res(),
 	port(), redirection(), server_names(), body_limit(0), routes() {}
 
 Config::Config(MasterConfig const &master) : MasterConfig(master), \
-	methods(this->_methods_supported), address(), address_res(),
+	methods(this->_methods_supported), address(), port_str(), address_res(),
 	port(), redirection(), server_names(), body_limit(0), routes() {}
 
 Config::Config(Config const &cp)  { *this = cp; }
@@ -30,6 +30,7 @@ Config					&Config::operator=(Config const &rhs)
 {
 	this->MasterConfig::operator=(rhs);
 	this->address = rhs.address;
+	this->port_str = rhs.port_str;
 	this->address_res = rhs.address_res;
 	this->port = rhs.port;
 	this->redirection = rhs.redirection;
@@ -143,6 +144,7 @@ std::vector<std::string> const &values)
 			if (values[0].find('.') != std::string::npos)
 			{
 				this->port = htons(80);
+				this->port_str = "80";
 				if (inet_pton(AF_INET, values[0].c_str(), &this->address_res))
 				{
 					this->address = values[0];
@@ -158,6 +160,7 @@ std::vector<std::string> const &values)
 				if (port_readed >= 0 && port_readed <= 65535)
 				{
 					this->port = htons(port_readed);
+					this->port_str = values[0];
 					return ;
 				}
 			}
@@ -167,8 +170,9 @@ std::vector<std::string> const &values)
 			if (inet_pton(AF_INET, values[0].c_str(), &this->address_res))
 			{
 				this->address = values[0];
+				this->port_str = values[1];
 				long int port_readed = 0;
-				std::istringstream(values[0]) >> port_readed;
+				std::istringstream(values[1]) >> port_readed;
 				if (port_readed >= 0 && port_readed <= 65535)
 				{
 					this->port = htons(port_readed);

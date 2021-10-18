@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 22:36:30 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 12:08:16 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/18 18:43:20 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ typedef	struct Config : public MasterConfig
 
 	std::set<std::string>		methods;
 	std::string					address;
+	std::string					port_str;
 	unsigned long				address_res;	// mandatory
 	unsigned short				port;			// mandatory
 	std::pair<int, std::string>	redirection;

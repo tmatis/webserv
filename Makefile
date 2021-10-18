@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+         #
+#    By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/14 10:00:31 by tmatis            #+#    #+#              #
-#    Updated: 2021/10/18 03:23:28 by mamartin         ###   ########.fr        #
+#    Updated: 2021/10/18 21:47:59 by nouchata         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,7 +37,7 @@ INCLUDE_PATH	= ./src
 SRCS			= poll_cases.cpp http/HTTPHeader.cpp http/HTTPGeneral.cpp \
 					http/HTTPRequest.cpp http/HTTPResponse.cpp \
 					socket/Client.cpp socket/Listener.cpp socket/Server.cpp \
-					socket/TCP_Socket.cpp polling/polling.cpp \
+					socket/TCP_Socket.cpp socket/CGI.cpp polling/polling.cpp \
 					config/Config.cpp config/MasterConfig.cpp config/Route.cpp http/HTTPURI.cpp \
 					socket/server_impl/serv_get.cpp socket/server_impl/serv_post.cpp \
 					socket/server_impl/serv_delete.cpp socket/server_impl/serv_request.cpp \

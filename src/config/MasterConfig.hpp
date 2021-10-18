@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 11:16:04 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/18 03:10:20 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/18 18:01:45 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class MasterConfig
 {
 	public:
 	// webserv proper config
+	std::string								_server_name_version;
 	unsigned long							_flags;
 	bool									_autoindex;
 	bool									_uploadfiles;

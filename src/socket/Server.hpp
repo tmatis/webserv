@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 04:05:56 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/18 21:05:50 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,10 @@ class Server
 		std::vector<Client>&			get_clients(void);
 		const std::vector<f_pollfd>&	get_files(void) const;
 		const Listener&					get_listener(void) const;
+		const Config&					get_config(void) const;
+
+		/*** RESPONSES PUBLIC ********************************************************/
+		std::string		_append_paths(const std::string& str1, const std::string& str2);
 
 	private:
 	
@@ -59,7 +63,6 @@ class Server
 		bool			_read_request(Client &client);
 		const Route&	_resolve_routes(const std::string& uri_path);
 		int				_check_request_validity(const Route& rules, HTTPRequest& request);
-		std::string		_append_paths(const std::string& str1, const std::string& str2);
 		/*** RESPONSES ********************************************************/
 		int				_handle_error(Client& client, int status, bool autogen = false);
 		void			_create_response(Client& client, const std::string *body = NULL);

@@ -34,6 +34,11 @@ HTTPHeader &HTTPGeneral::getHeader()
 	return (_header);
 }
 
+HTTPHeader const &HTTPGeneral::getHeader() const
+{
+	return (_header);
+}
+
 std::string const &HTTPGeneral::getBody() const
 {
 	return (_body);

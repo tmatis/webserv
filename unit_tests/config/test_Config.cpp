@@ -18,12 +18,14 @@ car_test test_parseConfig(void)
 	car_assert_cmp(mconfig._configs.size(), static_cast<unsigned long>(2));
 
 	car_assert_cmp(mconfig._configs[0].address, "127.0.0.1");
-	car_assert_cmp(mconfig._configs[0].port, htons(80));
+	car_assert_cmp(mconfig._configs[0].port_str, "659");
+	car_assert_cmp(mconfig._configs[0].port, htons(659));
 	car_assert_cmp(mconfig._configs[0].methods.size(), static_cast<unsigned long>(1));
 	car_assert_cmp(mconfig._configs[0].server_names.find("localhost") \
 	!= mconfig._index_paths.end(), true);
 
 	car_assert_cmp(mconfig._configs[1].address, "0.0.0.0");
+	car_assert_cmp(mconfig._configs[1].port_str, "8080");
 	car_assert_cmp(mconfig._configs[1].port, htons(8080));
 	car_assert_cmp(mconfig._configs[1].methods.size(), static_cast<unsigned long>(3));
 	car_assert_cmp(mconfig._configs[1].server_names.size(), static_cast<unsigned long>(0));

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_cgi.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:37 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 03:19:42 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/18 19:25:50 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,13 @@ Server::_check_cgi_extension(const Route& rules, const std::string& uri_path)
 		return (false); // no cgi
 
 	// look for cgi_extension in uri path
-	size_t	pos = uri_path.rfind(rules.cgi_extension);
-	if (pos == std::string::npos)
-		return (false);
-	else if (pos == uri_path.length() - rules.cgi_extension.length())
-		return (true); // cgi_extension found at the end of path
+	size_t	pos = uri_path.find(rules.cgi_extension);
+	while (pos != std::string::npos)
+	{
+		if (pos + rules.cgi_extension.size() == uri_path.size() || \
+		uri_path[pos + 1] == '/')
+			return (true);
+		pos = uri_path.find(rules.cgi_extension, pos + 1);
+	}
 	return (false); // not found or not where it should be
 }
