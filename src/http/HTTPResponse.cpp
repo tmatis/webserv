@@ -198,6 +198,16 @@ void HTTPResponse::setConnection(HTTPConnectionType type)
 		_header.setValue("Connection", "close");
 }
 
+void HTTPResponse::setAllow(std::string const &allow)
+{
+	_header.setValue("Allow", allow);
+}
+
+void HTTPResponse::setLocation(std::string const &location)
+{
+	_header.setValue("Location", location);
+}
+
 /* ************************* METHODS ************************* */
 
 void HTTPResponse::clear(void)
@@ -217,6 +227,8 @@ std::string HTTPResponse::toString(void)
 	_header.setValue("Date", getDate());
 	if (_body.size())
 		_header.setValue("Content-Length", itoa(_body.size()));
+	if (!_header.getValue("Content-Type"))
+		setContentType("text/html");
 	if (!_header.getValue("Connection"))
 		setConnection(HTTP_CONNECTION_KEEP_ALIVE);
 	res += "HTTP/1.1 " + itoa(_status) + " " + status_code_to_string(_status) + "\r\n";
