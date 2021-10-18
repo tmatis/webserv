@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 20:58:55 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/18 01:25:36 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,9 +130,9 @@ Server::handle_request(Client& client)
 		// _handle_cgi(uri, client);
 	}
 
-	if (_handle_upload(client, route) == true)
-		return (OK); // file uploaded, waiting for write permission
-
+	if (_handle_upload(client, route) == true) // file has been created or an error occured
+		return (OK); // client state == (IDLE || WAITING_ANSWER)
+	
 	// search content requested by the client
 	code = _find_resource(route, uri.getPath(), client);
 	if (code != OK)
@@ -148,7 +148,6 @@ Server::send_response(Client& client)
 {
 	std::string	response = client.response().toString();
 
-	client.request().clear();
 	if (write(client.fd(), response.data(), response.size()) < 0)
 	{
 		client.write_trials++;
@@ -167,7 +166,16 @@ Server::send_response(Client& client)
 		return ;
 	}
 
-	client.clear();
+	try
+	{
+		client.clear();
+	}
+	catch (const std::exception& e)
+	{
+		_handle_error(client, BAD_REQUEST);
+		return ;
+	}
+
 	if (client.request().isReady())
 		handle_request(client); // new request
 }
@@ -192,6 +200,24 @@ Server::create_file_response(Client& client)
 		return (-1);
 	}
 	_create_response(client, &file_content);
+	client.file(NULL);
+	return (0);
+}
+
+int
+Server::write_uploaded_file(Client& client)
+{
+	const f_pollfd*	fpfd = client.file();
+
+	if (write(fpfd->pfd.fd, fpfd->data.c_str(), fpfd->data.length()) < 0)
+	{
+		std::cerr << "server > cannot write uploaded file: " << strerror(errno) << "\n";
+		_handle_error(client, INTERNAL_SERVER_ERROR);
+		return (-1);
+	}
+	
+	client.response().setStatus(CREATED); // upload successful
+	_create_response(client);
 	client.file(NULL);
 	return (0);
 }
@@ -235,7 +261,6 @@ Server::_read_request(Client &client)
 	else
 	{
 		buffer[readBytes] = '\0';
-		std::cout << buffer << "\n";
 		client.request().parseChunk(std::string(buffer));
 	}
 	return (client.request().isReady());
@@ -587,5 +612,52 @@ Server::_handle_upload(Client& client, const Route& rules)
 
 	(void)rules;
 
-	return (false);
+	const std::string*	content_type	= client.request().getContentType();
+	std::string			mime_type		= "application/octet-stream"; // default content-type if not provided
+	std::string			boundary		= "";
+
+	if (*content_type == "multipart/form-data")
+	{
+		mime_type = *content_type;
+		return (false);
+	}
+	else if (*content_type == "application/x-www-form-urlencoded")
+		return (false); // this content-type cannot be used for file transfer
+	else
+	{
+		std::string filename = client.request().getURI().getPath();
+
+		// build file path
+		filename.erase(0, rules.location.length());				// remove location prefix
+		filename = _append_paths(rules.upload_path, filename);	// filename = upload_path + filename
+		
+		// create file
+		client.file(_create_file(filename, client.request().getBody()));
+		if (!client.file()) // an error occured when trying to open file (see error logs for more details)
+		{
+			_handle_error(client, INTERNAL_SERVER_ERROR);
+			return (true);
+		}
+	}
+
+	client.state(IDLE);
+	return (true);
+}
+
+f_pollfd*
+Server::_create_file(const std::string& filename, const std::string& data)
+{
+	int	mode = S_IRWXU | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH; // 755 filemode
+	int	fd;
+
+	// open file (read only, non blocking fd, create it if it doesn't already exist)
+	fd = open(filename.data(), O_WRONLY | O_CREAT | O_NONBLOCK, mode);
+	if (fd == -1)
+	{
+		std::cerr << "server > cannot open file \"" << filename << "\": " << strerror(errno) << "\n";
+		return (NULL);
+	}
+
+	_files.push_back(f_pollfd(filename, fd, POLLOUT, data));
+	return (&_files.back());
 }

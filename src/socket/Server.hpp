@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 20:58:53 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/17 23:26:01 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ class Server
 		int		handle_request(Client& client);
 		void	send_response(Client& client);
 		int		create_file_response(Client& client);
+		int		write_uploaded_file(Client& client);
 
 		// getters
 		std::vector<Client>&			get_clients(void);
@@ -64,6 +65,7 @@ class Server
 		bool						_handle_redirection(Client& client, const Route& rules);
 		std::string					_replace_conf_vars(Client& client, const std::string& redirection);
 		bool						_handle_upload(Client& client, const Route& rules);
+		f_pollfd*					_create_file(const std::string& filename, const std::string& data);
 
 		Listener					_host;		// listener socket
 		std::vector<Client>			_clients;	// list of clients connected

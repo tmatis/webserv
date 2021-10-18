@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 12:09:47 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/17 23:36:24 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,6 +134,8 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 		revent	= pc.get_raw_revents(client.file()->pfd.fd);
 		if (revent & POLLIN) // file is ready for reading
 			host->create_file_response(client);
+		else if (revent & POLLOUT)
+			host->write_uploaded_file(client);
 	}
 
 	return (0);

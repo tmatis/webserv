@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 20:58:22 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/17 23:54:44 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 
 /*** F_POLLFD *****************************************************************/
 
-f_pollfd::f_pollfd(const std::string& filename, int fd, int event)
-	: name(filename)
+f_pollfd::f_pollfd(const std::string& filename, int fd, int event, const std::string& data)
+	: name(filename), data(data)
 {
 	pfd.fd		= fd;
 	pfd.events	= event; // fd is read only
@@ -114,4 +114,5 @@ Client::clear(void)
 	write_trials	= 0;
 	_state			= PENDING_REQUEST;
 	_response.clear();
+	_request.clear();
 }
