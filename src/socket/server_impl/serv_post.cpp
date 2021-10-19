@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 04:36:09 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/18 19:11:22 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ Server::_handle_upload(Client& client, const Route& rules)
 		filename = _append_paths(rules.upload_path, filename);	// filename = upload_path + filename
 		
 		// create file
-		client.file(_create_file(filename, client.request().getBody()));
+		client.file(_create_file(filename, client.request().getBody(), rules._upload_rights));
 		if (!client.file()) // an error occured when trying to open file (see error logs for more details)
 		{
 			_handle_error(client, INTERNAL_SERVER_ERROR);
@@ -68,9 +68,8 @@ Server::_handle_upload(Client& client, const Route& rules)
 }
 
 f_pollfd*
-Server::_create_file(const std::string& filename, const std::string& data)
+Server::_create_file(const std::string& filename, const std::string& data, uint mode)
 {
-	int	mode = S_IRWXU | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH; // 755 filemode
 	int	fd;
 
 	// open file (read only, non blocking fd, create it if it doesn't already exist)

@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 17:46:01 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/19 23:20:15 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,8 @@ class Server
 		std::string		_append_paths(const std::string& str1, const std::string& str2);
 		/*** RESPONSES ********************************************************/
 		int				_handle_error(Client& client, int status, bool autogen = false);
-		void			_create_response(Client& client, const std::string *body = NULL);
+		void			_create_response(Client& client);
+		void			_define_content_type(Client& client, HTTPResponse& response);
 
 		/* METHOD HANDLERS ================================================== */
 		int				_handle_get(Client &client, const Route& rules, const HTTPURI& uri);
@@ -74,7 +75,7 @@ class Server
 		bool			_file_already_requested(Client& client, std::string const &filepath);
 		/*** POST *************************************************************/
 		bool			_handle_upload(Client& client, const Route& rules);
-		f_pollfd*		_create_file(const std::string& filename, const std::string& data);
+		f_pollfd*		_create_file(const std::string& filename, const std::string& data, uint mode);
 		std::string		_get_uri_reference(const std::string& filename);
 
 		/* OTHER ============================================================ */

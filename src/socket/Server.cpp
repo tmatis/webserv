@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 04:08:49 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/19 23:17:37 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,7 +189,9 @@ Server::create_file_response(Client& client)
 		_handle_error(client, INTERNAL_SERVER_ERROR);
 		return (-1);
 	}
-	_create_response(client, &file_content);
+
+	client.response().setBody(file_content);
+	_create_response(client);
 	client.file(NULL);
 	return (0);
 }
