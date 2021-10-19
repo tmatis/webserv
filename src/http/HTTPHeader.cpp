@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/18 20:44:17 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/19 11:56:28 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ std::pair<std::string, std::string > const *HTTPHeader::parseLine(std::string li
 		value.erase(value.size() - 1, 1);
 	if (value.empty() || title.empty())
 		_is_valid = false;
-	this->setValue(title, value);
+	this->addValue(title, value);
 	return (&_headers.back());
 }
 

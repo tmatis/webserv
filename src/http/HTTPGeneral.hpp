@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:12:37 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/12 12:52:52 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/19 11:41:04 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,5 +60,7 @@ public:
 	void clear(void);
 
 };
+
+std::pair<size_t, short> find_nl(std::string const &buffer);
 
 #endif

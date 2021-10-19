@@ -1,5 +1,6 @@
 #include "HTTPResponse.hpp"
 #include <sstream>
+#include <iostream>
 
 /* *********************** UTILITIES ************************* */
 
@@ -119,12 +120,16 @@ std::string itoa(T value)
 /* ********************** CONSTRUCTORS *********************** */
 
 HTTPResponse::HTTPResponse(void)
-	: HTTPGeneral(), _status(OK), _is_ready(false)
+	: HTTPGeneral(), _status(OK), _is_ready(false),
+		_header_parsed(false), _cgi_res_buffer()
 {
 }
 
 HTTPResponse::HTTPResponse(HTTPResponse const &other)
-	: HTTPGeneral(other), _status(other._status), _is_ready(other._is_ready)
+	: HTTPGeneral(other), _status(other._status),
+		_is_ready(other._is_ready),
+		_header_parsed(other._header_parsed),
+		_cgi_res_buffer(other._cgi_res_buffer)
 {
 }
 
@@ -142,6 +147,8 @@ HTTPResponse &HTTPResponse::operator=(HTTPResponse const &other)
 		HTTPGeneral::operator=(other);
 		_status = other._status;
 		_is_ready = other._is_ready;
+		_header_parsed = other._header_parsed;
+		_cgi_res_buffer = other._cgi_res_buffer;
 	}
 	return *this;
 }
@@ -215,6 +222,38 @@ void HTTPResponse::clear(void)
 	HTTPGeneral::clear();
 	_status = OK;
 	_is_ready = false;
+	_header_parsed = false;
+	_cgi_res_buffer.clear();
+}
+
+void HTTPResponse::parseCgIRes(std::string const &str)
+{
+	static HTTPHeader header;
+
+	_cgi_res_buffer += str;
+
+	while (!_header_parsed && find_nl(_cgi_res_buffer).first != std::string::npos)
+	{
+		std::pair<size_t, short> pos = find_nl(_cgi_res_buffer);
+
+		std::string line = _cgi_res_buffer.substr(0, pos.first);
+		_cgi_res_buffer.erase(0, pos.first + pos.second);
+
+		if (line.empty())
+		{
+			_header_parsed = true;
+			this->setHeader(header);
+			header.clear();
+			break;
+		}
+		else if (!_header_parsed)
+			header.parseLine(line);
+	}
+	if (_header_parsed)
+	{
+		_body += _cgi_res_buffer;
+		_cgi_res_buffer.clear();
+	}
 }
 
 // transform response to string ready to be sent

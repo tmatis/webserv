@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 20:01:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/18 20:56:06 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/19 12:07:34 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,8 @@ private:
 	static const std::string _status_message[];
 	status_code _status;
 	bool		_is_ready;
+	bool 		_header_parsed;
+	std::string _cgi_res_buffer;
 
 public:
 /* ********************** CONSTRUCTORS *********************** */
@@ -99,10 +101,15 @@ public:
 /* ************************* METHODS ************************* */
 
 	void clear(void);
+
+	void parseCgIRes(const std::string &res);
+
 	std::string toString(void);
+
 	HTTPResponse &gen_error_page(int const &status);
 	HTTPResponse &gen_autoindex(std::vector<struct dirent> const &files, \
 	std::string const &dir, std::string const &uri_path);
+
 
 };
 
