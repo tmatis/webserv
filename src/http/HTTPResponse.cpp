@@ -80,7 +80,7 @@ const std::string HTTPResponse::_status_message[35] =
 		"Gateway Timeout",
 		"HTTP Version Not Supported"};
 
-std::string const &HTTPResponse::status_code_to_string(status_code code)
+std::string const &HTTPResponse::status_code_to_string(short code)
 {
 	for (size_t i = 0; i < sizeof(_status_code) / sizeof(_status_code[0]); i++)
 	{
@@ -161,7 +161,7 @@ bool HTTPResponse::isReady(void) const
 }
 
 
-status_code HTTPResponse::getStatus(void) const
+short HTTPResponse::getStatus(void) const
 {
 	return _status;
 }
@@ -173,7 +173,7 @@ void HTTPResponse::setReady(bool b)
 	_is_ready = b;
 }
 
-void HTTPResponse::setStatus(status_code code)
+void HTTPResponse::setStatus(short code)
 {
 	_status = code;
 }
@@ -226,7 +226,21 @@ void HTTPResponse::clear(void)
 	_cgi_res_buffer.clear();
 }
 
-void HTTPResponse::parseCgIRes(std::string const &str)
+void HTTPResponse::_applyCGI(HTTPHeader &header)
+{
+	std::string const *status = header.getValue("Status");
+
+	if (status)
+		this->setStatus(static_cast<short>(atoi(status->c_str())));
+	else
+		_status = OK;
+
+	this->setHeader(header);
+	header.clear();
+	_header_parsed = true;
+}
+
+void HTTPResponse::parseCGI(std::string const &str)
 {
 	static HTTPHeader header;
 
@@ -241,16 +255,14 @@ void HTTPResponse::parseCgIRes(std::string const &str)
 
 		if (line.empty())
 		{
-			_header_parsed = true;
-			this->setHeader(header);
-			header.clear();
+			this->_applyCGI(header);
 			break;
 		}
 		else if (!_header_parsed)
 		{
 			if (line.find(':') == std::string::npos)
 			{
-				_header_parsed = true;
+				this->_applyCGI(header);
 				_body += line;
 				if (pos.second == 2)
 					_body += "\r\n";
