@@ -247,7 +247,19 @@ void HTTPResponse::parseCgIRes(std::string const &str)
 			break;
 		}
 		else if (!_header_parsed)
-			header.parseLine(line);
+		{
+			if (line.find(':') == std::string::npos)
+			{
+				_header_parsed = true;
+				_body += line;
+				if (pos.second == 2)
+					_body += "\r\n";
+				else
+					_body += "\n";
+			}
+			else
+				header.parseLine(line);
+		}
 	}
 	if (_header_parsed)
 	{
