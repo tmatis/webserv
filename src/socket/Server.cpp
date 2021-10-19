@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 18:08:20 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/19 20:47:30 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ Server::flush_files(void)
 			++cl;
 		}
 
-		if (cl == _clients.end()) // no client request this file anymore
+		if (cl == _clients.end() && !f->cgi_file) // no client request this file anymore and it's not related to cgi
 		{
 			// delete file
 			close(f->pfd.fd);
@@ -222,6 +222,12 @@ Server::get_clients(void)
 
 const std::vector<f_pollfd>&
 Server::get_files(void) const
+{
+	return (_files);
+}
+
+std::vector<f_pollfd>&
+Server::get_files(void)
 {
 	return (_files);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_get.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:47 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 04:05:27 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/19 22:43:53 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,9 @@
 int
 Server::_handle_get(Client &client, const Route& rules, const HTTPURI& uri)
 {
-	if (_check_cgi_extension(rules, uri.getPath()))
+	std::pair<std::string, std::string>		cgi;
+	cgi = _check_cgi_extension(rules, uri.getPath());
+	if (!cgi.first.empty())
 	{
 		// _handle_cgi(uri, client);
 	}

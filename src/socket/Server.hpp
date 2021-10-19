@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 21:05:50 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/19 22:27:54 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ class Server
 		// getters
 		std::vector<Client>&			get_clients(void);
 		const std::vector<f_pollfd>&	get_files(void) const;
+		std::vector<f_pollfd>&			get_files(void);
 		const Listener&					get_listener(void) const;
 		const Config&					get_config(void) const;
 
@@ -82,7 +83,7 @@ class Server
 
 		/* OTHER ============================================================ */
 		/*** CGI **************************************************************/
-		int				_check_cgi_extension(const Route& rules, const std::string& uri_path);
+		std::pair<std::string, std::string>	_check_cgi_extension(const Route& rules, const std::string& uri_path);
 		/*** REDIRECTIONS *****************************************************/
 		bool			_handle_redirection(Client& client, const Route& rules);
 		std::string		_replace_conf_vars(Client& client, const std::string& redirection);

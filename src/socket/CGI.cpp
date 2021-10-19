@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/18 23:28:33 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/19 22:38:24 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,21 @@
 CGI::CGI(Server &server, Client &client, Route &route, \
 HTTPRequest const &httpreq, std::pair<std::string, std::string> const &cgi) : \
 _server(server), _client(client), _route(route), _request(httpreq), \
-cgi_infos(cgi), _var_formatted(NULL) {}
-CGI::~CGI() {}
+cgi_infos(cgi), _var_formatted(NULL), _var_count(0), _pid(0) {}
+CGI::~CGI()
+{
+	for (unsigned int i = 0 ; i < this->_var_count ; i++)
+		delete[] this->_var_formatted[i];
+	if (this->_var_count)
+		delete[] this->_var_formatted;
+}
 
 CGI			&CGI::construct()
 {
 	std::map<std::string, std::string>	vars;
 	std::string							tampon = this->_request.getURI().getPath();
 	size_t								pos = tampon.find(this->cgi_infos.first);
-	char								script_path[700];
+	char								script_path[350];
 	unsigned int 						i = 0;
 	std::map<std::string, std::string>::const_iterator \
 	it = this->_request.getURI().getQuery().begin();
@@ -53,10 +59,11 @@ CGI			&CGI::construct()
 			vars["PATH_INFO"] = std::string();
 			break ;
 		}
-		if (tampon[pos + 1] == '/')
+		if (pos + this->cgi_infos.first.size() < tampon.size() && \
+		tampon[pos + this->cgi_infos.first.size()] == '/')
 		{
-			vars["SCRIPT_NAME"] = tampon.substr(0, pos + 1);
-			tampon.erase(0, pos + 2);
+			vars["SCRIPT_NAME"] = tampon.substr(0, pos + this->cgi_infos.first.size());
+			tampon.erase(0, pos + this->cgi_infos.first.size());
 			vars["PATH_INFO"] = tampon;
 			break ;
 		}
@@ -87,7 +94,9 @@ CGI			&CGI::construct()
 	tampon = vars["SCRIPT_NAME"];
 	tampon.erase(0, this->_route.location.length());
 	tampon = this->_server._append_paths(this->_route._root, tampon);
-	vars["PATH_TRANSLATED"] = realpath(tampon.c_str(), script_path);
+	memset(script_path, 0, 350);
+	realpath(tampon.c_str(), script_path); // douteux
+	vars["PATH_TRANSLATED"] = script_path;
 	while (itr != this->_request.getHeader().getHeaders().end())
 	{
 		if ((*itr).first != "Content-Type" && (*itr).first != "Authorization" && \
@@ -97,7 +106,7 @@ CGI			&CGI::construct()
 		itr++;
 	}
 	it = vars.begin();
-	this->_var_formatted = new char *[vars.size()];
+	this->_var_formatted = new char *[vars.size() + 1];
 	this->_var_count = vars.size();
 	while (it != vars.end())
 	{
@@ -105,11 +114,150 @@ CGI			&CGI::construct()
 		(*it).second.size() + 2];
 		tampon = (*it).first + std::string("=") + (*it).second;
 		std::strcpy(this->_var_formatted[i], tampon.c_str());
+		this->_var_formatted[i][(*it).first.size() + (*it).second.size() + 1] = 0;
 		this->_var_containers.push_back((*it).first + \
 		std::string("=") + (*it).second);
+		i++;
 		it++;
 	}
+	this->_var_formatted[vars.size()] = NULL;
 	return (*this);
+}
+
+CGI			&CGI::launch()
+{
+	char 			*argv[] = {NULL};
+	std::string		error_case = "WEBSERV-CGI-ERROR: ";
+
+	if (pipe(this->_pipes_in) == -1)
+		throw std::runtime_error(strerror(errno));
+	if (pipe(this->_pipes_out) == -1)
+		throw std::runtime_error(strerror(errno));
+	this->_pid = fork();
+	if (this->_pid == -1)
+		throw std::runtime_error(strerror(errno));
+	if (this->_pid)
+	{
+		close(this->_pipes_in[0]);
+		close(this->_pipes_out[1]);
+		this->_server.get_files()\
+		.push_back(f_pollfd("cgi_input", this->_pipes_in[1], POLLOUT, "", true));
+		this->_fds.first = &(this->_server.get_files().back());
+		this->_server.get_files()\
+		.push_back(f_pollfd("cgi_output", this->_pipes_out[0], POLLIN, "", true));
+		this->_fds.second = &(this->_server.get_files().back());
+	}
+	else
+	{
+		close(this->_pipes_in[1]);
+		close(this->_pipes_out[0]);
+		dup2(this->_pipes_in[0], STDIN_FILENO);
+		dup2(this->_pipes_out[1], STDOUT_FILENO);
+		if (execve(this->cgi_infos.second.c_str(), argv, this->_var_formatted) == -1)
+		{
+			error_case.append(strerror(errno));
+			write(STDOUT_FILENO, error_case.c_str(), error_case.size());
+			exit(EXIT_SUCCESS);
+		}
+	}
+	return (*this);
+}
+
+bool			CGI::send_request()
+{
+	if (!this->_request.getBody().size())
+	{
+		for (std::vector<f_pollfd>::iterator it = \
+		this->_server.get_files().begin() ; it != \
+		this->_server.get_files().end() ; it++)
+			if ((*it).pfd.fd == this->_fds.first->pfd.fd)
+			{
+				this->_server.get_files().erase(it);
+				break ;
+			}
+		close(this->get_input_pipe());
+		return (true);
+	}
+	if (this->_fds.first->pfd.revents == POLLERR || \
+	this->_fds.first->pfd.revents == POLLHUP || \
+	this->_fds.first->pfd.revents == POLLNVAL)
+	{
+		for (std::vector<f_pollfd>::iterator it = \
+		this->_server.get_files().begin() ; it != \
+		this->_server.get_files().end() ; it++)
+			if ((*it).pfd.fd == this->_fds.first->pfd.fd)
+			{
+				this->_server.get_files().erase(it);
+				break ;
+			}
+		close(this->get_input_pipe());
+		throw std::runtime_error("poll error");
+	}
+	if (this->_fds.first->pfd.revents == POLLOUT)
+	{
+		for (std::vector<f_pollfd>::iterator it = \
+		this->_server.get_files().begin() ; it != \
+		this->_server.get_files().end() ; it++)
+			if ((*it).pfd.fd == this->_fds.first->pfd.fd)
+			{
+				this->_server.get_files().erase(it);
+				break ;
+			}
+		if (write(this->get_input_pipe(), this->_request.getBody().c_str(), \
+		this->_request.getBody().size()) == -1)
+		{
+			close(this->get_input_pipe());
+			throw std::runtime_error(strerror(errno));
+		}
+		close(this->get_input_pipe());
+		return (true);
+	}
+	return (false);
+}
+
+bool			CGI::get_response()
+{
+	char		buffer[200];
+	int			i = 1;
+
+	if (this->_fds.first->pfd.revents == POLLERR || \
+	this->_fds.first->pfd.revents == POLLHUP || \
+	this->_fds.first->pfd.revents == POLLNVAL)
+	{
+		for (std::vector<f_pollfd>::iterator it = \
+		this->_server.get_files().begin() ; it != \
+		this->_server.get_files().end() ; it++)
+			if ((*it).pfd.fd == this->_fds.second->pfd.fd)
+			{
+				this->_server.get_files().erase(it);
+				break ;
+			}
+		close(this->get_output_pipe());
+		throw std::runtime_error("poll error");
+	}
+	if (this->_fds.first->pfd.revents == POLLIN)
+	{
+		while (i > 0)
+		{
+			memset(buffer, 0, 200);
+			i = read(this->get_output_pipe(), buffer, 199);
+			if (i != -1)
+				this->_response += buffer;
+		}
+		for (std::vector<f_pollfd>::iterator it = \
+		this->_server.get_files().begin() ; it != \
+		this->_server.get_files().end() ; it++)
+			if ((*it).pfd.fd == this->_fds.second->pfd.fd)
+			{
+				this->_server.get_files().erase(it);
+				break ;
+			}
+		close(this->get_output_pipe());
+		if (i == -1)
+			throw std::runtime_error(strerror(errno));
+		return (true);
+	}
+	return (false);
 }
 
 std::string		CGI::get_var_formatted_str(std::string const &var_name)
@@ -123,4 +271,14 @@ std::string		CGI::get_var_formatted_str(std::string const &var_name)
 			res[i] = '_';
 	}
 	return (res);
+}
+
+int				CGI::get_input_pipe()
+{
+	return (this->_pipes_in[1]);
+}
+
+int				CGI::get_output_pipe()
+{
+	return (this->_pipes_out[0]);
 }

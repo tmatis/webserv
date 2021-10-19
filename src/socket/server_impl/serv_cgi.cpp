@@ -6,26 +6,37 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:37 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 19:25:50 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/19 22:36:30 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Server.hpp"
 
-int
+std::pair<std::string, std::string>
 Server::_check_cgi_extension(const Route& rules, const std::string& uri_path)
 {
-	if (rules.cgi_extension.length() == 0)
-		return (false); // no cgi
-
-	// look for cgi_extension in uri path
-	size_t	pos = uri_path.find(rules.cgi_extension);
-	while (pos != std::string::npos)
+	std::pair<std::string, std::string>		ret;
+	unsigned long							pos = std::string::npos;
+	unsigned long							tmp_pos;
+	
+	for (std::map<std::string, std::string>::const_iterator \
+	it = rules.cgis.begin() ; it != rules.cgis.end() ; it++)
 	{
-		if (pos + rules.cgi_extension.size() == uri_path.size() || \
-		uri_path[pos + 1] == '/')
-			return (true);
-		pos = uri_path.find(rules.cgi_extension, pos + 1);
+		tmp_pos = uri_path.find((*it).first);
+		while (tmp_pos != std::string::npos)
+		{
+			if (tmp_pos + (*it).first.size() == uri_path.size() || \
+			uri_path[tmp_pos + (*it).first.size()] == '/')
+			{
+				if (tmp_pos < pos)
+				{
+					pos = tmp_pos;
+					ret = (*it);
+				}
+				break ;
+			}
+			tmp_pos = uri_path.find((*it).first, tmp_pos + 1);
+		}
 	}
-	return (false); // not found or not where it should be
+	return (ret);
 }

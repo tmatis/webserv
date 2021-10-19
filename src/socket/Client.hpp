@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 23:22:49 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/19 20:45:30 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,14 @@ typedef struct pollfd
 
 typedef struct f_pollfd
 {
-	f_pollfd(const std::string& filename, int fd, int event = POLLIN, const std::string& data = "");
+	f_pollfd(const std::string& filename, int fd, int event = POLLIN, const std::string& data = "", bool cgi = false);
 
 	operator pollfd() const;
 
 	std::string	name;
 	std::string	data;
 	pollfd		pfd;
+	bool		cgi_file;
 }		f_pollfd;
 
 typedef	enum e_client_state

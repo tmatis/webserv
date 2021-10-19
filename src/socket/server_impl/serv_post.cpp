@@ -3,20 +3,27 @@
 /*                                                        :::      ::::::::   */
 /*   serv_post.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 04:36:09 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/19 23:03:49 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Server.hpp"
+#include "../CGI.hpp"
 
 int
 Server::_handle_post(Client &client, const Route& rules, const HTTPURI& uri)
 {
-	if (_check_cgi_extension(rules, uri.getPath()))
+	std::pair<std::string, std::string>		cgi;
+	cgi = _check_cgi_extension(rules, uri.getPath());
+	if (!cgi.first.empty())
 	{
+		// CGI cgi(*this, client, rules, client.request, cgi);
+		// cgi.construct().launch();
+		// cgi.send_request();
+		// cgi.get_response();
 		// _handle_cgi(uri, client);
 	}
 
