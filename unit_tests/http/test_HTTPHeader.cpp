@@ -6,13 +6,13 @@ car_test test_parseLine(void)
 
 	header.parseLine("name: value");
 	car_assert_cmp((*header.getValue("name")), "value");
-
+	header.clear();
 	header.parseLine("name: value1, value2");
 	car_assert_cmp((*header.getValue("name")), "value1, value2");
-
+	header.clear();
 	header.parseLine("name: value3\n");
 	car_assert_cmp((*header.getValue("name")), "value3");
-
+	header.clear();
 	header.parseLine("name: value4\r\n");
 	car_assert_cmp((*header.getValue("name")), "value4");
 }
@@ -23,10 +23,10 @@ car_test test_toString(void)
 
 	header.parseLine("name: value");
 	car_assert_cmp(header.toString(), "name: value\r\n");
-
+	header.clear();
 	header.parseLine("name: value1");
 	car_assert_cmp(header.toString(), "name: value1\r\n");
-
+	
 	header.parseLine("name2: value1");
 	header.parseLine("name3: value1");
 	header.parseLine("name4: value1,value2,value3");
