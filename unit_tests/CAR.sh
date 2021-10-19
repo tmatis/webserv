@@ -42,7 +42,7 @@ echo "	test_function *tests[] = {" >> collected.cpp;
 
 # Collect all the prototypes of the unit tests
 echo -e -n "${BLUE}Collecting tests modules... ${NC}"
-CPP_FILES=`find . -type f -name "*.cpp"`;
+CPP_FILES=`find . -type f -name "*.cpp" -exec ls -rt '{}' +`;
 for file in $CPP_FILES; do
 	PROTO=`grep car_test $file`;
 	if [ "$PROTO" != "" ]; then
