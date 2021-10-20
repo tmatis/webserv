@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:04 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 17:41:08 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 18:29:09 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,19 +104,6 @@ Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 	if (request.getMethod() == "POST" && !request.getHeader().getValue("Content-Length"))
 		return (LENGTH_REQUIRED);
 	return (OK);
-}
-
-std::string
-Server::_append_paths(const std::string& str1, const std::string& str2)
-{
-	size_t		last_index = str1.length() - 1;
-	std::string	ret;
-
-	if (str1[last_index] == '/' || str2[0] == '/')
-		ret = str1 + str2;
-	else
-		ret = str1 + "/" + str2;
-	return (ret);
 }
 
 bool

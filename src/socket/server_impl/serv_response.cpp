@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 15:56:55 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 18:19:44 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,12 +62,15 @@ Server::_create_response(Client& client)
 	// Allow (only for error 405)
 	else if (response.getStatus() == METHOD_NOT_ALLOWED)	
 	{
-		std::string	allow_header_val;
-
-		for (std::set<std::string>::iterator it = client.rules()->methods.begin();
-			it != client.rules()->methods.end();
-			++it)
-				allow_header_val += *it;
+		std::set<std::string>::iterator	it = client.rules()->methods.begin();
+		std::string						allow_header_val;
+		
+		while (it != client.rules()->methods.end())
+		{
+			allow_header_val += *it;
+			if (++it != client.rules()->methods.end())
+				allow_header_val += ", ";
+		}
 		headers.addValue("Allow", allow_header_val);
 	}
 	// Location in case of a redirection (30x status)

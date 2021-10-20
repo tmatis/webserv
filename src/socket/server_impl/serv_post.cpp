@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 16:51:30 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 18:30:16 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ Server::_handle_upload(Client& client, const Route& rules)
 
 	// build file path
 	filename.erase(0, rules.location.length());			   // remove location prefix
-	filename = _append_paths(rules.upload_path, filename); // filename = upload_path + filename
+	filename = HTTPGeneral::append_paths(rules.upload_path, filename); // filename = upload_path + filename
 
 	// create file
 	f_pollfd*	newfile = _create_file(filename, client.request().getBody(), rules._upload_rights);
@@ -107,7 +107,7 @@ Server::_get_uri_reference(const std::string& filename)
 		{
 			// replace root by location in filename
 			ref.erase(0, it->_root.length());
-			ref = _append_paths(it->location, ref);
+			ref = HTTPGeneral::append_paths(it->location, ref);
 			return (ref); // return uri reference to filename
 		}
 	}

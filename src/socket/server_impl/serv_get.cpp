@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:47 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 15:57:52 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 18:29:56 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 
 	// build path from root dir and uri path
 	path.erase(0, rules.location.length());		// location/path/to/file -> /path/to/file
-	path = _append_paths(rules._root, path);	// root/path/to/file
+	path = HTTPGeneral::append_paths(rules._root, path);	// root/path/to/file
 
 	struct stat	pathinfo;
 	if (stat(path.data(), &pathinfo) == -1)
@@ -89,7 +89,7 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 			return (NOT_FOUND);
 		}
 		else
-			path = _append_paths(path, file->d_name); // path + filename
+			path = HTTPGeneral::append_paths(path, file->d_name); // path + filename
 	}
 	
 	if (_file_already_requested(client, path))

@@ -300,12 +300,14 @@ std::string const &dir, std::string const &uri_path)
 	{
 		i = 1;
 		memset(tbuffer, 0, 50);
-		tampon = dir + "/" + (*it);
+
+		tampon = HTTPGeneral::append_paths(dir, *it);
 		if (lstat(tampon.c_str(), &file_stat) == -1)
 			i = 0;
-		tampon = uri_path + "/" + (*it) + '/';
+		tampon = HTTPGeneral::append_paths(uri_path, *it) + '/';
 		new_entry = "<a href=\"" + tampon + "\">";
 		tampon = *it + "/";
+		
 		if (tampon.size() < 50)
 			new_entry += std::string(tampon + "</a>").append(50 - tampon.size() + 1, ' ');
 		else
@@ -321,12 +323,14 @@ std::string const &dir, std::string const &uri_path)
 	{
 		i = 1;
 		memset(tbuffer, 0, 50);
-		tampon = dir + "/" + (*it);
+
+		tampon = HTTPGeneral::append_paths(dir, *it);
 		if (lstat(tampon.c_str(), &file_stat) == -1)
 			i = 0;
-		tampon = uri_path + "/" + (*it);
+		tampon = HTTPGeneral::append_paths(uri_path, *it);
 		new_entry = "<a href=\"" + tampon + "\">";
 		tampon = *it;
+
 		if (tampon.size() < 50)
 			new_entry += std::string(tampon + "</a>").append(50 - tampon.size() + 1, ' ');
 		else
