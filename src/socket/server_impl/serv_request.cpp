@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_request.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:04 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 18:02:27 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 17:02:46 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,9 @@ Server::_read_request(Client &client)
 		client.state(DISCONNECTED);
 	else
 	{
-		buffer[readBytes] = '\0';
-		client.request().parseChunk(std::string(buffer));
+		std::string::iterator iterator_begin(buffer);
+		std::string::iterator iterator_end(buffer + readBytes);
+		client.request().parseChunk(std::string(iterator_begin, iterator_end));
 	}
 	return (client.request().isReady());
 }
