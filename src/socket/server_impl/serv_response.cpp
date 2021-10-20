@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/19 23:20:38 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 02:15:03 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,14 +46,18 @@ Server::_create_response(Client& client)
 	std::stringstream	ss;
 
 	// Content-Type
-	_define_content_type(client, response);
+	if (response.getStatus() == OK)
+		_define_content_type(client, response);
+	else
+		response.getHeader().addValue("Content-Type", "text/html");
+
 
 	// Content-Length
 	ss << response.getBodySize();
 	headers.addValue("Content-Length", ss.str());		
 
 	// Connection (nginx behavior for error 400)
-	if (response.getStatus() == BAD_REQUEST)
+	if (response.getStatus() == BAD_REQUEST || response.getStatus() == REQUEST_TIMEOUT)
 		headers.addValue("Connection", "close");
 	// Allow (only for error 405)
 	else if (response.getStatus() == METHOD_NOT_ALLOWED)	
@@ -101,59 +105,5 @@ Server::_define_content_type(Client& client, HTTPResponse& response)
 		// try to detect it from file content itself
 		mime_type = client.rules()->find_mime_type(response.getBody(), false);
 	}
-	response.getHeader().addValue("Content-Type", mime_type); 
+	response.getHeader().addValue("Content-Type", mime_type);
 }
-
-#if 0
-
-bool
-Server::_check_useragent_accept_types(const std::string& content_type, const std::string* accepted)
-{
-	if (!accepted || *accepted == "*/*")
-		return (true); // no need to check anything
-
-	// isolate type and subtype from content-type
-	size_t		slash_pos		= content_type.find('/');
-	std::string	mime_type		= content_type.substr(0, slash_pos);
-	std::string	mime_subtype	= content_type.substr(slash_pos + 1, std::string::npos);
-
-	std::cout 	<< content_type << " "
-				<< mime_type << " "
-				<< mime_subtype << "\n";
-
-	size_t 		start			= 0;	// index of the first character of a mime type
-	size_t 		end				= 0; 	// index of the type-separator character
-	
-	while (end != std::string::npos)
-	{
-		end = accepted->find(',', start); // find separator character ','
-
-		size_t		pos = accepted->find(';', start); // ';' indicates a weight
-		std::string	tmp;
-
-		if (pos == std::string::npos) // no weight
-		{
-			if (end == std::string::npos)
-				tmp = accepted->substr(start, end); // copy all remaining string
-			else 
-				tmp = accepted->substr(start, end - start); // copy only mime type substring
-		}
-		else
-			tmp = accepted->substr(start, pos - start); // do not copy the weight factor part
-
-		// isolate type and subtype in mime type substring
-		slash_pos				= tmp.find('/');
-		std::string	tmp_type	= tmp.substr(0, slash_pos);
-		std::string	tmp_subtype	= tmp.substr(slash_pos + 1, std::string::npos);
-
-		if (mime_type == tmp_type) // compare type
-		{
-			if (mime_subtype == tmp_subtype || tmp_subtype == "*") // compare subtype
-				return (true); // content-type is accepted by the user-agent
-		}
-
-		start = end + 1; // check next type
-	}
-	return (false); // content-type is not accepted by the user-agent 
-}
-#endif

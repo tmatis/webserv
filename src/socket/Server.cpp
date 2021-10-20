@@ -6,11 +6,13 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/19 23:17:37 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 02:14:20 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+
+const int Server::timeout = REQUEST_TIMEOUT;
 
 Server::Server(const Config& conf) :
 	_host(Listener(conf.address_res, conf.port)), _config(conf) {}
@@ -58,7 +60,14 @@ Server::flush_clients(void)
 			it = _clients.erase(it);
 		}
 		else
+		{
+			std::cout << std::difftime(time(NULL), it->last_request) << "\n";
+			if (std::difftime(time(NULL), it->last_request) >= SERVER_TIMEOUT)
+			{
+				_handle_error(*it, REQUEST_TIMEOUT);
+			}
 			++it;
+		}
 	}
 }
 
@@ -109,6 +118,8 @@ Server::handle_request(Client& client)
 		return (_handle_error(client, BAD_REQUEST));
 	}
 	
+	client.last_request = time(NULL); // reset client timeout
+
 	// find correct route
 	HTTPRequest&	req		= client.request();
 	const HTTPURI&	uri		= req.getURI();

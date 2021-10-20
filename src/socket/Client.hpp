@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 23:22:49 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 01:56:05 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define CLIENT_HPP
 
 # include <poll.h>
+# include <ctime>
 
 # include "TCP_Socket.hpp"
 # include "../http/HTTPRequest.hpp"
@@ -67,6 +68,7 @@ class Client : public TCP_Socket
 		void			clear(void);
 
 		int				write_trials;
+		std::time_t		last_request;
 
 	private:
 

@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/19 23:20:15 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 02:01:43 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@
 # include "../config/Config.hpp"
 # include "../http/HTTPURI.hpp"
 # include "../config/Route.hpp"
+
+# define SERVER_TIMEOUT 15.0
 
 class Server
 {
@@ -60,6 +62,7 @@ class Server
 		const Route&	_resolve_routes(const std::string& uri_path);
 		int				_check_request_validity(const Route& rules, HTTPRequest& request);
 		std::string		_append_paths(const std::string& str1, const std::string& str2);
+		bool			_is_mime_type_supported(const Route& rules, const std::string& mime_type);
 		/*** RESPONSES ********************************************************/
 		int				_handle_error(Client& client, int status, bool autogen = false);
 		void			_create_response(Client& client);
@@ -89,6 +92,8 @@ class Server
 		std::vector<Client>			_clients;	// list of clients connected
 		std::vector<f_pollfd>		_files;		// files opened
 		const Config&				_config;	// configuration of the server
+
+		static const int			timeout;
 };
 
 #endif

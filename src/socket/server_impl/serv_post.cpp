@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 19:11:22 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/19 23:48:29 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,28 +39,37 @@ Server::_handle_upload(Client& client, const Route& rules)
 	std::string			mime_type		= "application/octet-stream"; // default content-type if not provided
 	std::string			boundary		= "";
 
-	if (*content_type == "multipart/form-data")
+	if (content_type)
 	{
-		mime_type = *content_type;
-		return (false);
-	}
-	else if (*content_type == "application/x-www-form-urlencoded")
-		return (false); // this content-type cannot be used for file transfer
-	else
-	{
-		std::string filename = client.request().getURI().getPath();
-
-		// build file path
-		filename.erase(0, rules.location.length());				// remove location prefix
-		filename = _append_paths(rules.upload_path, filename);	// filename = upload_path + filename
-		
-		// create file
-		client.file(_create_file(filename, client.request().getBody(), rules._upload_rights));
-		if (!client.file()) // an error occured when trying to open file (see error logs for more details)
+		if (*content_type == "multipart/form-data")
 		{
-			_handle_error(client, INTERNAL_SERVER_ERROR);
-			return (true);
+			return (false);
 		}
+		else if (*content_type == "application/x-www-form-urlencoded")
+			return (false); // this content-type cannot be used for file transfer
+		else
+			mime_type = *content_type;
+	}
+
+	// check if mime type is accepted for upload
+	if (!_is_mime_type_supported(rules, mime_type))
+	{
+		_handle_error(client, UNSUPPORTED_MEDIA_TYPE);
+		return (true);
+	}
+
+	std::string filename = client.request().getURI().getPath();
+
+	// build file path
+	filename.erase(0, rules.location.length());			   // remove location prefix
+	filename = _append_paths(rules.upload_path, filename); // filename = upload_path + filename
+
+	// create file
+	client.file(_create_file(filename, client.request().getBody(), rules._upload_rights));
+	if (!client.file()) // an error occured when trying to open file (see error logs for more details)
+	{
+		_handle_error(client, INTERNAL_SERVER_ERROR);
+		return (true);
 	}
 
 	client.state(IDLE);

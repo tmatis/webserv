@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 23:54:44 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 02:09:57 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ Client::connect(int host_fd)
 	_fd = accept(host_fd, (sockaddr*)&_addr, &size);
 	if (_fd == -1 || TCP_Socket::set_non_blocking(*this) == -1)
 		return (-1);
+	last_request = time(NULL); // get time of connection to handle timeout later
 	return (0);
 }
 
