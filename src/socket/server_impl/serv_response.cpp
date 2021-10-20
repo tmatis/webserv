@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 02:15:03 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 03:13:51 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ Server::_create_response(Client& client)
 	std::stringstream	ss;
 
 	// Content-Type
-	if (response.getStatus() == OK)
+	if (client.file())
 		_define_content_type(client, response);
 	else
 		response.getHeader().addValue("Content-Type", "text/html");

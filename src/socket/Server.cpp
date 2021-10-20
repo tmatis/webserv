@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 02:14:20 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 02:46:27 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,13 @@ Server::~Server(void)
 		close(it->fd());
 
 	// close files
-	for (std::vector<f_pollfd>::iterator it = _files.begin();
+	for (std::vector<f_pollfd*>::iterator it = _files.begin();
 		it != _files.end();
 		++it)
-			close(it->pfd.fd);
+	{
+		close((*it)->pfd.fd);
+		delete *it;
+	}
 }
 
 /*** CONNECTIONS **************************************************************/
@@ -61,11 +64,8 @@ Server::flush_clients(void)
 		}
 		else
 		{
-			std::cout << std::difftime(time(NULL), it->last_request) << "\n";
-			if (std::difftime(time(NULL), it->last_request) >= SERVER_TIMEOUT)
-			{
+			if (std::difftime(time(NULL), it->last_request) >= Server::timeout)
 				_handle_error(*it, REQUEST_TIMEOUT);
-			}
 			++it;
 		}
 	}
@@ -74,7 +74,7 @@ Server::flush_clients(void)
 void
 Server::flush_files(void)
 {
-	std::vector<f_pollfd>::iterator	f = _files.begin();
+	std::vector<f_pollfd*>::iterator	f = _files.begin();
 	client_iterator					cl;
 	
 	while (f != _files.end()) // check all files opened
@@ -82,7 +82,7 @@ Server::flush_files(void)
 		cl = _clients.begin();
 		while (cl != _clients.end())
 		{
-			if (cl->file() == &(*f))
+			if (cl->file() == *f)
 				break ; // file is requested by a client
 			++cl;
 		}
@@ -90,7 +90,8 @@ Server::flush_files(void)
 		if (cl == _clients.end()) // no client request this file anymore
 		{
 			// delete file
-			close(f->pfd.fd);
+			close((*f)->pfd.fd);
+			delete *f;
 			f = _files.erase(f);
 		}
 		else
@@ -233,7 +234,7 @@ Server::get_clients(void)
 	return (_clients);
 }
 
-const std::vector<f_pollfd>&
+const std::vector<f_pollfd*>&
 Server::get_files(void) const
 {
 	return (_files);

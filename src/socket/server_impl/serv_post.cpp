@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/19 23:48:29 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 02:33:28 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,8 +89,8 @@ Server::_create_file(const std::string& filename, const std::string& data, uint 
 		return (NULL);
 	}
 
-	_files.push_back(f_pollfd(filename, fd, POLLOUT, data));
-	return (&_files.back());
+	_files.push_back(new f_pollfd(filename, fd, POLLOUT, data));
+	return (_files.back());
 }
 
 std::string

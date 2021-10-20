@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 02:01:43 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 02:24:17 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,10 @@ class Server
 
 		// getters
 		std::vector<Client>&			get_clients(void);
-		const std::vector<f_pollfd>&	get_files(void) const;
+		const std::vector<f_pollfd*>&	get_files(void) const;
 		const Listener&					get_listener(void) const;
+
+		static const int				timeout;
 
 	private:
 	
@@ -88,12 +90,10 @@ class Server
 		bool			_handle_redirection(Client& client, const Route& rules);
 		std::string		_replace_conf_vars(Client& client, const std::string& redirection);
 		
-		Listener					_host;		// listener socket
-		std::vector<Client>			_clients;	// list of clients connected
-		std::vector<f_pollfd>		_files;		// files opened
-		const Config&				_config;	// configuration of the server
-
-		static const int			timeout;
+		Listener				_host;		// listener socket
+		std::vector<Client>		_clients;	// list of clients connected
+		std::vector<f_pollfd*>	_files;		// files opened
+		const Config&			_config;	// configuration of the server
 };
 
 #endif

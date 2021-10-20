@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:03:40 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/13 19:57:55 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 02:27:28 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,9 @@ void				PollClass::add_server(server &new_server)
 
 	this->_pfd_list.insert(this->_pfd_list.end(), new_server.get_clients().begin(), \
 	new_server.get_clients().end());
-	this->_pfd_list.insert(this->_pfd_list.end(), \
-	new_server.get_files().begin(), new_server.get_files().end());
+
+	for (size_t i = 0; i < new_server.get_files().size(); i++)
+		this->_pfd_list.insert(this->_pfd_list.end(), *new_server.get_files()[i]);
 }
 
 void				PollClass::remove_server(server *server)
@@ -137,7 +138,7 @@ void				PollClass::update_server_pfd(unsigned int index)
 	while (i < new_fst_size)
 	{
 		if (i + offset >= this->_pfd_list.size() || this->_pfd_list[offset + i].fd != \
-		this->_server_list[index]->get_files()[i].pfd.fd)
+		this->_server_list[index]->get_files()[i]->pfd.fd)
 		{
 			if (i < this->_server_data_size[index].second)
 			{
@@ -148,7 +149,7 @@ void				PollClass::update_server_pfd(unsigned int index)
 			else
 			{
 				this->_pfd_list.insert(this->_pfd_list.begin() + offset + i, \
-				this->_server_list[index]->get_files()[i]);
+				*this->_server_list[index]->get_files()[i]);
 			}
 		}
 		i++;

@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:47 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 18:01:36 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 02:32:54 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,8 +103,8 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 		return (INTERNAL_SERVER_ERROR);
 	}
 
-	_files.push_back(f_pollfd(path, fd));
-	client.file(&_files.back());
+	_files.push_back(new f_pollfd(path, fd));
+	client.file(_files.back());
 	return (OK);
 }
 
@@ -129,10 +129,10 @@ Server::_file_already_requested(Client& client, std::string const &filepath)
 {
 	for (size_t i = 0; i < _files.size(); i++)
 	{
-		if (_files[i].name == filepath) // file already in server's list
+		if (_files[i]->name == filepath) // file already in server's list
 		{
 			// assign file to the client
-			client.file(&_files[i]);
+			client.file(_files[i]);
 			return (true);
 		}
 	}
