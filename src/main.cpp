@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/19 22:57:36 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/21 00:12:48 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,94 +135,76 @@ std::pair<char **, unsigned int>			construct(HTTPURI &uri)
 
 int	main(int argc, char **argv)
 {
-	// if (argc != 2)
-	// {
-	// 	std::cerr << "webserv: Bad argument\n";
-	// 	std::cerr << "usage: ./webserv path/to/config\n";
-	// 	return (EXIT_FAILURE);
-	// }
+	if (argc != 2)
+	{
+		std::cerr << "webserv: Bad argument\n";
+		std::cerr << "usage: ./webserv path/to/config\n";
+		return (EXIT_FAILURE);
+	}
 
-	// // create configurations for server
-	// MasterConfig			mconfig;
+	// create configurations for server
+	MasterConfig			mconfig;
 
-	// mconfig.construct(argv[1]);
+	mconfig.construct(argv[1]);
 
-	// // create servers
-	// std::vector<Server*>	hosts;
+	// create servers
+	std::vector<Server*>	hosts;
 
-	// try
-	// {
-	// 	for (size_t i = 0; i < mconfig._configs.size(); i++)
-	// 		hosts.push_back(new Server(mconfig._configs[i]));
-	// }
-	// catch(const std::exception& e)
-	// {
-	// 	std::cerr << e.what() << '\n';
-	// 	destroy_servers(hosts);
-	// 	return (EXIT_FAILURE);
-	// }
+	try
+	{
+		for (size_t i = 0; i < mconfig._configs.size(); i++)
+			hosts.push_back(new Server(mconfig._configs[i]));
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+		destroy_servers(hosts);
+		return (EXIT_FAILURE);
+	}
 	
-	// // create poll class
-	// PollClass			pc(POLL_TIMEOUT);
+	// create poll class
+	PollClass			pc(POLL_TIMEOUT);
 
-	// for (size_t i = 0 ; i < hosts.size() ; i++)
-	// {
-	// 	// add server to poll class
-	// 	pc.add_server(*hosts[i]);
+	for (size_t i = 0 ; i < hosts.size() ; i++)
+	{
+		// add server to poll class
+		pc.add_server(*hosts[i]);
 		
-	// 	// print server listener info
-	// 	std::cout	<< "Listen on "
-	// 				<< inet_ntoa(hosts[i]->get_listener().addr().sin_addr)
-	// 				<< ":"
-	// 				<< ntohs(hosts[i]->get_listener().addr().sin_port)
-	// 				<< "\n";		
-	// }
+		// print server listener info
+		std::cout	<< "Listen on "
+					<< inet_ntoa(hosts[i]->get_listener().addr().sin_addr)
+					<< ":"
+					<< ntohs(hosts[i]->get_listener().addr().sin_port)
+					<< "\n";		
+	}
 
-	// while (true)
-	// {
-	// 	if (pc.polling() == -1)
-	// 		perror("webserv: poll: ");
+	while (true)
+	{
+		if (pc.polling() == -1)
+			perror("webserv: poll: ");
 
-	// 	// check events for each server
-	// 	for (std::vector<Server*>::iterator h = hosts.begin();
-	// 			h != hosts.end();
-	// 			++h)
-	// 	{
-	// 		// check events for each client
-	// 		for (Server::client_iterator cl = (*h)->get_clients().begin();
-	// 				cl != (*h)->get_clients().end();
-	// 				++cl)
-	// 		{
-	// 			if (handle_events(pc, *h, *cl) == -1)
-	// 				perror("webserv: client event: ");
-	// 		}
+		// check events for each server
+		for (std::vector<Server*>::iterator h = hosts.begin();
+				h != hosts.end();
+				++h)
+		{
+			// check events for each client
+			for (Server::client_iterator cl = (*h)->get_clients().begin();
+					cl != (*h)->get_clients().end();
+					++cl)
+			{
+				if (handle_events(pc, *h, *cl) == -1)
+					perror("webserv: client event: ");
+			}
 
-	// 		// check connection on server
-	// 		if (handle_events(pc, *h) == -1)
-	// 			perror("webserv: client connection: ");
+			// check connection on server
+			if (handle_events(pc, *h) == -1)
+				perror("webserv: client connection: ");
 
-	// 		(*h)->flush_clients();	// delete disconnected clients
-	// 		(*h)->flush_files();	// delete unused files
-	// 	}
-	// }
-
-	// (void)argc; (void)argv;
-	// std::string uri = "http://localhost/webserv/client.php";
-	// HTTPURI hu(uri);
-	// // std::cout << hu.getHost() << " " << hu.getPath() << " " << hu.getScheme() << std::endl;
-	// // std::map<std::string, std::string>::const_iterator it = hu.getQuery().begin();
-	// // while (it != hu.getQuery().end())
-	// // {
-	// // 	std::cout << (*it).first << " " << (*it).second << std::endl;
-	// // 	it++;
-	// // }
-	// std::pair<char **, unsigned int> pp = construct(hu);
-	// for (unsigned int i = 0 ; pp.first[i] ; i++)
-	// 	std::cout << pp.first[i] << std::endl;
-	// for (unsigned int i = 0 ; pp.first[i] ; i++)
-	// 	delete[] pp.first[i];
-	// if (pp.second)
-	// 	delete[] pp.first;
+			(*h)->flush_clients();	// delete disconnected clients
+			(*h)->flush_files();	// delete unused files
+		}
+	}
 	return (0);
 }
 
@@ -268,6 +250,22 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 
 	if (client.state() == IDLE) // client has requested a file
 	{
+		std::vector<CGI>::iterator it = host->get_cgis().begin();
+		for ( ; it != host->get_cgis().end() ; it++)
+		{
+			if (&((*it).get_client()) == &client)
+			{
+				// std::cout << (*it).get_state() << std::endl;
+				if ((*it).get_state() == 0)
+					(*it).send_request();
+				if ((*it).get_state() == 1)
+					(*it).get_response();
+				if ((*it).get_state() != 2)
+					return (0);
+				host->get_cgis().erase(it);
+				break ;
+			}
+		}
 		revent	= pc.get_raw_revents(client.file()->pfd.fd);
 		if (revent & POLLIN) // file is ready for reading
 			host->create_file_response(client);

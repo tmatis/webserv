@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:34:38 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/19 22:16:24 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/20 23:12:46 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,29 +18,34 @@
 # include <cstring>
 # include <stdexcept>
 
+class Server;
+
 class CGI
 {
 	private:
 	Server								&_server;
 	Client								&_client;
-	Route								&_route;
+	Route const							&_route;
 	HTTPRequest const					&_request;
 	std::pair<std::string, std::string>	cgi_infos;
-	std::vector<std::string>			_var_containers;
 	char								**_var_formatted;
+	std::map<std::string, std::string>	_var_containers;
 	int									_pipes_in[2];
 	int									_pipes_out[2];
 	unsigned int						_var_count;
 	pid_t								_pid;
 	std::string							_response;
+	int									_state;
 	/* first = input ; second = output */
 	std::pair<f_pollfd *, f_pollfd *>	_fds;
-	
-	CGI(Server &server, Client &client, Route &route, HTTPRequest const &httpreq, \
-	std::pair<std::string, std::string> const &cgi);
-	~CGI();
 
 	public:
+	CGI(Server &server, Client &client, Route const &route, HTTPRequest const &httpreq, \
+	std::pair<std::string, std::string> const &cgi);
+	CGI(CGI const &cp);
+	~CGI();
+
+	CGI						&operator=(CGI const &rhs);
 	static std::string		get_var_formatted_str(std::string const &var_name);
 	CGI						&construct();
 
@@ -56,7 +61,11 @@ class CGI
 
 	int					get_input_pipe();
 	int					get_output_pipe();
+	Client				&get_client();
+	char				**get_var_formatted();
+	std::map<std::string, std::string>	&get_vars();
 	std::string const	get_response() const;
+	int					get_state() const;
 };
 
 

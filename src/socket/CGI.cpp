@@ -6,16 +6,20 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/19 22:38:24 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/21 00:10:47 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #	include "CGI.hpp"
 
-CGI::CGI(Server &server, Client &client, Route &route, \
+CGI::CGI(Server &server, Client &client, Route const &route, \
 HTTPRequest const &httpreq, std::pair<std::string, std::string> const &cgi) : \
 _server(server), _client(client), _route(route), _request(httpreq), \
-cgi_infos(cgi), _var_formatted(NULL), _var_count(0), _pid(0) {}
+cgi_infos(cgi), _var_formatted(NULL), _var_count(0), _pid(0), _state(0) {}
+CGI::CGI(CGI const &cp) : _server(cp._server), _client(cp._client), \
+_route(cp._route), _request(cp._request), cgi_infos(cp.cgi_infos), \
+_var_formatted(cp._var_formatted), _var_count(cp._var_count), _pid(cp._pid), \
+_state(cp._state) {}
 CGI::~CGI()
 {
 	for (unsigned int i = 0 ; i < this->_var_count ; i++)
@@ -23,6 +27,8 @@ CGI::~CGI()
 	if (this->_var_count)
 		delete[] this->_var_formatted;
 }
+
+CGI			&CGI::operator=(CGI const &rhs) { (void)rhs; return (*this); }
 
 CGI			&CGI::construct()
 {
@@ -42,10 +48,12 @@ CGI			&CGI::construct()
 	vars["REMOTE_IDENT"] = std::string(); // not supported since nothing asked it
 	vars["QUERY_STRING"] = std::string();
 	vars["CONTENT_TYPE"] = std::string();
+	vars["CONTENT_LENGTH"] = "0";
 
-	vars["CONTENT_LENGTH"] = *(this->_request.getHeader().getValue("Content-Length"));
+	if (this->_request.getHeader().getValue("Content-Length")) //
+		vars["CONTENT_LENGTH"] = *(this->_request.getHeader().getValue("Content-Length")); //
 	vars["SERVER_SOFTWARE"] = this->_server.get_config()._server_name_version;
-	vars["SERVER_NAME"] = this->_request.getHost();
+	vars["SERVER_NAME"] = this->_request.getHost().substr(0, this->_request.getHost().find(':')); //
 	vars["GATEWAY_INTERFACE"] = "CGI/1.1";
 	vars["SERVER_PROTOCOL"] = this->_request.getVersion();
 	vars["SERVER_PORT"] = this->_server.get_config().port_str;
@@ -115,11 +123,10 @@ CGI			&CGI::construct()
 		tampon = (*it).first + std::string("=") + (*it).second;
 		std::strcpy(this->_var_formatted[i], tampon.c_str());
 		this->_var_formatted[i][(*it).first.size() + (*it).second.size() + 1] = 0;
-		this->_var_containers.push_back((*it).first + \
-		std::string("=") + (*it).second);
 		i++;
 		it++;
 	}
+	this->_var_containers = vars;
 	this->_var_formatted[vars.size()] = NULL;
 	return (*this);
 }
@@ -176,6 +183,7 @@ bool			CGI::send_request()
 				break ;
 			}
 		close(this->get_input_pipe());
+		this->_state++;
 		return (true);
 	}
 	if (this->_fds.first->pfd.revents == POLLERR || \
@@ -210,6 +218,7 @@ bool			CGI::send_request()
 			throw std::runtime_error(strerror(errno));
 		}
 		close(this->get_input_pipe());
+		this->_state++;
 		return (true);
 	}
 	return (false);
@@ -220,9 +229,10 @@ bool			CGI::get_response()
 	char		buffer[200];
 	int			i = 1;
 
-	if (this->_fds.first->pfd.revents == POLLERR || \
-	this->_fds.first->pfd.revents == POLLHUP || \
-	this->_fds.first->pfd.revents == POLLNVAL)
+	// std::cout << this->_fds.second->pfd.events << std::endl;
+	if (this->_fds.second->pfd.revents == POLLERR || \
+	this->_fds.second->pfd.revents == POLLHUP || \
+	this->_fds.second->pfd.revents == POLLNVAL)
 	{
 		for (std::vector<f_pollfd>::iterator it = \
 		this->_server.get_files().begin() ; it != \
@@ -235,7 +245,7 @@ bool			CGI::get_response()
 		close(this->get_output_pipe());
 		throw std::runtime_error("poll error");
 	}
-	if (this->_fds.first->pfd.revents == POLLIN)
+	if (this->_fds.second->pfd.revents == POLLIN)
 	{
 		while (i > 0)
 		{
@@ -255,6 +265,8 @@ bool			CGI::get_response()
 		close(this->get_output_pipe());
 		if (i == -1)
 			throw std::runtime_error(strerror(errno));
+		// std::cout << "'" << this->_response << "'" << std::endl;
+		this->_state++;
 		return (true);
 	}
 	return (false);
@@ -281,4 +293,24 @@ int				CGI::get_input_pipe()
 int				CGI::get_output_pipe()
 {
 	return (this->_pipes_out[0]);
+}
+
+char			**CGI::get_var_formatted()
+{
+	return (this->_var_formatted);
+}
+
+Client			&CGI::get_client()
+{
+	return (this->_client);
+}
+
+std::map<std::string, std::string>	&CGI::get_vars()
+{
+	return (this->_var_containers);
+}
+
+int				CGI::get_state() const
+{
+	return (this->_state);
 }

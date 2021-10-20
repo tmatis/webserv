@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/19 20:47:30 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/20 22:50:52 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,4 +242,10 @@ const Config&
 Server::get_config(void) const
 {
 	return (_config);
+}
+
+std::vector<CGI>&
+Server::get_cgis(void)
+{
+	return (_cgis);
 }

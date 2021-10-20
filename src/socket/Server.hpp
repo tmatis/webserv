@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/19 22:27:54 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/20 22:50:22 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,9 @@
 # include "../config/Config.hpp"
 # include "../http/HTTPURI.hpp"
 # include "../config/Route.hpp"
+# include "CGI.hpp"
+
+class CGI;
 
 class Server
 {
@@ -51,6 +54,7 @@ class Server
 		std::vector<f_pollfd>&			get_files(void);
 		const Listener&					get_listener(void) const;
 		const Config&					get_config(void) const;
+		std::vector<CGI>&				get_cgis(void);
 
 		/*** RESPONSES PUBLIC ********************************************************/
 		std::string		_append_paths(const std::string& str1, const std::string& str2);
@@ -90,6 +94,7 @@ class Server
 		
 		Listener					_host;		// listener socket
 		std::vector<Client>			_clients;	// list of clients connected
+		std::vector<CGI>			_cgis;		// running cgis
 		std::vector<f_pollfd>		_files;		// files opened
 		const Config&				_config;	// configuration of the server
 };
