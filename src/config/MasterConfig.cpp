@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/19 19:41:42 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 14:50:45 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -446,8 +446,10 @@ std::vector<std::string> const &values)
 					"\' (continued)" << std::endl;
 				continue ;
 			}
-			new_mime_tab[tampon2.substr(0, tampon2.find(' '))] = tampon2.erase(0, tampon2.find(' ') + 1);
+			std::string tmp = tampon2.substr(0, tampon2.find(' '));
+			new_mime_tab[tmp] = tampon2.erase(0, tampon2.find(' ') + 1);
 		}
+		this->_mime_types = new_mime_tab;
 	}
 	else
 		std::cerr << "config > \'" << var_pair.first << "\' : this " << \

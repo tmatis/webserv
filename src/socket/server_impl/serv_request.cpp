@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:04 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 01:44:22 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 13:59:01 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,12 +122,10 @@ Server::_append_paths(const std::string& str1, const std::string& str2)
 bool
 Server::_is_mime_type_supported(const Route& rules, const std::string& mime_type)
 {
-	std::cout << "list of mime types: \n";
 	for (std::map<std::string, std::string>::const_iterator it = rules._mime_types.begin();
 		it != rules._mime_types.end();
 		it++)
 	{
-		std::cout << "type: " << it->second << "\n";
 		if (it->second == mime_type)
 			return (true);
 	}
