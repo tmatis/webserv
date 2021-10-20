@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 02:33:28 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 16:51:30 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ Server::_handle_upload(Client& client, const Route& rules)
 
 	if (content_type)
 	{
-		if (*content_type == "multipart/form-data")
+		if (content_type->find("multipart/form-data") == 0)
 		{
 			return (false);
 		}
@@ -65,13 +65,14 @@ Server::_handle_upload(Client& client, const Route& rules)
 	filename = _append_paths(rules.upload_path, filename); // filename = upload_path + filename
 
 	// create file
-	client.file(_create_file(filename, client.request().getBody(), rules._upload_rights));
-	if (!client.file()) // an error occured when trying to open file (see error logs for more details)
+	f_pollfd*	newfile = _create_file(filename, client.request().getBody(), rules._upload_rights);
+	if (!newfile) // an error occured when trying to open file (see error logs for more details)
 	{
 		_handle_error(client, INTERNAL_SERVER_ERROR);
 		return (true);
 	}
-
+	
+	client.files().push_back(newfile);
 	client.state(IDLE);
 	return (true);
 }

@@ -67,7 +67,7 @@ const std::string HTTPResponse::_status_message[35] =
 		"Gone",
 		"Length Required",
 		"Precondition Failed",
-		"Request Entity Too Large",
+		"Payload Too Large",
 		"Request-URI Too Long",
 		"Unsupported Media Type",
 		"Requested Range Not Satisfiable",

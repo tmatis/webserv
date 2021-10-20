@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 01:56:05 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 15:42:41 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,32 +51,31 @@ class Client : public TCP_Socket
 	
 		Client(void);
 		
-		int				connect(int host_fd);
-		operator		pollfd() const;
+		int								connect(int host_fd);
+		operator						pollfd() const;
 
 		// getters
-		client_state	state(void) const;
-		HTTPRequest&	request(void);
-		HTTPResponse&	response(void);
-		const f_pollfd*	file(void) const;
-		const Route*	rules(void) const;
+		client_state					state(void) const;
+		const Route*					rules(void) const;
+		HTTPRequest&					request(void);
+		HTTPResponse&					response(void);
+		std::vector<const f_pollfd*>&	files(void);
 
 		// setters
-		void			state(client_state st);
-		void			file(const f_pollfd* f_pfd);
-		void			rules(const Route* rules);
-		void			clear(void);
+		void							state(client_state st);
+		void							rules(const Route* rules);
+		void							clear(void);
 
-		int				write_trials;
-		std::time_t		last_request;
+		int								write_trials;
+		std::time_t						last_request;
 
 	private:
 
-		client_state	_state;
-		HTTPRequest		_request;
-		HTTPResponse	_response;
-		const f_pollfd*	_file;
-		const Route*	_route;
+		client_state					_state;
+		HTTPRequest						_request;
+		HTTPResponse					_response;
+		std::vector<const f_pollfd*>	_files;
+		const Route*					_route;
 };
 
 #endif

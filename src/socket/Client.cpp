@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 02:09:57 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 16:02:58 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ f_pollfd::operator pollfd() const
 /*** CLIENT *******************************************************************/
 
 Client::Client(void) :
-	write_trials(0), _state(PENDING_REQUEST), _file(NULL), _route(NULL) {}
+	write_trials(0), _state(PENDING_REQUEST), _files(), _route(NULL) {}
 
 int
 Client::connect(int host_fd)
@@ -64,6 +64,11 @@ Client::state(void) const
 	return (_state);
 }
 
+const Route*
+Client::rules(void) const
+{
+	return (_route);
+}
 
 HTTPRequest&
 Client::request(void)
@@ -77,16 +82,10 @@ Client::response(void)
 	return (_response);
 }
 
-const f_pollfd*
-Client::file(void) const
+std::vector<const f_pollfd*>&
+Client::files(void)
 {
-	return (_file);
-}
-
-const Route*
-Client::rules(void) const
-{
-	return (_route);
+	return (_files);
 }
 
 /*** SETTERS ******************************************************************/
@@ -95,12 +94,6 @@ void
 Client::state(client_state st)
 {
 	_state = st;
-}
-
-void
-Client::file(const f_pollfd* f_pfd)
-{
-	_file = f_pfd;
 }
 
 void

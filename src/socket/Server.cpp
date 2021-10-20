@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 02:46:27 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 16:51:48 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,20 +74,33 @@ Server::flush_clients(void)
 void
 Server::flush_files(void)
 {
+	if (!_files.size())
+		return ;
+
 	std::vector<f_pollfd*>::iterator	f = _files.begin();
-	client_iterator					cl;
+	client_iterator						cl;
+	bool								found;
 	
 	while (f != _files.end()) // check all files opened
 	{
-		cl = _clients.begin();
-		while (cl != _clients.end())
+		found	= false;
+		cl		= _clients.begin();
+		
+		while (cl != _clients.end() && !found)
 		{
-			if (cl->file() == *f)
-				break ; // file is requested by a client
+			// check files requested by the client
+			for (size_t i = 0; i < cl->files().size(); i++)
+			{
+				if (cl->files()[i] == *f)
+				{
+					found = true;
+					break;
+				}
+			}
 			++cl;
 		}
 
-		if (cl == _clients.end()) // no client request this file anymore
+		if (!found) // no client request this file anymore
 		{
 			// delete file
 			close((*f)->pfd.fd);
@@ -189,7 +202,7 @@ Server::create_file_response(Client& client)
 	char		buffer[BUFFER_SIZE];
 	int			bytes;
 
-	while ((bytes = read(client.file()->pfd.fd, buffer, BUFFER_SIZE)) > 0)
+	while ((bytes = read(client.files().front()->pfd.fd, buffer, BUFFER_SIZE)) > 0)
 	{
 		buffer[bytes] = '\0';
 		file_content += buffer; // load file content
@@ -197,21 +210,21 @@ Server::create_file_response(Client& client)
 	if (bytes == -1)
 	{
 		std::cerr << "server > reading file requested failed: " << strerror(errno) << "\n";
-		client.file(NULL);
+		client.files().clear();
 		_handle_error(client, INTERNAL_SERVER_ERROR);
 		return (-1);
 	}
 
 	client.response().setBody(file_content);
 	_create_response(client);
-	client.file(NULL);
+	client.files().clear();
 	return (0);
 }
 
 int
 Server::write_uploaded_file(Client& client)
 {
-	const f_pollfd*	fpfd = client.file();
+	const f_pollfd*	fpfd = client.files().front(); 
 
 	if (write(fpfd->pfd.fd, fpfd->data.c_str(), fpfd->data.length()) < 0)
 	{
@@ -222,7 +235,7 @@ Server::write_uploaded_file(Client& client)
 	
 	client.response().setStatus(CREATED); // upload successful
 	_create_response(client);
-	client.file(NULL);
+	client.files().erase(client.files().begin());
 	return (0);
 }
 

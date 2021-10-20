@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 03:13:51 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 15:56:55 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ Server::_create_response(Client& client)
 	std::stringstream	ss;
 
 	// Content-Type
-	if (client.file())
+	if (client.files().size())
 		_define_content_type(client, response);
 	else
 		response.getHeader().addValue("Content-Type", "text/html");
@@ -83,7 +83,7 @@ Server::_create_response(Client& client)
 	// Location in case of file uploads (201 status)
 	else if (response.getStatus() == CREATED)
 	{
-		std::string ref = _get_uri_reference(client.file()->name);
+		std::string ref = _get_uri_reference(client.files().front()->name);
 		if (ref.length()) // new file can be referenced as an uri
 			headers.addValue("Location", ref); // add this uri reference to the response
 	}
@@ -97,7 +97,7 @@ Server::_create_response(Client& client)
 void
 Server::_define_content_type(Client& client, HTTPResponse& response)
 {
-	const std::string&	filename		= client.file()->name;
+	const std::string&	filename		= client.files().front()->name;
 	std::string			mime_type		= client.rules()->find_mime_type(filename);
 
 	if (mime_type == client.rules()->_default_mime) // if getting mime type from filename failed
