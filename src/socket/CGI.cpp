@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/21 00:10:47 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/22 12:44:04 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,7 +170,7 @@ CGI			&CGI::launch()
 	return (*this);
 }
 
-bool			CGI::send_request()
+bool			CGI::send_request(int const &revents)
 {
 	if (!this->_request.getBody().size())
 	{
@@ -186,9 +186,7 @@ bool			CGI::send_request()
 		this->_state++;
 		return (true);
 	}
-	if (this->_fds.first->pfd.revents == POLLERR || \
-	this->_fds.first->pfd.revents == POLLHUP || \
-	this->_fds.first->pfd.revents == POLLNVAL)
+	if (revents & POLLERR || revents & POLLHUP || revents & POLLNVAL)
 	{
 		for (std::vector<f_pollfd>::iterator it = \
 		this->_server.get_files().begin() ; it != \
@@ -201,7 +199,7 @@ bool			CGI::send_request()
 		close(this->get_input_pipe());
 		throw std::runtime_error("poll error");
 	}
-	if (this->_fds.first->pfd.revents == POLLOUT)
+	if (revents & POLLOUT)
 	{
 		for (std::vector<f_pollfd>::iterator it = \
 		this->_server.get_files().begin() ; it != \
@@ -224,15 +222,13 @@ bool			CGI::send_request()
 	return (false);
 }
 
-bool			CGI::get_response()
+bool			CGI::get_response(int const &revents)
 {
 	char		buffer[200];
 	int			i = 1;
 
-	// std::cout << this->_fds.second->pfd.events << std::endl;
-	if (this->_fds.second->pfd.revents == POLLERR || \
-	this->_fds.second->pfd.revents == POLLHUP || \
-	this->_fds.second->pfd.revents == POLLNVAL)
+	if (revents & POLLERR || (revents & POLLHUP && !(revents & POLLIN)) || \
+	revents & POLLNVAL)
 	{
 		for (std::vector<f_pollfd>::iterator it = \
 		this->_server.get_files().begin() ; it != \
@@ -245,7 +241,7 @@ bool			CGI::get_response()
 		close(this->get_output_pipe());
 		throw std::runtime_error("poll error");
 	}
-	if (this->_fds.second->pfd.revents == POLLIN)
+	if (revents & POLLIN)
 	{
 		while (i > 0)
 		{
@@ -265,7 +261,6 @@ bool			CGI::get_response()
 		close(this->get_output_pipe());
 		if (i == -1)
 			throw std::runtime_error(strerror(errno));
-		// std::cout << "'" << this->_response << "'" << std::endl;
 		this->_state++;
 		return (true);
 	}

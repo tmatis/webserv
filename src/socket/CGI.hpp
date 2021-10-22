@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:34:38 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/20 23:12:46 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/22 12:34:37 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +56,8 @@ class CGI
 
 	/* needs to be run, if there's no body to send the function returns true
 	 * */
-	bool					send_request();
-	bool					get_response();
+	bool					send_request(int const &revents);
+	bool					get_response(int const &revents);
 
 	int					get_input_pipe();
 	int					get_output_pipe();

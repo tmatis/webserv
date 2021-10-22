@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/21 00:12:48 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/22 12:36:20 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,9 +257,9 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 			{
 				// std::cout << (*it).get_state() << std::endl;
 				if ((*it).get_state() == 0)
-					(*it).send_request();
+					(*it).send_request(pc.get_raw_revents((*it).get_input_pipe()));
 				if ((*it).get_state() == 1)
-					(*it).get_response();
+					(*it).get_response(pc.get_raw_revents((*it).get_output_pipe()));
 				if ((*it).get_state() != 2)
 					return (0);
 				host->get_cgis().erase(it);
