@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/22 12:54:46 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/22 13:31:15 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,6 +193,15 @@ Server::create_file_response(Client& client)
 	}
 	_create_response(client, &file_content);
 	client.file(NULL);
+	return (0);
+}
+
+int
+Server::create_file_response(CGI& cgi)
+{
+	cgi.get_client().response().parseCGI(cgi.get_response());
+	_create_response(cgi.get_client(), NULL);
+	cgi.get_client().file(NULL);
 	return (0);
 }
 

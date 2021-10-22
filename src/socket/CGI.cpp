@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/22 12:44:04 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/22 13:47:15 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,7 +197,7 @@ bool			CGI::send_request(int const &revents)
 				break ;
 			}
 		close(this->get_input_pipe());
-		throw std::runtime_error("poll error");
+		throw std::runtime_error("poll error req");
 	}
 	if (revents & POLLOUT)
 	{
@@ -239,7 +239,7 @@ bool			CGI::get_response(int const &revents)
 				break ;
 			}
 		close(this->get_output_pipe());
-		throw std::runtime_error("poll error");
+		throw std::runtime_error("poll error res");
 	}
 	if (revents & POLLIN)
 	{
@@ -303,6 +303,11 @@ Client			&CGI::get_client()
 std::map<std::string, std::string>	&CGI::get_vars()
 {
 	return (this->_var_containers);
+}
+
+std::string const	&CGI::get_response() const
+{
+	return (this->_response);
 }
 
 int				CGI::get_state() const

@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:34:38 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/22 12:34:37 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/22 13:30:15 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ class CGI
 	Client				&get_client();
 	char				**get_var_formatted();
 	std::map<std::string, std::string>	&get_vars();
-	std::string const	get_response() const;
+	std::string const	&get_response() const;
 	int					get_state() const;
 };
 

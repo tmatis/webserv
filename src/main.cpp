@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/22 12:36:20 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/22 13:30:59 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -262,8 +262,9 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 					(*it).get_response(pc.get_raw_revents((*it).get_output_pipe()));
 				if ((*it).get_state() != 2)
 					return (0);
+				host->create_file_response((*it));
 				host->get_cgis().erase(it);
-				break ;
+				return (0);
 			}
 		}
 		revent	= pc.get_raw_revents(client.file()->pfd.fd);

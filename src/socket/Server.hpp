@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/22 12:55:02 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/22 13:30:23 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ class Server
 		int		handle_request(Client& client);
 		void	send_response(Client& client);
 		int		create_file_response(Client& client);
+		int		create_file_response(CGI& cgi);
 		int		write_uploaded_file(Client& client);
 
 		// getters
