@@ -1,5 +1,6 @@
 #include "HTTPResponse.hpp"
 #include <sstream>
+#include <iostream>
 
 /* *********************** UTILITIES ************************* */
 
@@ -79,7 +80,7 @@ const std::string HTTPResponse::_status_message[35] =
 		"Gateway Timeout",
 		"HTTP Version Not Supported"};
 
-std::string const &HTTPResponse::status_code_to_string(status_code code)
+std::string const &HTTPResponse::status_code_to_string(short code)
 {
 	for (size_t i = 0; i < sizeof(_status_code) / sizeof(_status_code[0]); i++)
 	{
@@ -119,12 +120,16 @@ std::string itoa(T value)
 /* ********************** CONSTRUCTORS *********************** */
 
 HTTPResponse::HTTPResponse(void)
-	: HTTPGeneral(), _status(OK), _is_ready(false)
+	: HTTPGeneral(), _status(OK), _is_ready(false),
+		_header_parsed(false), _cgi_res_buffer()
 {
 }
 
 HTTPResponse::HTTPResponse(HTTPResponse const &other)
-	: HTTPGeneral(other), _status(other._status), _is_ready(other._is_ready)
+	: HTTPGeneral(other), _status(other._status),
+		_is_ready(other._is_ready),
+		_header_parsed(other._header_parsed),
+		_cgi_res_buffer(other._cgi_res_buffer)
 {
 }
 
@@ -142,6 +147,8 @@ HTTPResponse &HTTPResponse::operator=(HTTPResponse const &other)
 		HTTPGeneral::operator=(other);
 		_status = other._status;
 		_is_ready = other._is_ready;
+		_header_parsed = other._header_parsed;
+		_cgi_res_buffer = other._cgi_res_buffer;
 	}
 	return *this;
 }
@@ -154,7 +161,7 @@ bool HTTPResponse::isReady(void) const
 }
 
 
-status_code HTTPResponse::getStatus(void) const
+short HTTPResponse::getStatus(void) const
 {
 	return _status;
 }
@@ -166,7 +173,7 @@ void HTTPResponse::setReady(bool b)
 	_is_ready = b;
 }
 
-void HTTPResponse::setStatus(status_code code)
+void HTTPResponse::setStatus(short code)
 {
 	_status = code;
 }
@@ -185,17 +192,27 @@ void HTTPResponse::setContentType(std::string const &type)
 		|| type == "application/xml"
 		|| type == "application/x-www-form-urlencoded")
 
-		_header.addValue("Content-Type", type + "; charset=UTF-8");
+		_header.setValue("Content-Type", type + "; charset=UTF-8");
 	else
-		_header.addValue("Content-Type", type);
+		_header.setValue("Content-Type", type);
 }
 
 void HTTPResponse::setConnection(HTTPConnectionType type)
 {
 	if (type == HTTP_CONNECTION_KEEP_ALIVE)
-		_header.addValue("Connection", "keep-alive");
+		_header.setValue("Connection", "keep-alive");
 	else if (type == HTTP_CONNECTION_CLOSE)
-		_header.addValue("Connection", "close");
+		_header.setValue("Connection", "close");
+}
+
+void HTTPResponse::setAllow(std::string const &allow)
+{
+	_header.setValue("Allow", allow);
+}
+
+void HTTPResponse::setLocation(std::string const &location)
+{
+	_header.setValue("Location", location);
 }
 
 /* ************************* METHODS ************************* */
@@ -205,6 +222,62 @@ void HTTPResponse::clear(void)
 	HTTPGeneral::clear();
 	_status = OK;
 	_is_ready = false;
+	_header_parsed = false;
+	_cgi_res_buffer.clear();
+}
+
+void HTTPResponse::_applyCGI(HTTPHeader &header)
+{
+	std::string const *status = header.getValue("Status");
+
+	if (status)
+		this->setStatus(static_cast<short>(atoi(status->c_str())));
+	else
+		_status = OK;
+
+	this->setHeader(header);
+	header.clear();
+	_header_parsed = true;
+}
+
+void HTTPResponse::parseCGI(std::string const &str)
+{
+	static HTTPHeader header;
+
+	_cgi_res_buffer += str;
+
+	while (!_header_parsed && find_nl(_cgi_res_buffer).first != std::string::npos)
+	{
+		std::pair<size_t, short> pos = find_nl(_cgi_res_buffer);
+
+		std::string line = _cgi_res_buffer.substr(0, pos.first);
+		_cgi_res_buffer.erase(0, pos.first + pos.second);
+
+		if (line.empty())
+		{
+			this->_applyCGI(header);
+			break;
+		}
+		else if (!_header_parsed)
+		{
+			if (line.find(':') == std::string::npos)
+			{
+				this->_applyCGI(header);
+				_body += line;
+				if (pos.second == 2)
+					_body += "\r\n";
+				else
+					_body += "\n";
+			}
+			else
+				header.parseLine(line);
+		}
+	}
+	if (_header_parsed)
+	{
+		_body += _cgi_res_buffer;
+		_cgi_res_buffer.clear();
+	}
 }
 
 // transform response to string ready to be sent
@@ -213,10 +286,12 @@ std::string HTTPResponse::toString(void)
 {
 	std::string res;
 
-	_header.addValue("Server", "Webserv");
-	_header.addValue("Date", getDate());
+	_header.setValue("Server", "Webserv");
+	_header.setValue("Date", getDate());
 	if (_body.size())
-		_header.addValue("Content-Length", itoa(_body.size()));
+		_header.setValue("Content-Length", itoa(_body.size()));
+	if (!_header.getValue("Content-Type"))
+		setContentType("text/html");
 	if (!_header.getValue("Connection"))
 		setConnection(HTTP_CONNECTION_KEEP_ALIVE);
 	res += "HTTP/1.1 " + itoa(_status) + " " + status_code_to_string(_status) + "\r\n";
@@ -254,7 +329,7 @@ HTTPResponse	&HTTPResponse::gen_error_page(int const &status)
 }
 
 HTTPResponse	&HTTPResponse::gen_autoindex(std::vector<struct dirent> const &files, \
-std::string const &dir)
+std::string const &dir, std::string const &uri_path)
 {
 	unsigned int									i = 0;
 	std::string										tmplate;
@@ -268,7 +343,7 @@ std::string const &dir)
 	std::set<std::string>::iterator					it;
 
 	tmplate += "<html>\n<head><title>Index of " + dir + "</title></head>\n";
-	tmplate += "<body>\n<h1>Index of " + dir + "</h1>\n<hr>\n<pre>";
+	tmplate += "<body>\n<h1>Index of " + uri_path + "</h1>\n<hr>\n<pre>";
 	tmplate += "<a href=\"../\">../</a>\n";
 
 	while (i < files.size())
@@ -291,8 +366,9 @@ std::string const &dir)
 		tampon = dir + "/" + (*it);
 		if (lstat(tampon.c_str(), &file_stat) == -1)
 			i = 0;
-		tampon = (*it) + '/';
+		tampon = uri_path + "/" + (*it) + '/';
 		new_entry = "<a href=\"" + tampon + "\">";
+		tampon = *it + "/";
 		if (tampon.size() < 50)
 			new_entry += std::string(tampon + "</a>").append(50 - tampon.size() + 1, ' ');
 		else
@@ -311,8 +387,9 @@ std::string const &dir)
 		tampon = dir + "/" + (*it);
 		if (lstat(tampon.c_str(), &file_stat) == -1)
 			i = 0;
-		tampon = (*it);
+		tampon = uri_path + "/" + (*it);
 		new_entry = "<a href=\"" + tampon + "\">";
+		tampon = *it;
 		if (tampon.size() < 50)
 			new_entry += std::string(tampon + "</a>").append(50 - tampon.size() + 1, ' ');
 		else

@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:15:26 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/18 21:17:01 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/22 12:55:39 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,9 @@ public:
 /* ************************* METHODS ************************* */
 
 	std::pair<std::string, std::string > const *parseLine(std::string line);
+	void setValue(std::string const &key, std::string const &value);
 	void addValue(std::string const &key, std::string const &value);
+	void delValue(std::string const &key);
 	std::string toString(void) const;
 	void clear(void);
 

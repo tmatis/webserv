@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   serv_request.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:04 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 03:14:09 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/22 11:50:24 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Server.hpp"
+#include <iterator>
+#include "../../utils/random_access_iterator.hpp"
 
 bool
 Server::_read_request(Client &client)
@@ -28,8 +30,9 @@ Server::_read_request(Client &client)
 		client.state(DISCONNECTED);
 	else
 	{
-		buffer[readBytes] = '\0';
-		client.request().parseChunk(std::string(buffer));
+		ft::random_access_iterator<char> iterator_begin(buffer);
+		ft::random_access_iterator<char> iterator_end(buffer + readBytes);
+		client.request().parseChunk(std::string(iterator_begin, iterator_end));
 	}
 	return (client.request().isReady());
 }

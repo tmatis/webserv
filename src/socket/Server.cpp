@@ -6,11 +6,12 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 22:50:52 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/22 12:54:46 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "../utils/random_access_iterator.hpp"
 
 Server::Server(const Config& conf) :
 	_host(Listener(conf.address_res, conf.port)), _config(conf) {}
@@ -177,10 +178,11 @@ Server::create_file_response(Client& client)
 	char		buffer[BUFFER_SIZE];
 	int			bytes;
 
-	while ((bytes = read(client.file()->pfd.fd, buffer, BUFFER_SIZE)) > 0)
+	while ((bytes = read(client.file()->pfd.fd, buffer, BUFFER_SIZE)) > 0) // problem here to fix ! not protected with poll...
 	{
-		buffer[bytes] = '\0';
-		file_content += buffer; // load file content
+		ft::random_access_iterator<char> iterator_begin(buffer);
+		ft::random_access_iterator<char> iterator_end(buffer + bytes);
+		file_content += std::string(iterator_begin, iterator_end); // load file content
 	}
 	if (bytes == -1)
 	{

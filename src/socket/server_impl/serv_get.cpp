@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:47 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 23:07:04 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/22 12:54:26 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,8 +55,10 @@ Server::_handle_get(Client &client, const Route& rules, const HTTPURI& uri)
 }
 
 int
-Server::_find_resource(const Route& rules, std::string path, Client& client)
+Server::_find_resource(const Route& rules, const std::string& uri_path, Client& client)
 {
+	std::string path = uri_path;
+
 	// build path from root dir and uri path
 	path.erase(0, rules.location.length());		// location/path/to/file -> /path/to/file
 	path = _append_paths(rules._root, path);	// root/path/to/file
@@ -105,7 +107,7 @@ Server::_find_resource(const Route& rules, std::string path, Client& client)
 		{
 			if (rules._autoindex) // autoindex enabled
 			{
-				client.response().gen_autoindex(dirls, path);
+				client.response().gen_autoindex(dirls, path, uri_path);
 				_create_response(client);
 				return (OK);
 			}

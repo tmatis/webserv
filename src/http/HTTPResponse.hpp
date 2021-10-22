@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HTTPResponse.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 20:01:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/16 14:05:49 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/19 15:23:54 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,8 +65,11 @@ class HTTPResponse : public HTTPGeneral
 private:
 	static const short _status_code[];
 	static const std::string _status_message[];
-	status_code _status;
+	short _status;
 	bool		_is_ready;
+	bool 		_header_parsed;
+	std::string _cgi_res_buffer;
+	void _applyCGI(HTTPHeader &header);
 
 public:
 /* ********************** CONSTRUCTORS *********************** */
@@ -80,27 +83,34 @@ public:
 	HTTPResponse &operator=(HTTPResponse const &src);
 
 /* *********************** UTILITIES ************************* */
-	static std::string const &status_code_to_string(status_code code);
+	static std::string const &status_code_to_string(short code);
 	
 /* ************************* GETTERS ************************* */
 	
-	status_code getStatus(void) const;
+	short getStatus(void) const;
 	bool isReady(void) const;
 
 /* ************************* SETTERS ************************* */
 
-	void setStatus(status_code code);
+	void setStatus(short code);
 	void setReady(bool b);
 	void setContentType(std::string const &type);
 	void setConnection(HTTPConnectionType type);
+	void setAllow(std::string const &allow);
+	void setLocation(std::string const &location);
 
 /* ************************* METHODS ************************* */
 
 	void clear(void);
+
+	void parseCGI(const std::string &res);
+
 	std::string toString(void);
+
 	HTTPResponse &gen_error_page(int const &status);
 	HTTPResponse &gen_autoindex(std::vector<struct dirent> const &files, \
-	std::string const &dir);
+	std::string const &dir, std::string const &uri_path);
+
 
 };
 

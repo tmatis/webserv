@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/18 23:30:34 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/22 12:55:32 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ bool HTTPHeader::isValid(void) const
 /* ************************* METHODS ************************* */
 
 // replace or add a header
-void HTTPHeader::addValue(std::string const &key, std::string const &value)
+void HTTPHeader::setValue(std::string const &key, std::string const &value)
 {
 	for (std::vector<std::pair<std::string, std::string> >::iterator
 			 it = _headers.begin();
@@ -84,6 +84,24 @@ void HTTPHeader::addValue(std::string const &key, std::string const &value)
 	_headers.push_back(std::make_pair(key, value));
 }
 
+void HTTPHeader::addValue(std::string const &key, std::string const &value)
+{
+	_headers.push_back(std::make_pair(key, value));
+}
+
+void HTTPHeader::delValue(std::string const &key)
+{
+	for (std::vector<std::pair<std::string, std::string> >::iterator
+			 it = _headers.begin();
+		 it != _headers.end(); ++it)
+	{
+		if (it->first == key)
+		{
+			_headers.erase(it);
+			return;
+		}
+	}
+}
 
 // parse line at format: key: value and return key
 

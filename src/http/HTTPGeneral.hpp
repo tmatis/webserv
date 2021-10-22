@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:12:37 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/18 20:40:28 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/22 12:55:21 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,5 +61,7 @@ public:
 	void clear(void);
 
 };
+
+std::pair<size_t, short> find_nl(std::string const &buffer);
 
 #endif
