@@ -288,8 +288,7 @@ std::string HTTPResponse::toString(void)
 
 	_header.setValue("Server", "Webserv");
 	_header.setValue("Date", getDate());
-	if (_body.size())
-		_header.setValue("Content-Length", itoa(_body.size()));
+	_header.setValue("Content-Length", itoa(_body.size()));
 	if (!_header.getValue("Content-Type"))
 		setContentType("text/html");
 	if (!_header.getValue("Connection"))
