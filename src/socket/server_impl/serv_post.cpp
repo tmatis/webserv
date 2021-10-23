@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 02:56:53 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 03:10:20 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ Server::_form_upload(Client& client)
 			// check that the server supports this content-type
 			if (!_is_mime_type_supported(*client.rules(), type))
 			{
-				client.files().clear();
+				_clear_previous_files(client);
 				_handle_error(client, UNSUPPORTED_MEDIA_TYPE);
 				return ;
 			}
@@ -131,7 +131,7 @@ Server::_form_upload(Client& client)
 			fpfd		= _create_file(filename, data, client.rules()->_upload_rights);
 			if (!fpfd) // file creation failed
 			{
-				client.files().clear();
+				_clear_previous_files(client);
 				_handle_error(client, INTERNAL_SERVER_ERROR);
 				return ;
 			}
@@ -226,4 +226,14 @@ Server::_create_file(const std::string& filename, const std::string& data, uint 
 
 	_files.push_back(new f_pollfd(filename, fd, POLLOUT, data));
 	return (_files.back());
+}
+
+void
+Server::_clear_previous_files(Client& client)
+{
+	for (std::vector<f_pollfd*>::iterator it = client.files().begin();
+			it != client.files().end();
+			it++)
+				remove((*it)->name.data());
+	client.files().clear();
 }
