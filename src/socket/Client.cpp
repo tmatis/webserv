@@ -15,7 +15,7 @@
 /*** F_POLLFD *****************************************************************/
 
 f_pollfd::f_pollfd(const std::string& filename, int fd, int event, const std::string& data)
-	: name(filename), data(data), done(false)
+	: name(filename), data(data)
 {
 	pfd.fd		= fd;
 	pfd.events	= event; // fd is read only

@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 00:56:30 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 20:47:46 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ typedef struct f_pollfd
 	std::string	name;
 	std::string	data;
 	pollfd		pfd;
-	bool		done;
 }		f_pollfd;
 
 typedef	enum e_client_state

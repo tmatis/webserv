@@ -100,6 +100,14 @@ Server::_form_upload(Client& client)
 	std::string	body = client.request().getBody();
 	std::string line;
 
+	/* create an array with filenames inside upload dir */
+	std::vector<std::string> files;
+	if (_list_directory(files, client.rules()->upload_path) == -1)
+	{
+		_handle_error(client, INTERNAL_SERVER_ERROR);
+		return ;
+	}
+
 	start = 0;
 	while (line != boundary_end)
 	{
@@ -124,6 +132,10 @@ Server::_form_upload(Client& client)
 			end			= body.find(boundary, start);		// find where next boundary is
 			data		= body.substr(start, end - start);	// copy data until next boundary
 			start		= end;								// continue parsing from that position
+
+			/* change filename if it already exists */
+			_check_existing_file(files, filename);
+			files.push_back(filename);
 
 			// create file on local filesystem
 			filename	= HTTPGeneral::append_paths(client.rules()->upload_path, filename);
@@ -235,4 +247,55 @@ Server::_clear_previous_files(Client& client)
 			++it)
 				remove((*it)->name.data());
 	client.files().clear();
+}
+
+int
+Server::_list_directory(std::vector<std::string>& files, const std::string& path)
+{
+	DIR*	dirptr;
+	dirent*	curr;
+
+	// open directory
+	if (!(dirptr = opendir(path.data())))
+	{
+		std::cerr << "server > cannot open directory \"" << path << "\": " << strerror(errno) << "\n";
+		return (-1);
+	}
+
+	errno = 0;
+	while ((curr = readdir(dirptr))) // read directory entries
+		files.push_back(curr->d_name);
+	closedir(dirptr);
+	if (errno) // readdir failed
+	{
+		std::cerr << "server > cannot read directory \"" << path << "\": " << strerror(errno) << "\n";
+		return (-1);
+	}
+	return (0);
+}
+
+void
+Server::_check_existing_file(std::vector<std::string>& files, std::string& filename)
+{
+	std::string							curr	= filename;
+	size_t								ext_pos	= filename.rfind('.');
+	int									n		= 0;
+	std::vector<std::string>::iterator	it		= files.begin();
+	std::stringstream					ss;
+
+	while (it != files.end())
+	{
+		if (*it == curr)
+		{
+			n++;
+			ss << n;
+			curr = filename;
+			curr.insert(ext_pos, " (" + ss.str() + ")");
+			ss.str("");
+			it = files.begin();
+		}
+		else
+			++it;
+	}
+	filename = curr;
 }
