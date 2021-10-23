@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HTTPResponse.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 20:01:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/19 15:23:54 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/23 20:27:27 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,9 +109,9 @@ public:
 
 	HTTPResponse &gen_error_page(int const &status);
 	HTTPResponse &gen_autoindex(std::vector<struct dirent> const &files, \
-	std::string const &dir, std::string const &uri_path);
-
-
+		std::string const &dir, std::string const &uri_path);
+	HTTPResponse &gen_upload_response(const std::string& uri_path, \
+		const std::vector<std::string>& files = std::vector<std::string>());
 };
 
 #endif

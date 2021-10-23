@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 01:04:10 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 20:34:16 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,15 +46,10 @@ Server::_create_response(Client& client)
 	std::stringstream	ss;
 
 	// Content-Type
-	if (client.files().size())
+	if (client.files().size() && response.getStatus() != CREATED)
 		_define_content_type(client, response);
 	else
 		response.getHeader().addValue("Content-Type", "text/html");
-
-
-	// Content-Length
-	ss << response.getBodySize();
-	headers.addValue("Content-Length", ss.str());		
 
 	// Connection (nginx behavior for error 400)
 	if (response.getStatus() == BAD_REQUEST || response.getStatus() == REQUEST_TIMEOUT)
@@ -88,11 +83,28 @@ Server::_create_response(Client& client)
 	{
 		std::string ref = _get_uri_reference(client.files().front()->name);
 		if (ref.length()) // new file can be referenced as an uri
+		{
+			std::vector<std::string> file_links;
+
+			file_links.push_back(ref);
+			for (std::vector<f_pollfd*>::iterator it = client.files().begin() + 1;
+					it != client.files().end();
+					it++)
+						file_links.push_back(_get_uri_reference((*it)->name));
+
+			response.gen_upload_response(client.request().getURI().getPath(), file_links);
 			headers.addValue("Location", ref); // add this uri reference to the response
+		}
+		else
+		{
+			response.gen_upload_response(client.request().getURI().getPath());
+			response.setStatus(OK);
+		}
 	}
 	
-	int fd = open("test.jpg", O_CREAT | O_WRONLY, client.rules()->_upload_rights);
-	write(fd, response.getBody().data(), response.getBody().length());
+	// Content-Length
+	ss << response.getBodySize();
+	headers.addValue("Content-Length", ss.str());
 
 	response.setHeader(headers);
 	response.setReady(true);

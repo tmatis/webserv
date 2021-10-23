@@ -417,3 +417,29 @@ std::string const &dir, std::string const &uri_path)
 	this->_status = static_cast<status_code>(200);
 	return (*this);
 }
+
+HTTPResponse &HTTPResponse::gen_upload_response(const std::string& uri_path, \
+		const std::vector<std::string>& files)
+{
+	_body.clear();
+	_body += "<html>\n<head><title>Upload succesful !</title></head>\n";
+	_body += "<body>\n<h1>File(s) uploaded succesfully</h1>";
+
+	// add links to uploaded files on server
+	std::vector<std::string>::const_iterator it = files.begin();
+	while (it != files.end())
+	{
+		_body += "<a href=\"" + *it + "\">";
+		_body += it->substr(it->rfind('/') + 1, std::string::npos);
+		_body += "</a></br>\n";
+		it++;
+	}
+
+	// link to previous page
+	_body += "<a href=\"" + uri_path + "\"> return to previous page </a>\n";
+	
+	// webserv signature
+	_body += "<hr><center>webserv du feu <img src=\"h";
+	_body += "ttps://i.imgur.com/z81h8VU.gif\"></center>\n</body>\n</html>\n";
+	return (*this);
+}
