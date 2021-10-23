@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_response.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 21:12:42 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 15:52:07 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,10 +102,6 @@ Server::_create_response(Client& client)
 		}
 	}
 	
-	// Content-Length
-	ss << response.getBodySize();
-	headers.addValue("Content-Length", ss.str());
-
 	response.setHeader(headers);
 	response.setReady(true);
 	client.rules(NULL);

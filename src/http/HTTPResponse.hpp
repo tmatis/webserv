@@ -69,6 +69,8 @@ private:
 	bool		_is_ready;
 	bool 		_header_parsed;
 	std::string _cgi_res_buffer;
+	size_t		_content_length_cgi;
+	bool		_content_length_cgi_set;
 	void _applyCGI(HTTPHeader &header);
 
 public:
@@ -103,7 +105,7 @@ public:
 
 	void clear(void);
 
-	void parseCGI(const std::string &res);
+	bool parseCGI(const std::string &res);
 
 	std::string toString(void);
 
