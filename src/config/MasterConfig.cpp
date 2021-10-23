@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/23 15:43:38 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/23 16:00:35 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ void		MasterConfig::construct(std::string const &config_path)
 		config_fd.seekg(0, config_fd.beg);
 		buffer = new char[length + 1];
 		config_fd.read(buffer, length);
-		buffer[length] = 0;
+		buffer[config_fd.gcount()] = 0;
 		config_str = buffer;
 		MasterConfig::remove_comments(config_str);
 		parsing_res = this->extract_key_value(config_str);
@@ -275,7 +275,7 @@ std::vector<std::string> const &values)
 		error_page.seekg(0, error_page.beg);
 		buffer = new char[i + 1];
 		error_page.read(buffer, i);
-		buffer[i] = 0;
+		buffer[error_page.gcount()] = 0;
 		i = 0;
 		std::istringstream(values[0]) >> i;
 		this->_error_pages[i] = buffer;
@@ -428,7 +428,7 @@ std::vector<std::string> const &values)
 		mime_types.seekg(0, mime_types.beg);
 		buffer = new char[i + 1];
 		mime_types.read(buffer, i);
-		buffer[i] = 0;
+		buffer[mime_types.gcount()] = 0;
 		i = 0;
 		tampon = buffer;
 		delete[] buffer;
