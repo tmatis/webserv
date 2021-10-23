@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 03:16:05 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 20:50:29 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,26 +199,30 @@ Server::send_response(Client& client)
 int
 Server::create_file_response(Client& client)
 {
-	std::string	file_content;
+	f_pollfd*	file;
 	char		buffer[BUFFER_SIZE];
 	int			bytes;
 
-	while ((bytes = read(client.files().front()->pfd.fd, buffer, BUFFER_SIZE)) > 0) // problem here to fix ! not protected with poll...
+	file	= client.files().front();
+	bytes	= read(file->pfd.fd, buffer, BUFFER_SIZE);
+	if (bytes > 0)
 	{
 		ft::random_access_iterator<char> iterator_begin(buffer);
 		ft::random_access_iterator<char> iterator_end(buffer + bytes);
-		file_content += std::string(iterator_begin, iterator_end); // load file content
+		file->data += std::string(iterator_begin, iterator_end); // load file content
 	}
-	if (bytes == -1)
+	else if (bytes == 0)
+	{
+		client.response().setBody(file->data);
+		_create_response(client);		
+	}
+	else
 	{
 		std::cerr << "server > reading file requested failed: " << strerror(errno) << "\n";
 		client.files().clear();
 		_handle_error(client, INTERNAL_SERVER_ERROR);
 		return (-1);
 	}
-
-	client.response().setBody(file_content);
-	_create_response(client);
 	return (0);
 }
 
@@ -234,7 +238,6 @@ Server::write_uploaded_file(Client& client, int index)
 		return (-1);
 	}
 	
-	fpfd->done				= true;
 	fpfd->pfd.events		= 0;
 	client.files_number()	-= 1;
 	
