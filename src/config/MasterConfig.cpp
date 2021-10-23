@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/20 14:50:45 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 15:43:38 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,10 @@
 # include "MasterConfig.hpp"
 # include "Config.hpp"
 
-MasterConfig::MasterConfig() : _flags(0), _autoindex(false), \
-_uploadfiles(false), _max_simultaneous_clients(-1), _user(), _error_log(), \
-_default_mime("application/octet-stream"), _mime_types(), \
+MasterConfig::MasterConfig() : _flags(0), _autoindex(false),
+_uploadfiles(false), _max_simultaneous_clients(-1), _user(), _error_log(),
+_old_cerr(),
+_default_mime("application/octet-stream"), _mime_types(),
 _index_paths(), _error_pages(), _upload_rights(S_IRUSR | S_IWUSR)
 {
 	this->_methods_supported.insert("GET");
@@ -37,6 +38,7 @@ MasterConfig::~MasterConfig()
 
 MasterConfig	&MasterConfig::operator=(MasterConfig const &rhs)
 {
+	this->_flags = rhs._flags;
 	this->_autoindex = rhs._autoindex;
 	this->_uploadfiles = rhs._uploadfiles;
 	this->_max_simultaneous_clients = rhs._max_simultaneous_clients;
@@ -47,6 +49,7 @@ MasterConfig	&MasterConfig::operator=(MasterConfig const &rhs)
 	this->_error_pages = rhs._error_pages;
 	this->_methods_supported = rhs._methods_supported;
 	this->_upload_rights = rhs._upload_rights;
+	this->_old_cerr = rhs._old_cerr;
 	return (*this);
 }
 
@@ -94,10 +97,10 @@ void		MasterConfig::construct(std::string const &config_path)
 	std::ifstream										config_fd;
 	std::string											config_str;
 	std::pair<std::string, std::string>					parsing_res;
-	int													length = 0;
 	char												*buffer = NULL;
 
 	try {
+		size_t length = 0;
 		config_fd.open(config_path.c_str(), std::ifstream::in);
 		if (!config_fd.is_open())
 			throw std::invalid_argument("can't open the provided file");
@@ -152,15 +155,14 @@ MasterConfig::extract_key_value(std::string &line)
 {
 	std::pair<std::string, std::string>		ret;
 	bool									braces = false;
-	int										find_res;
 	unsigned char							count = 0;
 
 	if (line.empty())
 		return (ret);
 	while (count < 4)
 	{
-		unsigned int i = 0;
-		find_res = 0;
+		size_t i = 0;
+		int	find_res = 0;
 		if (count == 3 && line[i] == '{')
 			braces = true;
 		for ( ; i < line.size() ; i++)
@@ -408,7 +410,6 @@ std::vector<std::string> const &values)
 {
 	std::ifstream						mime_types;
 	std::map<std::string, std::string>	new_mime_tab;
-	std::pair<std::string, std::string>	pair;
 	char								*buffer;
 	std::string							tampon = var_pair.second;
 	std::string							tampon2;
@@ -460,7 +461,6 @@ std::string		MasterConfig::find_mime_type(std::string const &content, bool is_fi
 {
 	std::string											extension;
 	std::map<std::string, std::string>::const_iterator	it;
-	unsigned int										i = 0;
 
 	if (is_filename && content.find('.') != std::string::npos)
 	{
@@ -471,6 +471,7 @@ std::string		MasterConfig::find_mime_type(std::string const &content, bool is_fi
 	}
 	if (!is_filename)
 	{
+		size_t i;
 		for (i = 0 ; i < content.size() ; i++)
 			if (!std::isprint(content[i]) && !std::isspace(content[i]))
 				break ;
@@ -499,7 +500,7 @@ std::vector<std::string> const &values)
 int	\
 MasterConfig::permission_flags(int rights)
 {
-	int	arr_rights[3]	= {
+	int	const arr_rights[3]	= {
 		rights / 100,			// user
 		(rights % 100) / 10,	// group
 		rights % 10				// other
