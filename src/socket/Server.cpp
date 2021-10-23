@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 20:50:29 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 21:13:11 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,6 +233,7 @@ Server::write_uploaded_file(Client& client, int index)
 
 	if (write(fpfd->pfd.fd, fpfd->data.c_str(), fpfd->data.length()) < 0)
 	{
+		_clear_previous_files(client); // delete all files created
 		std::cerr << "server > cannot write uploaded file: " << strerror(errno) << "\n";
 		_handle_error(client, INTERNAL_SERVER_ERROR);
 		return (-1);

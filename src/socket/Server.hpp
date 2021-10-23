@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 03:08:14 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 21:52:29 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,8 @@ class Server
 		std::string		_get_next_line(const std::string& src, size_t* pos);
 		f_pollfd*		_create_file(const std::string& filename, const std::string& data, uint mode);
 		void			_clear_previous_files(Client& client);
-
+		int				_list_directory(std::vector<std::string>& files, const std::string& path);
+		void			_check_existing_file(std::vector<std::string>& files, std::string& filename);
 
 		/* OTHER ============================================================ */
 		/*** CGI **************************************************************/

@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 20:34:16 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 21:12:42 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ Server::_create_response(Client& client)
 			file_links.push_back(ref);
 			for (std::vector<f_pollfd*>::iterator it = client.files().begin() + 1;
 					it != client.files().end();
-					it++)
+					++it)
 						file_links.push_back(_get_uri_reference((*it)->name));
 
 			response.gen_upload_response(client.request().getURI().getPath(), file_links);
