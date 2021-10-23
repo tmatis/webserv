@@ -436,7 +436,7 @@ HTTPResponse &HTTPResponse::gen_upload_response(const std::string& uri_path, \
 	}
 
 	// link to previous page
-	_body += "<a href=\"" + uri_path + "\"> return to previous page </a>\n";
+	_body += "<hr><a href=\"" + uri_path + "\"> return to previous page </a>\n";
 	
 	// webserv signature
 	_body += "<hr><center>webserv du feu <img src=\"h";

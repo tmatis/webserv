@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 22:24:24 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 22:39:36 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,6 +136,7 @@ Server::_form_upload(Client& client)
 
 			/* change filename if it already exists */
 			_check_existing_file(files, filename);
+			files.push_back(filename);
 
 			// create file on local filesystem
 			filename	= HTTPGeneral::append_paths(client.rules()->upload_path, filename);
