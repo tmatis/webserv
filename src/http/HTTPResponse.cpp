@@ -287,22 +287,23 @@ bool HTTPResponse::parseCGI(std::string const &str)
 	}
 	if (_header_parsed)
 	{
+		bool return_value = false;
 		// if we have a content length, we need to read the body until we reach it
 		if (_content_length_cgi_set) 
 		{
 			if (_cgi_res_buffer.size() + _body.size() < _content_length_cgi)
 				_body += _cgi_res_buffer;
 			else
+			{
 				_body += _cgi_res_buffer.substr(0, _content_length_cgi - _body.size());
-			_cgi_res_buffer.clear();
+				return_value = true;
+			}
 		}
 		// if we don't have a content length, we need to read the body until we reach the end
 		else
-		{
 			_body += _cgi_res_buffer;
-			_cgi_res_buffer.clear();
-			return (true);
-		}
+		_cgi_res_buffer.clear();
+		return (return_value);
 	}
 	return (false);
 }
