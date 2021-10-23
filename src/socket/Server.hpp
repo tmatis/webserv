@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 18:29:19 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 02:55:34 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 # include "../http/HTTPURI.hpp"
 # include "../config/Route.hpp"
 
-# define SERVER_TIMEOUT 15.0
+# define SERVER_TIMEOUT 15.0 // seconds
 
 class Server
 {
@@ -45,7 +45,7 @@ class Server
 		int		handle_request(Client& client);
 		void	send_response(Client& client);
 		int		create_file_response(Client& client);
-		int		write_uploaded_file(Client& client);
+		int		write_uploaded_file(Client& client, int index);
 
 		// getters
 		std::vector<Client>&			get_clients(void);
@@ -68,6 +68,7 @@ class Server
 		int				_handle_error(Client& client, int status, bool autogen = false);
 		void			_create_response(Client& client);
 		void			_define_content_type(Client& client, HTTPResponse& response);
+		std::string		_get_uri_reference(const std::string& filename);
 
 		/* METHOD HANDLERS ================================================== */
 		int				_handle_get(Client &client, const Route& rules, const HTTPURI& uri);
@@ -79,8 +80,14 @@ class Server
 		bool			_file_already_requested(Client& client, std::string const &filepath);
 		/*** POST *************************************************************/
 		bool			_handle_upload(Client& client, const Route& rules);
+		void			_raw_upload(Client& client, const Route& rules, const std::string& mime);
+		void			_form_upload(Client& client);
+		std::string		_get_boundary(const std::string* content_type);
+		std::string		_get_file_info(const std::string& body, std::string& type, size_t *start);
+		std::string		_get_next_line(const std::string& src, size_t* pos);
 		f_pollfd*		_create_file(const std::string& filename, const std::string& data, uint mode);
-		std::string		_get_uri_reference(const std::string& filename);
+		bool			_check_supported_type(Client& client);
+
 
 		/* OTHER ============================================================ */
 		/*** CGI **************************************************************/

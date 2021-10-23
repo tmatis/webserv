@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 15:42:41 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 00:56:30 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ typedef struct f_pollfd
 	std::string	name;
 	std::string	data;
 	pollfd		pfd;
+	bool		done;
 }		f_pollfd;
 
 typedef	enum e_client_state
@@ -59,11 +60,13 @@ class Client : public TCP_Socket
 		const Route*					rules(void) const;
 		HTTPRequest&					request(void);
 		HTTPResponse&					response(void);
-		std::vector<const f_pollfd*>&	files(void);
+		std::vector<f_pollfd*>&			files(void);
+		int&							files_number(void);
 
 		// setters
 		void							state(client_state st);
 		void							rules(const Route* rules);
+		void							add_file(f_pollfd* fpfd);
 		void							clear(void);
 
 		int								write_trials;
@@ -74,8 +77,9 @@ class Client : public TCP_Socket
 		client_state					_state;
 		HTTPRequest						_request;
 		HTTPResponse					_response;
-		std::vector<const f_pollfd*>	_files;
+		std::vector<f_pollfd*>			_files;
 		const Route*					_route;
+		int								_n_files;
 };
 
 #endif

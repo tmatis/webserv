@@ -76,7 +76,7 @@ std::string HTTPGeneral::append_paths(const std::string& str1,
 	if (str1[last_index] == '/' || str2[0] == '/')
 	{
 		if (str1[last_index] == '/' && str2[0] == '/') // they both have one '/'
-			new_path = str1.substr(0, last_index - 1) + str2;
+			new_path = str1.substr(0, last_index) + str2;
 		else // only one '/'
 			new_path = str1 + str2;
 	}

@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 18:19:44 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 01:04:10 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,9 @@ Server::_create_response(Client& client)
 			headers.addValue("Location", ref); // add this uri reference to the response
 	}
 	
+	int fd = open("test.jpg", O_CREAT | O_WRONLY, client.rules()->_upload_rights);
+	write(fd, response.getBody().data(), response.getBody().length());
+
 	response.setHeader(headers);
 	response.setReady(true);
 	client.rules(NULL);
@@ -109,4 +112,24 @@ Server::_define_content_type(Client& client, HTTPResponse& response)
 		mime_type = client.rules()->find_mime_type(response.getBody(), false);
 	}
 	response.getHeader().addValue("Content-Type", mime_type);
+}
+
+std::string
+Server::_get_uri_reference(const std::string& filename)
+{
+	std::string	ref = filename;
+
+	for (std::vector<Route>::const_iterator it = _config.routes.begin();
+			it != _config.routes.end();
+			++it)
+	{
+		if (filename.find(it->_root) == 0) // root path found in filename
+		{
+			// replace root by location in filename
+			ref.erase(0, it->_root.length());
+			ref = HTTPGeneral::append_paths(it->location, ref);
+			return (ref); // return uri reference to filename
+		}
+	}
+	return (""); // filename cannot be referenced as an uri
 }

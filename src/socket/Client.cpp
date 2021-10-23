@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 16:02:58 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 00:27:56 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 /*** F_POLLFD *****************************************************************/
 
 f_pollfd::f_pollfd(const std::string& filename, int fd, int event, const std::string& data)
-	: name(filename), data(data)
+	: name(filename), data(data), done(false)
 {
 	pfd.fd		= fd;
 	pfd.events	= event; // fd is read only
@@ -29,7 +29,7 @@ f_pollfd::operator pollfd() const
 /*** CLIENT *******************************************************************/
 
 Client::Client(void) :
-	write_trials(0), _state(PENDING_REQUEST), _files(), _route(NULL) {}
+	write_trials(0), _state(PENDING_REQUEST), _files(), _route(NULL), _n_files(0) {}
 
 int
 Client::connect(int host_fd)
@@ -82,10 +82,16 @@ Client::response(void)
 	return (_response);
 }
 
-std::vector<const f_pollfd*>&
+std::vector<f_pollfd*>&
 Client::files(void)
 {
 	return (_files);
+}
+
+int&
+Client::files_number(void)
+{
+	return (_n_files);
 }
 
 /*** SETTERS ******************************************************************/
@@ -103,10 +109,20 @@ Client::rules(const Route* rules)
 }
 
 void
+Client::add_file(f_pollfd* fpfd)
+{
+	_files.push_back(fpfd);
+	_n_files++;
+}
+
+void
 Client::clear(void)
 {
 	write_trials	= 0;
 	_state			= PENDING_REQUEST;
+	_route			= NULL;
+	_n_files		= 0;
+	_files.clear();
 	_response.clear();
 	_request.clear();
 }

@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 18:30:16 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 02:56:53 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,38 +43,172 @@ Server::_handle_upload(Client& client, const Route& rules)
 	{
 		if (content_type->find("multipart/form-data") == 0)
 		{
-			return (false);
+			// parse body to create one or multiple files
+			_form_upload(client);
+			return (true);
 		}
 		else if (*content_type == "application/x-www-form-urlencoded")
 			return (false); // this content-type cannot be used for file transfer
 		else
 			mime_type = *content_type;
 	}
+	
+	// create a file with raw data from body
+	_raw_upload(client, rules, mime_type);
+	return (true);
+}
+
+void
+Server::_raw_upload(Client& client, const Route& rules, const std::string& mime)
+{
+	std::string	filename;
+	f_pollfd*	newfile;
 
 	// check if mime type is accepted for upload
-	if (!_is_mime_type_supported(rules, mime_type))
+	if (!_is_mime_type_supported(rules, mime))
 	{
 		_handle_error(client, UNSUPPORTED_MEDIA_TYPE);
-		return (true);
+		return ;
 	}
 
-	std::string filename = client.request().getURI().getPath();
-
 	// build file path
-	filename.erase(0, rules.location.length());			   // remove location prefix
-	filename = HTTPGeneral::append_paths(rules.upload_path, filename); // filename = upload_path + filename
+	filename = client.request().getURI().getPath();
+	filename.erase(0, rules.location.length());			   				// remove location prefix
+	filename = HTTPGeneral::append_paths(rules.upload_path, filename);	// filename = upload_path + filename
 
 	// create file
-	f_pollfd*	newfile = _create_file(filename, client.request().getBody(), rules._upload_rights);
+	newfile = _create_file(filename, client.request().getBody(), rules._upload_rights);
 	if (!newfile) // an error occured when trying to open file (see error logs for more details)
 	{
 		_handle_error(client, INTERNAL_SERVER_ERROR);
-		return (true);
+		return ;
+	}
+
+	client.add_file(newfile);
+	client.state(IDLE);
+}
+
+void
+Server::_form_upload(Client& client)
+{
+	// extract boundary string from Content-Type header
+	std::string boundary		= _get_boundary(client.request().getHeader().getValue("Content-Type"));
+	std::string boundary_end	= boundary + "--";
+
+	size_t		start;	// current position in body
+	size_t		end;	// index of next boundary
+
+	std::string	body = client.request().getBody();
+	std::string line;
+
+	start = 0;
+	while (line != boundary_end)
+	{
+		line =  _get_next_line(body, &start);
+		if (line == boundary)
+		{
+			std::string	filename;
+			std::string	type;
+			std::string	data;
+			f_pollfd*	fpfd;
+
+			filename	= _get_file_info(body, type, &start);
+
+			// check that the server supports this content-type
+			if (!_is_mime_type_supported(*client.rules(), type))
+			{
+				client.files().clear();
+				_handle_error(client, UNSUPPORTED_MEDIA_TYPE);
+				return ;
+			}
+
+			end			= body.find(boundary, start);		// find where next boundary is
+			data		= body.substr(start, end - start);	// copy data until next boundary
+			start		= end;								// continue parsing from that position
+
+			// create file on local filesystem
+			filename	= HTTPGeneral::append_paths(client.rules()->upload_path, filename);
+			fpfd		= _create_file(filename, data, client.rules()->_upload_rights);
+			if (!fpfd) // file creation failed
+			{
+				client.files().clear();
+				_handle_error(client, INTERNAL_SERVER_ERROR);
+				return ;
+			}
+			client.add_file(fpfd);
+		}
+	}
+	client.state(IDLE);
+}
+
+std::string
+Server::_get_boundary(const std::string* content_type)
+{
+	size_t		start		= content_type->find("boundary=") + 9;
+	size_t		end			= content_type->find(';', start);
+	std::string boundary;
+	
+	if (end == std::string::npos)
+		boundary = content_type->substr(start, end);
+	else
+		boundary = content_type->substr(start, end - start);
+
+	// boundaries start with two '-'
+	boundary.insert(boundary.begin(), 2, '-');
+	return (boundary);
+}
+
+std::string
+Server::_get_file_info(const std::string& body, std::string& type, size_t *start)
+{
+	std::string line;
+	std::string	filename;
+	size_t		pos;
+	
+	line = _get_next_line(body, start);
+	while (line.size() > 1)
+	{
+		if (line.find("Content-Disposition: ") == 0) // content disposition
+		{
+			// extract filename
+			pos = line.find("filename");
+			if (pos != std::string::npos)
+			{
+				filename = line.substr(pos + 10, std::string::npos);
+				filename.erase(filename.length() - 1, 1); // erase '"' at the end of filename
+			}
+			else
+				filename = "unknown";
+		}
+		else if (line.find("Content-Type: ") == 0) // content type
+			type = line.substr(14, line.length() - 14);
+		line = _get_next_line(body, start);
 	}
 	
-	client.files().push_back(newfile);
-	client.state(IDLE);
-	return (true);
+	// set a default type if none
+	if (!type.size())
+		type = "application/octet-stream";
+
+	return (filename);
+}
+
+std::string
+Server::_get_next_line(const std::string& src, size_t* pos)
+{
+	size_t		end = src.find("\r\n", *pos);
+	std::string	line;
+
+	if (end == std::string::npos)
+	{
+		line = src.substr(*pos, end);
+		*pos = end;
+	}
+	else
+	{
+		line = src.substr(*pos, end - *pos);
+		*pos = end + 2;
+	}
+	return (line);
 }
 
 f_pollfd*
@@ -92,24 +226,4 @@ Server::_create_file(const std::string& filename, const std::string& data, uint 
 
 	_files.push_back(new f_pollfd(filename, fd, POLLOUT, data));
 	return (_files.back());
-}
-
-std::string
-Server::_get_uri_reference(const std::string& filename)
-{
-	std::string	ref = filename;
-
-	for (std::vector<Route>::const_iterator it = _config.routes.begin();
-			it != _config.routes.end();
-			++it)
-	{
-		if (filename.find(it->_root) == 0) // root path found in filename
-		{
-			// replace root by location in filename
-			ref.erase(0, it->_root.length());
-			ref = HTTPGeneral::append_paths(it->location, ref);
-			return (ref); // return uri reference to filename
-		}
-	}
-	return (""); // filename cannot be referenced as an uri
 }

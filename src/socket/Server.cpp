@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 16:51:48 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 00:57:56 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,8 +204,9 @@ Server::create_file_response(Client& client)
 
 	while ((bytes = read(client.files().front()->pfd.fd, buffer, BUFFER_SIZE)) > 0)
 	{
-		buffer[bytes] = '\0';
-		file_content += buffer; // load file content
+		std::string::iterator it_begin(buffer);
+		std::string::iterator it_end(buffer + bytes);
+		file_content.insert(file_content.end(), it_begin, it_end);
 	}
 	if (bytes == -1)
 	{
@@ -217,14 +218,13 @@ Server::create_file_response(Client& client)
 
 	client.response().setBody(file_content);
 	_create_response(client);
-	client.files().clear();
 	return (0);
 }
 
 int
-Server::write_uploaded_file(Client& client)
+Server::write_uploaded_file(Client& client, int index)
 {
-	const f_pollfd*	fpfd = client.files().front(); 
+	f_pollfd*	fpfd = client.files()[index]; 
 
 	if (write(fpfd->pfd.fd, fpfd->data.c_str(), fpfd->data.length()) < 0)
 	{
@@ -233,9 +233,15 @@ Server::write_uploaded_file(Client& client)
 		return (-1);
 	}
 	
-	client.response().setStatus(CREATED); // upload successful
-	_create_response(client);
-	client.files().erase(client.files().begin());
+	fpfd->done				= true;
+	fpfd->pfd.events		= 0;
+	client.files_number()	-= 1;
+	
+	if (client.files_number() == 0)
+	{
+		client.response().setStatus(CREATED); // upload successful
+		_create_response(client);
+	}
 	return (0);
 }
 
