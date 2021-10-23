@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:12:37 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/20 18:23:38 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 03:13:33 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,5 +64,7 @@ public:
 		const std::string& str2);
 
 };
+
+std::pair<size_t, short> find_nl(std::string const &buffer);
 
 #endif

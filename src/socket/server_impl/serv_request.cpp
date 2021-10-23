@@ -6,11 +6,13 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:04 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 20:04:32 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 03:16:30 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Server.hpp"
+#include <iterator>
+#include "../../utils/random_access_iterator.hpp"
 
 bool
 Server::_read_request(Client &client)
@@ -28,11 +30,8 @@ Server::_read_request(Client &client)
 		client.state(DISCONNECTED);
 	else
 	{
-		buffer[readBytes] = '\0';
-		std::cout << buffer << "\n";
-	
-		std::string::iterator iterator_begin(buffer);
-		std::string::iterator iterator_end(buffer + readBytes);
+		ft::random_access_iterator<char> iterator_begin(buffer);
+		ft::random_access_iterator<char> iterator_end(buffer + readBytes);
 		client.request().parseChunk(std::string(iterator_begin, iterator_end));
 	}
 	return (client.request().isReady());

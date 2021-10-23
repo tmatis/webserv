@@ -29,3 +29,56 @@ car_test test_response(void)
 	expected_toString += "Hello World!";
 	car_assert(response.toString() == expected_toString);
 }
+
+car_test cgi_response_parsing(void)
+{
+	HTTPResponse cgi_res;
+
+	cgi_res.parseCGI("Content-type: text/html\r\n");
+	cgi_res.parseCGI("\r\n");
+	cgi_res.parseCGI("hello\r\n");
+
+
+	car_assert_cmp(cgi_res.getStatus(), 200);
+	car_assert_cmp(*cgi_res.getHeader().getValue("Content-type"), "text/html");
+	car_assert_cmp(cgi_res.getBody(), "hello\r\n");
+
+	cgi_res.clear();
+
+	cgi_res.parseCGI("Content-type: text/html\r\n\r\nhello\r\n");
+
+	car_assert_cmp(cgi_res.getStatus(), 200);
+	car_assert_cmp(*cgi_res.getHeader().getValue("Content-type"), "text/html");
+	car_assert_cmp(cgi_res.getBody(), "hello\r\n");
+}
+
+car_test cgi_response_parsing_weird(void)
+{
+	HTTPResponse cgi_res;
+
+	cgi_res.parseCGI("hello\r\n");
+
+	car_assert_cmp(cgi_res.getStatus(), 200);
+	car_assert_cmp(cgi_res.getBody(), "hello\r\n");
+	
+	cgi_res.clear();
+
+	cgi_res.parseCGI("");
+
+	car_assert_cmp(cgi_res.getStatus(), 200);
+	car_assert_cmp(cgi_res.getBody(), "");
+}
+
+car_test cgi_response_with_status(void)
+{
+	HTTPResponse cgi_res;
+
+	cgi_res.parseCGI("Content-type: text/html\r\n");
+	cgi_res.parseCGI("Status: 404 Not found\r\n");
+	cgi_res.parseCGI("\r\n");
+	cgi_res.parseCGI("hello\r\n");
+
+	car_assert_cmp(cgi_res.getStatus(), 404);
+	car_assert_cmp(*cgi_res.getHeader().getValue("Content-type"), "text/html");
+
+}

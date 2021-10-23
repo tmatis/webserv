@@ -6,11 +6,12 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 00:57:56 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 03:16:05 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "../utils/random_access_iterator.hpp"
 
 const int Server::timeout = REQUEST_TIMEOUT;
 
@@ -202,11 +203,11 @@ Server::create_file_response(Client& client)
 	char		buffer[BUFFER_SIZE];
 	int			bytes;
 
-	while ((bytes = read(client.files().front()->pfd.fd, buffer, BUFFER_SIZE)) > 0)
+	while ((bytes = read(client.files().front()->pfd.fd, buffer, BUFFER_SIZE)) > 0) // problem here to fix ! not protected with poll...
 	{
-		std::string::iterator it_begin(buffer);
-		std::string::iterator it_end(buffer + bytes);
-		file_content.insert(file_content.end(), it_begin, it_end);
+		ft::random_access_iterator<char> iterator_begin(buffer);
+		ft::random_access_iterator<char> iterator_end(buffer + bytes);
+		file_content += std::string(iterator_begin, iterator_end); // load file content
 	}
 	if (bytes == -1)
 	{

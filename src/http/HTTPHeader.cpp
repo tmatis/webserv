@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/18 20:44:17 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/19 15:10:00 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,20 @@ void HTTPHeader::addValue(std::string const &key, std::string const &value)
 	_headers.push_back(std::make_pair(key, value));
 }
 
+void HTTPHeader::delValue(std::string const &key)
+{
+	for (std::vector<std::pair<std::string, std::string> >::iterator
+			 it = _headers.begin();
+		 it != _headers.end(); ++it)
+	{
+		if (it->first == key)
+		{
+			_headers.erase(it);
+			return;
+		}
+	}
+}
+
 // parse line at format: key: value and return key
 
 std::pair<std::string, std::string > const *HTTPHeader::parseLine(std::string line)
@@ -107,7 +121,7 @@ std::pair<std::string, std::string > const *HTTPHeader::parseLine(std::string li
 		value.erase(value.size() - 1, 1);
 	if (value.empty() || title.empty())
 		_is_valid = false;
-	this->setValue(title, value);
+	this->addValue(title, value);
 	return (&_headers.back());
 }
 
