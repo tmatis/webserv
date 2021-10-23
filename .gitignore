@@ -12,3 +12,5 @@ vscode/
 www
 *.cnf
 *.log
+supported.mime
+webserv.cnf

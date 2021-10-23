@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:43 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 04:06:01 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/20 18:30:39 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,8 @@ Server::_handle_delete(Client& client, const Route& rules, const HTTPURI& uri)
 	std::string path = uri.getPath();
 
 	// build path from root dir and uri path
-	path.erase(0, rules.location.length());		// location/path/to/file -> /path/to/file
-	path = _append_paths(rules._root, path);	// root/path/to/file
+	path.erase(0, rules.location.length());					// location/path/to/file -> /path/to/file
+	path = HTTPGeneral::append_paths(rules._root, path);	// root/path/to/file
 
 	if (remove(path.data()) == -1)
 	{

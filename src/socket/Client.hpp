@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 23:22:49 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 00:56:30 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define CLIENT_HPP
 
 # include <poll.h>
+# include <ctime>
 
 # include "TCP_Socket.hpp"
 # include "../http/HTTPRequest.hpp"
@@ -32,6 +33,7 @@ typedef struct f_pollfd
 	std::string	name;
 	std::string	data;
 	pollfd		pfd;
+	bool		done;
 }		f_pollfd;
 
 typedef	enum e_client_state
@@ -50,31 +52,34 @@ class Client : public TCP_Socket
 	
 		Client(void);
 		
-		int				connect(int host_fd);
-		operator		pollfd() const;
+		int								connect(int host_fd);
+		operator						pollfd() const;
 
 		// getters
-		client_state	state(void) const;
-		HTTPRequest&	request(void);
-		HTTPResponse&	response(void);
-		const f_pollfd*	file(void) const;
-		const Route*	rules(void) const;
+		client_state					state(void) const;
+		const Route*					rules(void) const;
+		HTTPRequest&					request(void);
+		HTTPResponse&					response(void);
+		std::vector<f_pollfd*>&			files(void);
+		int&							files_number(void);
 
 		// setters
-		void			state(client_state st);
-		void			file(const f_pollfd* f_pfd);
-		void			rules(const Route* rules);
-		void			clear(void);
+		void							state(client_state st);
+		void							rules(const Route* rules);
+		void							add_file(f_pollfd* fpfd);
+		void							clear(void);
 
-		int				write_trials;
+		int								write_trials;
+		std::time_t						last_request;
 
 	private:
 
-		client_state	_state;
-		HTTPRequest		_request;
-		HTTPResponse	_response;
-		const f_pollfd*	_file;
-		const Route*	_route;
+		client_state					_state;
+		HTTPRequest						_request;
+		HTTPResponse					_response;
+		std::vector<f_pollfd*>			_files;
+		const Route*					_route;
+		int								_n_files;
 };
 
 #endif

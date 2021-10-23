@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 23:36:24 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/22 18:50:43 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,11 +131,15 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 
 	if (client.state() == IDLE) // client has requested a file
 	{
-		revent	= pc.get_raw_revents(client.file()->pfd.fd);
-		if (revent & POLLIN) // file is ready for reading
-			host->create_file_response(client);
-		else if (revent & POLLOUT)
-			host->write_uploaded_file(client);
+		for (size_t i = 0; i < client.files().size(); i++)
+		{
+			revent = pc.get_raw_revents(client.files()[i]->pfd.fd);
+			
+			if (revent & POLLIN) // file is ready for reading
+				host->create_file_response(client);
+			else if (revent & POLLOUT)
+				host->write_uploaded_file(client, i);
+		}
 	}
 
 	return (0);

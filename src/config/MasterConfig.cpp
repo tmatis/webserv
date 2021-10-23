@@ -3,12 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/18 03:17:38 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/20 14:50:45 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+# include <fcntl.h>
 
 # include "MasterConfig.hpp"
 # include "Config.hpp"
@@ -16,7 +18,7 @@
 MasterConfig::MasterConfig() : _flags(0), _autoindex(false), \
 _uploadfiles(false), _max_simultaneous_clients(-1), _user(), _error_log(), \
 _default_mime("application/octet-stream"), _mime_types(), \
-_index_paths(), _error_pages(), _upload_rights(600)
+_index_paths(), _error_pages(), _upload_rights(S_IRUSR | S_IWUSR)
 {
 	this->_methods_supported.insert("GET");
 	this->_methods_supported.insert("DELETE");
@@ -444,19 +446,21 @@ std::vector<std::string> const &values)
 					"\' (continued)" << std::endl;
 				continue ;
 			}
-			new_mime_tab[tampon2.substr(0, tampon2.find(' '))] = tampon2.erase(0, tampon2.find(' ') + 1);
+			std::string tmp = tampon2.substr(0, tampon2.find(' '));
+			new_mime_tab[tmp] = tampon2.erase(0, tampon2.find(' ') + 1);
 		}
+		this->_mime_types = new_mime_tab;
 	}
 	else
 		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
 		"directive needs a path (ignored)" << std::endl;
 }
 
-std::string		MasterConfig::find_mime_type(std::string const &content, bool is_filename)
+std::string		MasterConfig::find_mime_type(std::string const &content, bool is_filename) const
 {
-	std::string										extension;
-	std::map<std::string, std::string>::iterator	it;
-	unsigned int									i = 0;
+	std::string											extension;
+	std::map<std::string, std::string>::const_iterator	it;
+	unsigned int										i = 0;
 
 	if (is_filename && content.find('.') != std::string::npos)
 	{
@@ -483,8 +487,41 @@ std::vector<std::string> const &values)
 	(void)var_pair;
 	if (values.size() == 1 && MasterConfig::is_there_only_digits(values[0]) \
 	&& values[0].size() == 3)
-		std::istringstream(values[0]) >> this->_upload_rights;
+	{
+		std::istringstream(values[0]) >> this->_upload_rights;		// integer value (ex: 753)
+		this->_upload_rights = permission_flags(_upload_rights);	// flags (ex: 111 110 011)
+	}
 	else
 		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
 		"directive must be a 3-digits positive number (ignored)" << std::endl;
+}
+
+int	\
+MasterConfig::permission_flags(int rights)
+{
+	int	arr_rights[3]	= {
+		rights / 100,			// user
+		(rights % 100) / 10,	// group
+		rights % 10				// other
+	};
+	int rflags			= 0;
+	int	offset			= 6;
+
+	for (int i = 0; i < 3; i++)
+	{
+		// read
+		if (arr_rights[i] & (1 << 2))
+			rflags = rflags | (1 << (offset + 2));
+		
+		// write
+		if (arr_rights[i] & (1 << 1))
+			rflags = rflags | (1 << (offset + 1));
+		
+		// exec
+		if (arr_rights[i] & 1)
+			rflags = rflags | (1 << offset);		
+
+		offset -= 3;
+	}
+	return (rflags);
 }

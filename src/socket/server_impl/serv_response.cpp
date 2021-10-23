@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_response.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 21:02:38 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/23 01:04:10 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,8 @@ Server::_handle_error(Client& client, int status, bool autogen)
 		if (errpage != _config._error_pages.end()) // page exists
 		{
 			client.response().setStatus((status_code)status);
-			_create_response(client, &errpage->second);
+			client.response().setBody(errpage->second);
+			_create_response(client);
 			return (0);
 		}
 		else // doesn't exist
@@ -38,29 +39,41 @@ Server::_handle_error(Client& client, int status, bool autogen)
 }
 
 void
-Server::_create_response(Client& client, const std::string *body)
+Server::_create_response(Client& client)
 {
-	HTTPResponse&		response = client.response();
+	HTTPResponse&		response	= client.response();
+	HTTPHeader&			headers		= response.getHeader();
 	std::stringstream	ss;
-	
-	if (body)
-		response.setBody(*body);
 
-	// set headers
-	// response.setContentType("text/html");					// default Content-Type set of not in response.toString()
-	//headers.setValue("Content-Length", ss.str());			// Content-Length calculated in response.toString()
-	if (response.getStatus() == BAD_REQUEST)
-		response.setConnection(HTTP_CONNECTION_CLOSE);			// Connection (nginx behavior)
-	else if (response.getStatus() == METHOD_NOT_ALLOWED)	// Allow (only for 405 errors)
+	// Content-Type
+	if (client.files().size())
+		_define_content_type(client, response);
+	else
+		response.getHeader().addValue("Content-Type", "text/html");
+
+
+	// Content-Length
+	ss << response.getBodySize();
+	headers.addValue("Content-Length", ss.str());		
+
+	// Connection (nginx behavior for error 400)
+	if (response.getStatus() == BAD_REQUEST || response.getStatus() == REQUEST_TIMEOUT)
+		headers.addValue("Connection", "close");
+	// Allow (only for error 405)
+	else if (response.getStatus() == METHOD_NOT_ALLOWED)	
 	{
-		std::string	allow_header_val;
-
-		for (std::set<std::string>::iterator it = client.rules()->methods.begin();
-			it != client.rules()->methods.end();
-			++it)
-				allow_header_val += *it;
-		response.setAllow(allow_header_val);
+		std::set<std::string>::iterator	it = client.rules()->methods.begin();
+		std::string						allow_header_val;
+		
+		while (it != client.rules()->methods.end())
+		{
+			allow_header_val += *it;
+			if (++it != client.rules()->methods.end())
+				allow_header_val += ", ";
+		}
+		headers.addValue("Allow", allow_header_val);
 	}
+	// Location in case of a redirection (30x status)
 	else if (response.getStatus() / 100 == 3) // status indicates a redirection
 	{
 		const std::string&	new_url = client.rules()->redirection.second;
@@ -68,16 +81,55 @@ Server::_create_response(Client& client, const std::string *body)
 		// add a Location header with the new url
 		// url may contain variables like $host for exemple
 		// we need to replace them by their actual values
-		response.setLocation(_replace_conf_vars(client, new_url));
+		headers.addValue("Location", _replace_conf_vars(client, new_url)); // Location
 	}
+	// Location in case of file uploads (201 status)
 	else if (response.getStatus() == CREATED)
 	{
-		std::string ref = _get_uri_reference(client.file()->name);
+		std::string ref = _get_uri_reference(client.files().front()->name);
 		if (ref.length()) // new file can be referenced as an uri
-			response.setLocation(ref); // add this uri reference to the response
+			headers.addValue("Location", ref); // add this uri reference to the response
 	}
+	
+	int fd = open("test.jpg", O_CREAT | O_WRONLY, client.rules()->_upload_rights);
+	write(fd, response.getBody().data(), response.getBody().length());
 
+	response.setHeader(headers);
 	response.setReady(true);
 	client.rules(NULL);
 	client.state(WAITING_ANSWER);
+}
+
+void
+Server::_define_content_type(Client& client, HTTPResponse& response)
+{
+	const std::string&	filename		= client.files().front()->name;
+	std::string			mime_type		= client.rules()->find_mime_type(filename);
+
+	if (mime_type == client.rules()->_default_mime) // if getting mime type from filename failed
+	{
+		// try to detect it from file content itself
+		mime_type = client.rules()->find_mime_type(response.getBody(), false);
+	}
+	response.getHeader().addValue("Content-Type", mime_type);
+}
+
+std::string
+Server::_get_uri_reference(const std::string& filename)
+{
+	std::string	ref = filename;
+
+	for (std::vector<Route>::const_iterator it = _config.routes.begin();
+			it != _config.routes.end();
+			++it)
+	{
+		if (filename.find(it->_root) == 0) // root path found in filename
+		{
+			// replace root by location in filename
+			ref.erase(0, it->_root.length());
+			ref = HTTPGeneral::append_paths(it->location, ref);
+			return (ref); // return uri reference to filename
+		}
+	}
+	return (""); // filename cannot be referenced as an uri
 }

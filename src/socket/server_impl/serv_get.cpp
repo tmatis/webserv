@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:47 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 18:01:36 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/22 23:49:17 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ Server::_handle_get(Client &client, const Route& rules, const HTTPURI& uri)
 	int code = _find_resource(rules, uri.getPath(), client);
 	if (code != OK)
 		return (_handle_error(client, code));
-	else if (client.file()) // resource found
+	else if (client.files().size()) // resource found
 		client.state(IDLE);
 	return (OK);
 }
@@ -36,7 +36,7 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 
 	// build path from root dir and uri path
 	path.erase(0, rules.location.length());		// location/path/to/file -> /path/to/file
-	path = _append_paths(rules._root, path);	// root/path/to/file
+	path = HTTPGeneral::append_paths(rules._root, path);	// root/path/to/file
 
 	struct stat	pathinfo;
 	if (stat(path.data(), &pathinfo) == -1)
@@ -89,7 +89,7 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 			return (NOT_FOUND);
 		}
 		else
-			path = _append_paths(path, file->d_name); // path + filename
+			path = HTTPGeneral::append_paths(path, file->d_name); // path + filename
 	}
 	
 	if (_file_already_requested(client, path))
@@ -103,8 +103,8 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 		return (INTERNAL_SERVER_ERROR);
 	}
 
-	_files.push_back(f_pollfd(path, fd));
-	client.file(&_files.back());
+	_files.push_back(new f_pollfd(path, fd));
+	client.add_file(_files.back());
 	return (OK);
 }
 
@@ -129,10 +129,10 @@ Server::_file_already_requested(Client& client, std::string const &filepath)
 {
 	for (size_t i = 0; i < _files.size(); i++)
 	{
-		if (_files[i].name == filepath) // file already in server's list
+		if (_files[i]->name == filepath) // file already in server's list
 		{
 			// assign file to the client
-			client.file(&_files[i]);
+			client.add_file(_files[i]);
 			return (true);
 		}
 	}

@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 17:46:01 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 03:08:14 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@
 # include "../config/Config.hpp"
 # include "../http/HTTPURI.hpp"
 # include "../config/Route.hpp"
+
+# define SERVER_TIMEOUT 15.0 // seconds
 
 class Server
 {
@@ -43,12 +45,14 @@ class Server
 		int		handle_request(Client& client);
 		void	send_response(Client& client);
 		int		create_file_response(Client& client);
-		int		write_uploaded_file(Client& client);
+		int		write_uploaded_file(Client& client, int index);
 
 		// getters
 		std::vector<Client>&			get_clients(void);
-		const std::vector<f_pollfd>&	get_files(void) const;
+		const std::vector<f_pollfd*>&	get_files(void) const;
 		const Listener&					get_listener(void) const;
+
+		static const int				timeout;
 
 	private:
 	
@@ -59,10 +63,12 @@ class Server
 		bool			_read_request(Client &client);
 		const Route&	_resolve_routes(const std::string& uri_path);
 		int				_check_request_validity(const Route& rules, HTTPRequest& request);
-		std::string		_append_paths(const std::string& str1, const std::string& str2);
+		bool			_is_mime_type_supported(const Route& rules, const std::string& mime_type);
 		/*** RESPONSES ********************************************************/
 		int				_handle_error(Client& client, int status, bool autogen = false);
-		void			_create_response(Client& client, const std::string *body = NULL);
+		void			_create_response(Client& client);
+		void			_define_content_type(Client& client, HTTPResponse& response);
+		std::string		_get_uri_reference(const std::string& filename);
 
 		/* METHOD HANDLERS ================================================== */
 		int				_handle_get(Client &client, const Route& rules, const HTTPURI& uri);
@@ -74,8 +80,14 @@ class Server
 		bool			_file_already_requested(Client& client, std::string const &filepath);
 		/*** POST *************************************************************/
 		bool			_handle_upload(Client& client, const Route& rules);
-		f_pollfd*		_create_file(const std::string& filename, const std::string& data);
-		std::string		_get_uri_reference(const std::string& filename);
+		void			_raw_upload(Client& client, const Route& rules, const std::string& mime);
+		void			_form_upload(Client& client);
+		std::string		_get_boundary(const std::string* content_type);
+		std::string		_get_file_info(const std::string& body, std::string& type, size_t *start);
+		std::string		_get_next_line(const std::string& src, size_t* pos);
+		f_pollfd*		_create_file(const std::string& filename, const std::string& data, uint mode);
+		void			_clear_previous_files(Client& client);
+
 
 		/* OTHER ============================================================ */
 		/*** CGI **************************************************************/
@@ -84,10 +96,10 @@ class Server
 		bool			_handle_redirection(Client& client, const Route& rules);
 		std::string		_replace_conf_vars(Client& client, const std::string& redirection);
 		
-		Listener					_host;		// listener socket
-		std::vector<Client>			_clients;	// list of clients connected
-		std::vector<f_pollfd>		_files;		// files opened
-		const Config&				_config;	// configuration of the server
+		Listener				_host;		// listener socket
+		std::vector<Client>		_clients;	// list of clients connected
+		std::vector<f_pollfd*>	_files;		// files opened
+		const Config&			_config;	// configuration of the server
 };
 
 #endif

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 11:16:04 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/18 03:10:20 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/19 19:41:33 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,7 @@ class MasterConfig
 	std::vector<std::string> const &values);
 	void	set_upload_rights(std::pair<std::string, std::string> const &var_pair, \
 	std::vector<std::string> const &values);
+	int		permission_flags(int rights);
 
 	static void								keep_only_printable_chars(std::string &edit);
 	static bool								is_there_only_digits(std::string const &edit);
@@ -88,8 +89,7 @@ class MasterConfig
 	void					construct(std::string const &config_path = "webserv.cnf");
 	void					fill_var(std::pair<std::string, std::string> const &var_pair);
 	void					server_construct(std::string &server_data);
-	std::string				find_mime_type(std::string const &content, bool is_filename = true);
-
+	std::string				find_mime_type(std::string const &content, bool is_filename = true) const;
 
 	class ErrorAtLine : public std::exception
 	{

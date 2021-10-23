@@ -3,15 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/22 11:50:59 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/23 03:16:05 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "../utils/random_access_iterator.hpp"
+
+const int Server::timeout = REQUEST_TIMEOUT;
 
 Server::Server(const Config& conf) :
 	_host(Listener(conf.address_res, conf.port)), _config(conf) {}
@@ -24,10 +26,13 @@ Server::~Server(void)
 		close(it->fd());
 
 	// close files
-	for (std::vector<f_pollfd>::iterator it = _files.begin();
+	for (std::vector<f_pollfd*>::iterator it = _files.begin();
 		it != _files.end();
 		++it)
-			close(it->pfd.fd);
+	{
+		close((*it)->pfd.fd);
+		delete *it;
+	}
 }
 
 /*** CONNECTIONS **************************************************************/
@@ -59,30 +64,48 @@ Server::flush_clients(void)
 			it = _clients.erase(it);
 		}
 		else
+		{
+			if (std::difftime(time(NULL), it->last_request) >= Server::timeout)
+				_handle_error(*it, REQUEST_TIMEOUT);
 			++it;
+		}
 	}
 }
 
 void
 Server::flush_files(void)
 {
-	std::vector<f_pollfd>::iterator	f = _files.begin();
-	client_iterator					cl;
+	if (!_files.size())
+		return ;
+
+	std::vector<f_pollfd*>::iterator	f = _files.begin();
+	client_iterator						cl;
+	bool								found;
 	
 	while (f != _files.end()) // check all files opened
 	{
-		cl = _clients.begin();
-		while (cl != _clients.end())
+		found	= false;
+		cl		= _clients.begin();
+		
+		while (cl != _clients.end() && !found)
 		{
-			if (cl->file() == &(*f))
-				break ; // file is requested by a client
+			// check files requested by the client
+			for (size_t i = 0; i < cl->files().size(); i++)
+			{
+				if (cl->files()[i] == *f)
+				{
+					found = true;
+					break;
+				}
+			}
 			++cl;
 		}
 
-		if (cl == _clients.end()) // no client request this file anymore
+		if (!found) // no client request this file anymore
 		{
 			// delete file
-			close(f->pfd.fd);
+			close((*f)->pfd.fd);
+			delete *f;
 			f = _files.erase(f);
 		}
 		else
@@ -110,6 +133,8 @@ Server::handle_request(Client& client)
 		return (_handle_error(client, BAD_REQUEST));
 	}
 	
+	client.last_request = time(NULL); // reset client timeout
+
 	// find correct route
 	HTTPRequest&	req		= client.request();
 	const HTTPURI&	uri		= req.getURI();
@@ -178,7 +203,7 @@ Server::create_file_response(Client& client)
 	char		buffer[BUFFER_SIZE];
 	int			bytes;
 
-	while ((bytes = read(client.file()->pfd.fd, buffer, BUFFER_SIZE)) > 0) // problem here to fix ! not protected with poll...
+	while ((bytes = read(client.files().front()->pfd.fd, buffer, BUFFER_SIZE)) > 0) // problem here to fix ! not protected with poll...
 	{
 		ft::random_access_iterator<char> iterator_begin(buffer);
 		ft::random_access_iterator<char> iterator_end(buffer + bytes);
@@ -187,19 +212,20 @@ Server::create_file_response(Client& client)
 	if (bytes == -1)
 	{
 		std::cerr << "server > reading file requested failed: " << strerror(errno) << "\n";
-		client.file(NULL);
+		client.files().clear();
 		_handle_error(client, INTERNAL_SERVER_ERROR);
 		return (-1);
 	}
-	_create_response(client, &file_content);
-	client.file(NULL);
+
+	client.response().setBody(file_content);
+	_create_response(client);
 	return (0);
 }
 
 int
-Server::write_uploaded_file(Client& client)
+Server::write_uploaded_file(Client& client, int index)
 {
-	const f_pollfd*	fpfd = client.file();
+	f_pollfd*	fpfd = client.files()[index]; 
 
 	if (write(fpfd->pfd.fd, fpfd->data.c_str(), fpfd->data.length()) < 0)
 	{
@@ -208,9 +234,15 @@ Server::write_uploaded_file(Client& client)
 		return (-1);
 	}
 	
-	client.response().setStatus(CREATED); // upload successful
-	_create_response(client);
-	client.file(NULL);
+	fpfd->done				= true;
+	fpfd->pfd.events		= 0;
+	client.files_number()	-= 1;
+	
+	if (client.files_number() == 0)
+	{
+		client.response().setStatus(CREATED); // upload successful
+		_create_response(client);
+	}
 	return (0);
 }
 
@@ -222,7 +254,7 @@ Server::get_clients(void)
 	return (_clients);
 }
 
-const std::vector<f_pollfd>&
+const std::vector<f_pollfd*>&
 Server::get_files(void) const
 {
 	return (_files);

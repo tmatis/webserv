@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/17 23:54:44 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 00:27:56 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 /*** F_POLLFD *****************************************************************/
 
 f_pollfd::f_pollfd(const std::string& filename, int fd, int event, const std::string& data)
-	: name(filename), data(data)
+	: name(filename), data(data), done(false)
 {
 	pfd.fd		= fd;
 	pfd.events	= event; // fd is read only
@@ -29,7 +29,7 @@ f_pollfd::operator pollfd() const
 /*** CLIENT *******************************************************************/
 
 Client::Client(void) :
-	write_trials(0), _state(PENDING_REQUEST), _file(NULL), _route(NULL) {}
+	write_trials(0), _state(PENDING_REQUEST), _files(), _route(NULL), _n_files(0) {}
 
 int
 Client::connect(int host_fd)
@@ -40,6 +40,7 @@ Client::connect(int host_fd)
 	_fd = accept(host_fd, (sockaddr*)&_addr, &size);
 	if (_fd == -1 || TCP_Socket::set_non_blocking(*this) == -1)
 		return (-1);
+	last_request = time(NULL); // get time of connection to handle timeout later
 	return (0);
 }
 
@@ -63,6 +64,11 @@ Client::state(void) const
 	return (_state);
 }
 
+const Route*
+Client::rules(void) const
+{
+	return (_route);
+}
 
 HTTPRequest&
 Client::request(void)
@@ -76,16 +82,16 @@ Client::response(void)
 	return (_response);
 }
 
-const f_pollfd*
-Client::file(void) const
+std::vector<f_pollfd*>&
+Client::files(void)
 {
-	return (_file);
+	return (_files);
 }
 
-const Route*
-Client::rules(void) const
+int&
+Client::files_number(void)
 {
-	return (_route);
+	return (_n_files);
 }
 
 /*** SETTERS ******************************************************************/
@@ -97,15 +103,16 @@ Client::state(client_state st)
 }
 
 void
-Client::file(const f_pollfd* f_pfd)
-{
-	_file = f_pfd;
-}
-
-void
 Client::rules(const Route* rules)
 {
 	_route = rules;
+}
+
+void
+Client::add_file(f_pollfd* fpfd)
+{
+	_files.push_back(fpfd);
+	_n_files++;
 }
 
 void
@@ -113,6 +120,9 @@ Client::clear(void)
 {
 	write_trials	= 0;
 	_state			= PENDING_REQUEST;
+	_route			= NULL;
+	_n_files		= 0;
+	_files.clear();
 	_response.clear();
 	_request.clear();
 }

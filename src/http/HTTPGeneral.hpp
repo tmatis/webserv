@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HTTPGeneral.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:12:37 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/19 11:41:04 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/23 03:13:33 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,10 @@ public:
 
 /* ************************* METHODS ************************* */
 	void clear(void);
+
+/* ************************* STATIC METHODS ****************** */
+	static std::string append_paths(const std::string& str1,
+		const std::string& str2);
 
 };
 

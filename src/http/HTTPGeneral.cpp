@@ -82,3 +82,22 @@ void HTTPGeneral::clear(void)
 	_body.clear();
 }
 
+/* ************************* STATIC METHODS ****************** */
+
+std::string HTTPGeneral::append_paths(const std::string& str1,
+		const std::string& str2)
+{
+	size_t		last_index = str1.length() - 1;
+	std::string	new_path;
+
+	if (str1[last_index] == '/' || str2[0] == '/')
+	{
+		if (str1[last_index] == '/' && str2[0] == '/') // they both have one '/'
+			new_path = str1.substr(0, last_index) + str2;
+		else // only one '/'
+			new_path = str1 + str2;
+	}
+	else // no '/' in both strings
+		new_path = str1 + "/" + str2;
+	return (new_path);
+}
