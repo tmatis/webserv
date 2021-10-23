@@ -432,7 +432,7 @@ HTTPResponse &HTTPResponse::gen_upload_response(const std::string& uri_path, \
 		_body += "<a href=\"" + *it + "\">";
 		_body += it->substr(it->rfind('/') + 1, std::string::npos);
 		_body += "</a></br>\n";
-		it++;
+		++it;
 	}
 
 	// link to previous page
