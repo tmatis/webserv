@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 15:45:45 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/24 00:30:07 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,7 +175,7 @@ Server::send_response(Client& client)
 		return ;
 	}
 
-	if (*client.response().getHeader().getValue("Connection") == "close")
+	if (client.response().getConnection() == HTTP_CONNECTION_CLOSE)
 	{
 		client.state(DISCONNECTED);
 		return ;
