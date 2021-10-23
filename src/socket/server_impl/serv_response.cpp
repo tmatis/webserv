@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_response.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 01:04:10 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 15:52:07 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,9 +91,6 @@ Server::_create_response(Client& client)
 			headers.addValue("Location", ref); // add this uri reference to the response
 	}
 	
-	int fd = open("test.jpg", O_CREAT | O_WRONLY, client.rules()->_upload_rights);
-	write(fd, response.getBody().data(), response.getBody().length());
-
 	response.setHeader(headers);
 	response.setReady(true);
 	client.rules(NULL);

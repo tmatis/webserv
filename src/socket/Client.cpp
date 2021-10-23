@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 00:27:56 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 15:45:07 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ f_pollfd::operator pollfd() const
 /*** CLIENT *******************************************************************/
 
 Client::Client(void) :
-	write_trials(0), _state(PENDING_REQUEST), _files(), _route(NULL), _n_files(0) {}
+	write_trials(0), last_request(), _state(PENDING_REQUEST), _files(), _route(NULL), _n_files(0) {}
 
 int
 Client::connect(int host_fd)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_redirection.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:59 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 03:19:56 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 15:46:44 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ std::string
 Server::_replace_conf_vars(Client& client, const std::string& redirection)
 {
 	std::string	url = redirection;
-	std::string	port;
 	size_t		pos;
 
  	// replace "$host" placeholder by real hostname
