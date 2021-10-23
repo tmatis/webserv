@@ -121,7 +121,8 @@ std::string itoa(T value)
 
 HTTPResponse::HTTPResponse(void)
 	: HTTPGeneral(), _status(OK), _is_ready(false),
-		_header_parsed(false), _cgi_res_buffer()
+		_header_parsed(false), _cgi_res_buffer(),
+		_content_length_cgi(0), _content_length_cgi_set(false)
 {
 }
 
@@ -129,7 +130,9 @@ HTTPResponse::HTTPResponse(HTTPResponse const &other)
 	: HTTPGeneral(other), _status(other._status),
 		_is_ready(other._is_ready),
 		_header_parsed(other._header_parsed),
-		_cgi_res_buffer(other._cgi_res_buffer)
+		_cgi_res_buffer(other._cgi_res_buffer),
+		_content_length_cgi(other._content_length_cgi),
+		_content_length_cgi_set(other._content_length_cgi_set)
 {
 }
 
@@ -149,6 +152,8 @@ HTTPResponse &HTTPResponse::operator=(HTTPResponse const &other)
 		_is_ready = other._is_ready;
 		_header_parsed = other._header_parsed;
 		_cgi_res_buffer = other._cgi_res_buffer;
+		_content_length_cgi = other._content_length_cgi;
+		_content_length_cgi_set = other._content_length_cgi_set;
 	}
 	return *this;
 }
@@ -229,18 +234,25 @@ void HTTPResponse::clear(void)
 void HTTPResponse::_applyCGI(HTTPHeader &header)
 {
 	std::string const *status = header.getValue("Status");
-
 	if (status)
 		this->setStatus(static_cast<short>(atoi(status->c_str())));
 	else
 		_status = OK;
 
+	std::string const *content_length = header.getValue("Content-Length");
+	
+	if (content_length)
+	{
+		_content_length_cgi = std::strtol(content_length->c_str(), NULL, 10);
+		_content_length_cgi_set = true;
+	}
+	
 	this->setHeader(header);
 	header.clear();
 	_header_parsed = true;
 }
 
-void HTTPResponse::parseCGI(std::string const &str)
+bool HTTPResponse::parseCGI(std::string const &str)
 {
 	static HTTPHeader header;
 
@@ -275,9 +287,24 @@ void HTTPResponse::parseCGI(std::string const &str)
 	}
 	if (_header_parsed)
 	{
-		_body += _cgi_res_buffer;
-		_cgi_res_buffer.clear();
+		// if we have a content length, we need to read the body until we reach it
+		if (_content_length_cgi_set) 
+		{
+			if (_cgi_res_buffer.size() + _body.size() < _content_length_cgi)
+				_body += _cgi_res_buffer;
+			else
+				_body += _cgi_res_buffer.substr(0, _content_length_cgi - _body.size());
+			_cgi_res_buffer.clear();
+		}
+		// if we don't have a content length, we need to read the body until we reach the end
+		else
+		{
+			_body += _cgi_res_buffer;
+			_cgi_res_buffer.clear();
+			return (true);
+		}
 	}
+	return (false);
 }
 
 // transform response to string ready to be sent
