@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_post.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 03:10:20 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 15:46:31 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ Server::_handle_upload(Client& client, const Route& rules)
 
 	const std::string*	content_type	= client.request().getContentType();
 	std::string			mime_type		= "application/octet-stream"; // default content-type if not provided
-	std::string			boundary		= "";
 
 	if (content_type)
 	{
@@ -233,7 +232,7 @@ Server::_clear_previous_files(Client& client)
 {
 	for (std::vector<f_pollfd*>::iterator it = client.files().begin();
 			it != client.files().end();
-			it++)
+			++it)
 				remove((*it)->name.data());
 	client.files().clear();
 }

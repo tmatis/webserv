@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 03:16:05 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/23 15:45:45 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,11 +80,10 @@ Server::flush_files(void)
 
 	std::vector<f_pollfd*>::iterator	f = _files.begin();
 	client_iterator						cl;
-	bool								found;
 	
 	while (f != _files.end()) // check all files opened
 	{
-		found	= false;
+		bool found	= false;
 		cl		= _clients.begin();
 		
 		while (cl != _clients.end() && !found)
