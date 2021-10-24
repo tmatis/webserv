@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/22 13:30:59 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 11:08:10 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,6 +250,7 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 
 	if (client.state() == IDLE) // client has requested a file
 	{
+
 		std::vector<CGI>::iterator it = host->get_cgis().begin();
 		for ( ; it != host->get_cgis().end() ; it++)
 		{
@@ -267,11 +268,15 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 				return (0);
 			}
 		}
-		revent	= pc.get_raw_revents(client.file()->pfd.fd);
-		if (revent & POLLIN) // file is ready for reading
-			host->create_file_response(client);
-		else if (revent & POLLOUT)
-			host->write_uploaded_file(client);
+		for (size_t i = 0; i < client.files().size(); i++)
+		{
+			revent = pc.get_raw_revents(client.files()[i]->pfd.fd);
+			
+			if (revent & POLLIN) // file is ready for reading
+				host->create_file_response(client);
+			else if (revent & POLLOUT)
+				host->write_uploaded_file(client, i);
+		}
 	}
 
 	return (0);

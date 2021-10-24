@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/03 18:49:56 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/22 11:19:09 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/23 15:45:27 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ namespace ft
 		typedef std::random_access_iterator_tag iterator_category;
 
 		random_access_iterator() : _ptr(NULL){};
-		random_access_iterator(pointer ptr) : _ptr(ptr){};
+		explicit random_access_iterator(pointer ptr) : _ptr(ptr){};
 		random_access_iterator(const random_access_iterator &other) : _ptr(other._ptr){};
 
 		virtual ~random_access_iterator(){};

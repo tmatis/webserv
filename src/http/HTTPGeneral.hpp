@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:12:37 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/22 12:55:21 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 11:08:07 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,10 @@ public:
 
 /* ************************* METHODS ************************* */
 	void clear(void);
+
+/* ************************* STATIC METHODS ****************** */
+	static std::string append_paths(const std::string& str1,
+		const std::string& str2);
 
 };
 

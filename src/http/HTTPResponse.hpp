@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 20:01:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/19 15:23:54 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/24 00:24:17 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,8 @@ private:
 	bool		_is_ready;
 	bool 		_header_parsed;
 	std::string _cgi_res_buffer;
+	size_t		_content_length_cgi;
+	bool		_content_length_cgi_set;
 	void _applyCGI(HTTPHeader &header);
 
 public:
@@ -89,6 +91,7 @@ public:
 	
 	short getStatus(void) const;
 	bool isReady(void) const;
+	HTTPConnectionType getConnection(void) const;
 
 /* ************************* SETTERS ************************* */
 
@@ -103,15 +106,15 @@ public:
 
 	void clear(void);
 
-	void parseCGI(const std::string &res);
+	bool parseCGI(const std::string &res);
 
 	std::string toString(void);
 
 	HTTPResponse &gen_error_page(int const &status);
 	HTTPResponse &gen_autoindex(std::vector<struct dirent> const &files, \
-	std::string const &dir, std::string const &uri_path);
-
-
+		std::string const &dir, std::string const &uri_path);
+	HTTPResponse &gen_upload_response(const std::string& uri_path, \
+		const std::vector<std::string>& files = std::vector<std::string>());
 };
 
 #endif

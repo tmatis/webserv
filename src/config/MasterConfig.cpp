@@ -6,18 +6,21 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/18 18:02:58 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 11:08:09 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+# include <fcntl.h>
 
 # include "MasterConfig.hpp"
 # include "Config.hpp"
 
 MasterConfig::MasterConfig() : _server_name_version("firewebserv/0.0"), \
- _flags(0), _autoindex(false), \
-_uploadfiles(false), _max_simultaneous_clients(-1), _user(), _error_log(), \
-_default_mime("application/octet-stream"), _mime_types(), \
-_index_paths(), _error_pages(), _upload_rights(600)
+_flags(0), _autoindex(false), \
+_uploadfiles(false), _max_simultaneous_clients(-1), _user(), _error_log(),
+_old_cerr(),
+_default_mime("application/octet-stream"), _mime_types(),
+_index_paths(), _error_pages(), _upload_rights(S_IRUSR | S_IWUSR)
 {
 	this->_methods_supported.insert("GET");
 	this->_methods_supported.insert("DELETE");
@@ -37,6 +40,7 @@ MasterConfig::~MasterConfig()
 
 MasterConfig	&MasterConfig::operator=(MasterConfig const &rhs)
 {
+	this->_flags = rhs._flags;
 	this->_autoindex = rhs._autoindex;
 	this->_uploadfiles = rhs._uploadfiles;
 	this->_max_simultaneous_clients = rhs._max_simultaneous_clients;
@@ -47,6 +51,7 @@ MasterConfig	&MasterConfig::operator=(MasterConfig const &rhs)
 	this->_error_pages = rhs._error_pages;
 	this->_methods_supported = rhs._methods_supported;
 	this->_upload_rights = rhs._upload_rights;
+	this->_old_cerr = rhs._old_cerr;
 	return (*this);
 }
 
@@ -94,10 +99,10 @@ void		MasterConfig::construct(std::string const &config_path)
 	std::ifstream										config_fd;
 	std::string											config_str;
 	std::pair<std::string, std::string>					parsing_res;
-	int													length = 0;
 	char												*buffer = NULL;
 
 	try {
+		size_t length = 0;
 		config_fd.open(config_path.c_str(), std::ifstream::in);
 		if (!config_fd.is_open())
 			throw std::invalid_argument("can't open the provided file");
@@ -106,7 +111,7 @@ void		MasterConfig::construct(std::string const &config_path)
 		config_fd.seekg(0, config_fd.beg);
 		buffer = new char[length + 1];
 		config_fd.read(buffer, length);
-		buffer[length] = 0;
+		buffer[config_fd.gcount()] = 0;
 		config_str = buffer;
 		MasterConfig::remove_comments(config_str);
 		parsing_res = this->extract_key_value(config_str);
@@ -152,15 +157,14 @@ MasterConfig::extract_key_value(std::string &line)
 {
 	std::pair<std::string, std::string>		ret;
 	bool									braces = false;
-	int										find_res;
 	unsigned char							count = 0;
 
 	if (line.empty())
 		return (ret);
 	while (count < 4)
 	{
-		unsigned int i = 0;
-		find_res = 0;
+		size_t i = 0;
+		int	find_res = 0;
 		if (count == 3 && line[i] == '{')
 			braces = true;
 		for ( ; i < line.size() ; i++)
@@ -273,7 +277,7 @@ std::vector<std::string> const &values)
 		error_page.seekg(0, error_page.beg);
 		buffer = new char[i + 1];
 		error_page.read(buffer, i);
-		buffer[i] = 0;
+		buffer[error_page.gcount()] = 0;
 		i = 0;
 		std::istringstream(values[0]) >> i;
 		this->_error_pages[i] = buffer;
@@ -408,7 +412,6 @@ std::vector<std::string> const &values)
 {
 	std::ifstream						mime_types;
 	std::map<std::string, std::string>	new_mime_tab;
-	std::pair<std::string, std::string>	pair;
 	char								*buffer;
 	std::string							tampon = var_pair.second;
 	std::string							tampon2;
@@ -427,7 +430,7 @@ std::vector<std::string> const &values)
 		mime_types.seekg(0, mime_types.beg);
 		buffer = new char[i + 1];
 		mime_types.read(buffer, i);
-		buffer[i] = 0;
+		buffer[mime_types.gcount()] = 0;
 		i = 0;
 		tampon = buffer;
 		delete[] buffer;
@@ -446,19 +449,20 @@ std::vector<std::string> const &values)
 					"\' (continued)" << std::endl;
 				continue ;
 			}
-			new_mime_tab[tampon2.substr(0, tampon2.find(' '))] = tampon2.erase(0, tampon2.find(' ') + 1);
+			std::string tmp = tampon2.substr(0, tampon2.find(' '));
+			new_mime_tab[tmp] = tampon2.erase(0, tampon2.find(' ') + 1);
 		}
+		this->_mime_types = new_mime_tab;
 	}
 	else
 		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
 		"directive needs a path (ignored)" << std::endl;
 }
 
-std::string		MasterConfig::find_mime_type(std::string const &content, bool is_filename)
+std::string		MasterConfig::find_mime_type(std::string const &content, bool is_filename) const
 {
-	std::string										extension;
-	std::map<std::string, std::string>::iterator	it;
-	unsigned int									i = 0;
+	std::string											extension;
+	std::map<std::string, std::string>::const_iterator	it;
 
 	if (is_filename && content.find('.') != std::string::npos)
 	{
@@ -469,6 +473,7 @@ std::string		MasterConfig::find_mime_type(std::string const &content, bool is_fi
 	}
 	if (!is_filename)
 	{
+		size_t i;
 		for (i = 0 ; i < content.size() ; i++)
 			if (!std::isprint(content[i]) && !std::isspace(content[i]))
 				break ;
@@ -485,8 +490,41 @@ std::vector<std::string> const &values)
 	(void)var_pair;
 	if (values.size() == 1 && MasterConfig::is_there_only_digits(values[0]) \
 	&& values[0].size() == 3)
-		std::istringstream(values[0]) >> this->_upload_rights;
+	{
+		std::istringstream(values[0]) >> this->_upload_rights;		// integer value (ex: 753)
+		this->_upload_rights = permission_flags(_upload_rights);	// flags (ex: 111 110 011)
+	}
 	else
 		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
 		"directive must be a 3-digits positive number (ignored)" << std::endl;
+}
+
+int	\
+MasterConfig::permission_flags(int rights)
+{
+	int	const arr_rights[3]	= {
+		rights / 100,			// user
+		(rights % 100) / 10,	// group
+		rights % 10				// other
+	};
+	int rflags			= 0;
+	int	offset			= 6;
+
+	for (int i = 0; i < 3; i++)
+	{
+		// read
+		if (arr_rights[i] & (1 << 2))
+			rflags = rflags | (1 << (offset + 2));
+		
+		// write
+		if (arr_rights[i] & (1 << 1))
+			rflags = rflags | (1 << (offset + 1));
+		
+		// exec
+		if (arr_rights[i] & 1)
+			rflags = rflags | (1 << offset);		
+
+		offset -= 3;
+	}
+	return (rflags);
 }

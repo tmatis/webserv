@@ -68,7 +68,7 @@ const std::string HTTPResponse::_status_message[35] =
 		"Gone",
 		"Length Required",
 		"Precondition Failed",
-		"Request Entity Too Large",
+		"Payload Too Large",
 		"Request-URI Too Long",
 		"Unsupported Media Type",
 		"Requested Range Not Satisfiable",
@@ -121,7 +121,8 @@ std::string itoa(T value)
 
 HTTPResponse::HTTPResponse(void)
 	: HTTPGeneral(), _status(OK), _is_ready(false),
-		_header_parsed(false), _cgi_res_buffer()
+		_header_parsed(false), _cgi_res_buffer(),
+		_content_length_cgi(0), _content_length_cgi_set(false)
 {
 }
 
@@ -129,7 +130,9 @@ HTTPResponse::HTTPResponse(HTTPResponse const &other)
 	: HTTPGeneral(other), _status(other._status),
 		_is_ready(other._is_ready),
 		_header_parsed(other._header_parsed),
-		_cgi_res_buffer(other._cgi_res_buffer)
+		_cgi_res_buffer(other._cgi_res_buffer),
+		_content_length_cgi(other._content_length_cgi),
+		_content_length_cgi_set(other._content_length_cgi_set)
 {
 }
 
@@ -149,6 +152,8 @@ HTTPResponse &HTTPResponse::operator=(HTTPResponse const &other)
 		_is_ready = other._is_ready;
 		_header_parsed = other._header_parsed;
 		_cgi_res_buffer = other._cgi_res_buffer;
+		_content_length_cgi = other._content_length_cgi;
+		_content_length_cgi_set = other._content_length_cgi_set;
 	}
 	return *this;
 }
@@ -165,6 +170,18 @@ short HTTPResponse::getStatus(void) const
 {
 	return _status;
 }
+
+HTTPConnectionType HTTPResponse::getConnection(void) const
+{
+	std::string const *connection = _header.getValue("Connection");
+	if (connection == NULL)
+		return (HTTP_CONNECTION_CLOSE);
+	else if (*connection == "keep-alive")
+		return (HTTP_CONNECTION_KEEP_ALIVE);
+	else
+		return (HTTP_CONNECTION_CLOSE);
+}
+
 
 /* ************************* SETTERS ************************* */
 
@@ -229,18 +246,25 @@ void HTTPResponse::clear(void)
 void HTTPResponse::_applyCGI(HTTPHeader &header)
 {
 	std::string const *status = header.getValue("Status");
-
 	if (status)
 		this->setStatus(static_cast<short>(atoi(status->c_str())));
 	else
 		_status = OK;
 
+	std::string const *content_length = header.getValue("Content-Length");
+	
+	if (content_length)
+	{
+		_content_length_cgi = std::strtol(content_length->c_str(), NULL, 10);
+		_content_length_cgi_set = true;
+	}
+	
 	this->setHeader(header);
 	header.clear();
 	_header_parsed = true;
 }
 
-void HTTPResponse::parseCGI(std::string const &str)
+bool HTTPResponse::parseCGI(std::string const &str)
 {
 	static HTTPHeader header;
 
@@ -275,9 +299,25 @@ void HTTPResponse::parseCGI(std::string const &str)
 	}
 	if (_header_parsed)
 	{
-		_body += _cgi_res_buffer;
+		bool return_value = false;
+		// if we have a content length, we need to read the body until we reach it
+		if (_content_length_cgi_set) 
+		{
+			if (_cgi_res_buffer.size() + _body.size() < _content_length_cgi)
+				_body += _cgi_res_buffer;
+			else
+			{
+				_body += _cgi_res_buffer.substr(0, _content_length_cgi - _body.size());
+				return_value = true;
+			}
+		}
+		// if we don't have a content length, we need to read the body until we reach the end
+		else
+			_body += _cgi_res_buffer;
 		_cgi_res_buffer.clear();
+		return (return_value);
 	}
+	return (false);
 }
 
 // transform response to string ready to be sent
@@ -288,8 +328,7 @@ std::string HTTPResponse::toString(void)
 
 	_header.setValue("Server", "Webserv");
 	_header.setValue("Date", getDate());
-	if (_body.size())
-		_header.setValue("Content-Length", itoa(_body.size()));
+	_header.setValue("Content-Length", itoa(_body.size()));
 	if (!_header.getValue("Content-Type"))
 		setContentType("text/html");
 	if (!_header.getValue("Connection"))
@@ -363,12 +402,14 @@ std::string const &dir, std::string const &uri_path)
 	{
 		i = 1;
 		memset(tbuffer, 0, 50);
-		tampon = dir + "/" + (*it);
+
+		tampon = HTTPGeneral::append_paths(dir, *it);
 		if (lstat(tampon.c_str(), &file_stat) == -1)
 			i = 0;
-		tampon = uri_path + "/" + (*it) + '/';
+		tampon = HTTPGeneral::append_paths(uri_path, *it) + '/';
 		new_entry = "<a href=\"" + tampon + "\">";
 		tampon = *it + "/";
+		
 		if (tampon.size() < 50)
 			new_entry += std::string(tampon + "</a>").append(50 - tampon.size() + 1, ' ');
 		else
@@ -384,12 +425,14 @@ std::string const &dir, std::string const &uri_path)
 	{
 		i = 1;
 		memset(tbuffer, 0, 50);
-		tampon = dir + "/" + (*it);
+
+		tampon = HTTPGeneral::append_paths(dir, *it);
 		if (lstat(tampon.c_str(), &file_stat) == -1)
 			i = 0;
-		tampon = uri_path + "/" + (*it);
+		tampon = HTTPGeneral::append_paths(uri_path, *it);
 		new_entry = "<a href=\"" + tampon + "\">";
 		tampon = *it;
+
 		if (tampon.size() < 50)
 			new_entry += std::string(tampon + "</a>").append(50 - tampon.size() + 1, ' ');
 		else
@@ -412,5 +455,31 @@ std::string const &dir, std::string const &uri_path)
 	tmplate += "ttps://i.imgur.com/z81h8VU.gif\"></center>\n</body>\n</html>\n";
 	this->_body = tmplate;
 	this->_status = static_cast<status_code>(200);
+	return (*this);
+}
+
+HTTPResponse &HTTPResponse::gen_upload_response(const std::string& uri_path, \
+		const std::vector<std::string>& files)
+{
+	_body.clear();
+	_body += "<html>\n<head><title>Upload succesful !</title></head>\n";
+	_body += "<body>\n<h1>File(s) uploaded succesfully</h1>";
+
+	// add links to uploaded files on server
+	std::vector<std::string>::const_iterator it = files.begin();
+	while (it != files.end())
+	{
+		_body += "<a href=\"" + *it + "\">";
+		_body += it->substr(it->rfind('/') + 1, std::string::npos);
+		_body += "</a></br>\n";
+		++it;
+	}
+
+	// link to previous page
+	_body += "<hr><a href=\"" + uri_path + "\"> return to previous page </a>\n";
+	
+	// webserv signature
+	_body += "<hr><center>webserv du feu <img src=\"h";
+	_body += "ttps://i.imgur.com/z81h8VU.gif\"></center>\n</body>\n</html>\n";
 	return (*this);
 }

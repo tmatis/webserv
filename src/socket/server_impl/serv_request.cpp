@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:04 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/22 11:50:24 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/23 15:47:37 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,15 +108,15 @@ Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 	return (OK);
 }
 
-std::string
-Server::_append_paths(const std::string& str1, const std::string& str2)
+bool
+Server::_is_mime_type_supported(const Route& rules, const std::string& mime_type)
 {
-	size_t		last_index = str1.length() - 1;
-	std::string	ret;
-
-	if (str1[last_index] == '/' || str2[0] == '/')
-		ret = str1 + str2;
-	else
-		ret = str1 + "/" + str2;
-	return (ret);
+	for (std::map<std::string, std::string>::const_iterator it = rules._mime_types.begin();
+		it != rules._mime_types.end();
+		++it)
+	{
+		if (it->second == mime_type)
+			return (true);
+	}
+	return (false);
 }
