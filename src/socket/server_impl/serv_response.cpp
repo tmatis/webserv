@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 15:52:07 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/24 00:21:58 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,18 +42,17 @@ void
 Server::_create_response(Client& client)
 {
 	HTTPResponse&		response	= client.response();
-	HTTPHeader&			headers		= response.getHeader();
 	std::stringstream	ss;
 
 	// Content-Type
 	if (client.files().size() && response.getStatus() != CREATED)
 		_define_content_type(client, response);
 	else
-		response.getHeader().addValue("Content-Type", "text/html");
+		response.setContentType("text/html");
 
 	// Connection (nginx behavior for error 400)
 	if (response.getStatus() == BAD_REQUEST || response.getStatus() == REQUEST_TIMEOUT)
-		headers.addValue("Connection", "close");
+		response.setConnection(HTTP_CONNECTION_CLOSE);
 	// Allow (only for error 405)
 	else if (response.getStatus() == METHOD_NOT_ALLOWED)	
 	{
@@ -66,7 +65,7 @@ Server::_create_response(Client& client)
 			if (++it != client.rules()->methods.end())
 				allow_header_val += ", ";
 		}
-		headers.addValue("Allow", allow_header_val);
+		response.setAllow(allow_header_val);
 	}
 	// Location in case of a redirection (30x status)
 	else if (response.getStatus() / 100 == 3) // status indicates a redirection
@@ -76,7 +75,7 @@ Server::_create_response(Client& client)
 		// add a Location header with the new url
 		// url may contain variables like $host for exemple
 		// we need to replace them by their actual values
-		headers.addValue("Location", _replace_conf_vars(client, new_url)); // Location
+		response.setLocation(_replace_conf_vars(client, new_url)); // Location
 	}
 	// Location in case of file uploads (201 status)
 	else if (response.getStatus() == CREATED)
@@ -93,7 +92,7 @@ Server::_create_response(Client& client)
 						file_links.push_back(_get_uri_reference((*it)->name));
 
 			response.gen_upload_response(client.request().getURI().getPath(), file_links);
-			headers.addValue("Location", ref); // add this uri reference to the response
+			response.setLocation(ref); // add this uri reference to the response
 		}
 		else
 		{
@@ -102,7 +101,6 @@ Server::_create_response(Client& client)
 		}
 	}
 	
-	response.setHeader(headers);
 	response.setReady(true);
 	client.rules(NULL);
 	client.state(WAITING_ANSWER);
