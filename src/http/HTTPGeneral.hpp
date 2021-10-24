@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HTTPGeneral.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:12:37 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/23 03:13:33 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/24 11:08:07 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ public:
 /* ************************* GETTERS ************************* */
 
 	HTTPHeader &getHeader(void);
+	HTTPHeader const &getHeader(void) const;
 	std::string const &getBody(void) const;
 	size_t getBodySize(void) const;
 

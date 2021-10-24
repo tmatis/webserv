@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 11:16:04 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/19 19:41:33 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/24 12:59:20 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,12 @@ class MasterConfig
 {
 	public:
 	// webserv proper config
+	std::string								_server_name_version;
 	unsigned long							_flags;
 	bool									_autoindex;
 	bool									_uploadfiles;
 	int										_max_simultaneous_clients; // need to add a static var to server or client class
+	int										_timeout;
 	std::string								_user; // setuid setgid
 	std::ofstream							_error_log;
 	std::streambuf							*_old_cerr;
@@ -74,10 +76,14 @@ class MasterConfig
 	std::vector<std::string> const &values);
 	void	set_upload_rights(std::pair<std::string, std::string> const &var_pair, \
 	std::vector<std::string> const &values);
+	void	set_default_mime_type(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
+	void	set_timeout(std::pair<std::string, std::string> const &var_pair, \
+	std::vector<std::string> const &values);
 	int		permission_flags(int rights);
 
 	static void								keep_only_printable_chars(std::string &edit);
-	static bool								is_there_only_digits(std::string const &edit);
+	static bool								is_there_only_digits(std::string const &edit, bool const &or_dot = false);
 	static void								remove_comments(std::string &edit);
 
 	public:

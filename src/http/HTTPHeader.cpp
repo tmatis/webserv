@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HTTPHeader.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/19 15:10:00 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/22 12:55:32 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,10 @@ std::string const *HTTPHeader::getValue(std::string const &key) const
 	return (NULL);
 }
 
+std::vector<std::pair<std::string, std::string > > const &HTTPHeader::getHeaders() const
+{
+	return (this->_headers);
+}
 
 bool HTTPHeader::isValid(void) const
 {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/23 16:00:35 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/24 14:12:20 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,10 @@
 # include "MasterConfig.hpp"
 # include "Config.hpp"
 
-MasterConfig::MasterConfig() : _flags(0), _autoindex(false),
-_uploadfiles(false), _max_simultaneous_clients(-1), _user(), _error_log(),
-_old_cerr(),
+MasterConfig::MasterConfig() : _server_name_version("firewebserv/0.0"), \
+_flags(0), _autoindex(false), \
+_uploadfiles(false), _max_simultaneous_clients(-1), _timeout(15000), \
+_user(), _error_log(), _old_cerr(),
 _default_mime("application/octet-stream"), _mime_types(),
 _index_paths(), _error_pages(), _upload_rights(S_IRUSR | S_IWUSR)
 {
@@ -25,7 +26,8 @@ _index_paths(), _error_pages(), _upload_rights(S_IRUSR | S_IWUSR)
 	this->_methods_supported.insert("DELETE");
 	this->_methods_supported.insert("POST");
 }
-MasterConfig::MasterConfig(MasterConfig const &cp) { *this = cp; }
+MasterConfig::MasterConfig(MasterConfig const &cp) : \
+_server_name_version("firewebserv/0.0") { *this = cp; }
 MasterConfig::~MasterConfig()
 {
 	if (this->_error_log.is_open())
@@ -60,17 +62,18 @@ MasterConfig::fill_var(std::pair<std::string, std::string> const &var_pair)
 	std::vector<std::string>		values;
 	std::string						values_raw = var_pair.second;
 
-	std::string const str_args[10] = {"upload_rights", "user", "error_log", "max_simultaneous_clients", "index", \
-	"error_page", "root", "autoindex", "upload_files", "mime_types"};
+	std::string const str_args[12] = {"upload_rights", "user", "error_log", "max_simultaneous_clients", "index", \
+	"error_page", "root", "autoindex", "upload_files", "mime_types", "default_mime_type", "timeout"};
 
 	typedef void (MasterConfig::*func_setter)
 					(std::pair<std::string, std::string> const &var_pair,
 					std::vector<std::string> const &values);
 
-	func_setter const func_args[10] = {&MasterConfig::set_upload_rights, &MasterConfig::set_user, \
+	func_setter const func_args[12] = {&MasterConfig::set_upload_rights, &MasterConfig::set_user, \
 	&MasterConfig::set_error_log, &MasterConfig::set_max_simultaneous_clients, &MasterConfig::set_index_paths, \
 	&MasterConfig::set_error_pages, &MasterConfig::set_root, &MasterConfig::set_autoindex, \
-	&MasterConfig::set_uploadfiles, &MasterConfig::set_mime_types};
+	&MasterConfig::set_uploadfiles, &MasterConfig::set_mime_types, &MasterConfig::set_default_mime_type, \
+	&MasterConfig::set_timeout};
 
 	while (!values_raw.empty())
 	{
@@ -80,7 +83,7 @@ MasterConfig::fill_var(std::pair<std::string, std::string> const &var_pair)
 		values.push_back(values_raw.substr(0, i));
 		values_raw.erase(0, i + 1);
 	}
-	for (i = 0 ; i < 10 ; i++)
+	for (i = 0 ; i < 12 ; i++)
 	{
 		if (var_pair.first == str_args[i])
 		{
@@ -239,14 +242,19 @@ void		MasterConfig::remove_comments(std::string &edit)
 	}
 }
 
-bool		MasterConfig::is_there_only_digits(std::string const &edit)
+bool		MasterConfig::is_there_only_digits(std::string const &edit, bool const &or_dot)
 {
 	unsigned int		i = 0;
+	bool				dot = false;
 
 	while (i < edit.size())
 	{
-		if (!isdigit(edit[i]))
+		if (!isdigit(edit[i]) && !or_dot)
 			return (false);
+		if (!isdigit(edit[i]) && or_dot && (edit[i] != '.' || dot))
+			return (false);
+		if (edit[i] == '.')
+			dot = true;
 		i++;
 	}
 	return (true);
@@ -495,6 +503,33 @@ std::vector<std::string> const &values)
 	else
 		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
 		"directive must be a 3-digits positive number (ignored)" << std::endl;
+}
+
+void \
+MasterConfig::set_default_mime_type(std::pair<std::string, std::string> const &var_pair, \
+std::vector<std::string> const &values)
+{
+	if (values.size())
+		this->_default_mime = var_pair.second;
+	else
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs a string value (ignored)" << std::endl;
+}
+
+void \
+MasterConfig::set_timeout(std::pair<std::string, std::string> const &var_pair, \
+std::vector<std::string> const &values)
+{
+	(void)var_pair;
+	if (values.size() == 1 && MasterConfig::is_there_only_digits(values[0], true))
+	{
+		double	raw_timeout;
+		std::istringstream(values[0]) >> raw_timeout;
+		this->_timeout = static_cast<int>(raw_timeout * 1000);
+	}
+	else
+		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
+		"directive needs a positive (decimal) number (ignored)" << std::endl;
 }
 
 int	\

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Route.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:46:26 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/17 12:08:21 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/24 14:11:13 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,10 +32,9 @@ typedef struct Route : public Config
 	void	set_upload_path(std::pair<std::string, std::string> const &var_pair, \
 	std::vector<std::string> const &values);
 
-	std::string					location;
-	std::string					cgi_extension;
-	std::string					cgi_path;
-	std::string					upload_path;
+	std::string								location;
+	std::map<std::string, std::string>		cgis;
+	std::string								upload_path;
 }		Route;
 
 #endif

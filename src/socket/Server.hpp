@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 21:52:29 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/24 10:59:59 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,9 @@
 # include "../config/Config.hpp"
 # include "../http/HTTPURI.hpp"
 # include "../config/Route.hpp"
+# include "CGI.hpp"
+
+class CGI;
 
 # define SERVER_TIMEOUT 15.0 // seconds
 
@@ -45,12 +48,19 @@ class Server
 		int		handle_request(Client& client);
 		void	send_response(Client& client);
 		int		create_file_response(Client& client);
+		int		create_file_response(CGI& cgi);
 		int		write_uploaded_file(Client& client, int index);
 
 		// getters
 		std::vector<Client>&			get_clients(void);
-		const std::vector<f_pollfd*>&	get_files(void) const;
+		const std::vector<f_pollfd *>&	get_files(void) const;
+		std::vector<f_pollfd *>&		get_files(void);
 		const Listener&					get_listener(void) const;
+		const Config&					get_config(void) const;
+		std::vector<CGI>&				get_cgis(void);
+
+		/*** RESPONSES PUBLIC ********************************************************/
+		std::string		_append_paths(const std::string& str1, const std::string& str2);
 
 		static const int				timeout;
 
@@ -92,15 +102,16 @@ class Server
 
 		/* OTHER ============================================================ */
 		/*** CGI **************************************************************/
-		int				_check_cgi_extension(const Route& rules, const std::string& uri_path);
+		std::pair<std::string, std::string>	_check_cgi_extension(const Route& rules, const std::string& uri_path);
 		/*** REDIRECTIONS *****************************************************/
 		bool			_handle_redirection(Client& client, const Route& rules);
 		std::string		_replace_conf_vars(Client& client, const std::string& redirection);
 		
-		Listener				_host;		// listener socket
-		std::vector<Client>		_clients;	// list of clients connected
-		std::vector<f_pollfd*>	_files;		// files opened
-		const Config&			_config;	// configuration of the server
+		Listener					_host;		// listener socket
+		std::vector<Client>			_clients;	// list of clients connected
+		std::vector<CGI>			_cgis;		// running cgis
+		std::vector<f_pollfd *>		_files;		// files opened
+		const Config&				_config;	// configuration of the server
 };
 
 #endif

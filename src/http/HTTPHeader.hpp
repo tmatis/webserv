@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HTTPHeader.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:15:26 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/19 15:09:38 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/22 12:55:39 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ public:
 /* ************************* GETTERS ************************* */
 
 	std::string const *getValue(std::string const &key) const;
+	std::vector<std::pair<std::string, std::string > > const &getHeaders() const;
 	bool isValid(void) const;
 
 /* ************************* METHODS ************************* */

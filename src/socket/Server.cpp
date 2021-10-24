@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 00:30:07 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/24 13:52:50 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ Server::flush_files(void)
 			++cl;
 		}
 
-		if (!found) // no client request this file anymore
+		if (!found && !(*f)->cgi_file) // no client request this file anymore
 		{
 			// delete file
 			close((*f)->pfd.fd);
@@ -226,6 +226,17 @@ Server::create_file_response(Client& client)
 }
 
 int
+Server::create_file_response(CGI& cgi)
+{
+	// cgi.get_client().response().parseCGI(cgi.get_response());
+	// MISSING OTHER STATUS CODE FOR ERROR OR REDIRECTIONS
+	if (cgi.get_client().response().getStatus() == 500)
+		return (_handle_error(cgi.get_client(), 500));
+	_create_response(cgi.get_client());
+	return (0);
+}
+
+int
 Server::write_uploaded_file(Client& client, int index)
 {
 	f_pollfd*	fpfd = client.files()[index]; 
@@ -257,8 +268,14 @@ Server::get_clients(void)
 	return (_clients);
 }
 
-const std::vector<f_pollfd*>&
+const std::vector<f_pollfd *>&
 Server::get_files(void) const
+{
+	return (_files);
+}
+
+std::vector<f_pollfd *>&
+Server::get_files(void)
 {
 	return (_files);
 }
@@ -267,4 +284,16 @@ const Listener&
 Server::get_listener(void) const
 {
 	return (_host);
+}
+
+const Config&
+Server::get_config(void) const
+{
+	return (_config);
+}
+
+std::vector<CGI>&
+Server::get_cgis(void)
+{
+	return (_cgis);
 }

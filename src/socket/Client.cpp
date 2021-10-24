@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 15:45:07 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/24 11:08:06 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 
 /*** F_POLLFD *****************************************************************/
 
-f_pollfd::f_pollfd(const std::string& filename, int fd, int event, const std::string& data)
-	: name(filename), data(data)
+f_pollfd::f_pollfd(const std::string& filename, int fd, int event, \
+const std::string& data, bool cgi) : name(filename), data(data), cgi_file(cgi)
 {
 	pfd.fd		= fd;
 	pfd.events	= event; // fd is read only

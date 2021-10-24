@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:48:00 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/18 03:19:40 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 14:11:09 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ Route::Route(Config const &base) : Config(base)
 {
 	this->location = "/";
 	this->upload_path = ".";
-	this->cgi_extension = std::string();
+	// this->cgi_extension = std::string();
 }
 Route::Route(Route const &cp) { *this = cp; }
 Route::~Route() {}
@@ -27,8 +27,7 @@ Route		&Route::operator=(Route const &rhs)
 	this->Config::operator=(rhs);
 	this->location = rhs.location;
 	this->upload_path = rhs.upload_path;
-	this->cgi_extension = rhs.cgi_extension;
-	this->cgi_path = rhs.cgi_path;
+	this->cgis = rhs.cgis;
 	return (*this);
 }
 
@@ -108,8 +107,9 @@ std::vector<std::string> const &values)
 		path.erase(0, extension.size() + 1);
 		if (extension[0] != '.')
 			extension.insert(0, ".");
-		this->cgi_extension = extension;
-		this->cgi_path = path;
+		this->cgis[extension] = path;
+		// this->cgi_extension = extension;
+		// this->cgi_path = path;
 	}
 	else
 	{

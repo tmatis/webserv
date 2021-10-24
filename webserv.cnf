@@ -7,5 +7,8 @@ root						./www/;
 autoindex					on;
 upload_files				off;
 mime_types					src/config/sample.mime;
+timeout						15;
+default_mime_type			application/octet-stream;
 
-server { upload_rights 644; listen 2356; server_name localhost; methods GET; }
+server { upload_rights 644; listen 2356; server_name localhost; methods GET;
+_/ { cgi .php /usr/bin/php-cgi7.4; cgi .a ./cgi_tester; } }

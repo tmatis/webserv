@@ -7,7 +7,7 @@ root						./www/;
 autoindex					on;
 upload_files				off;
 
-server { listen 127.0.0.1; server_name localhost; methods GET; }
+server { listen 127.0.0.1 659; server_name localhost; methods GET; }
 
 server {
 	listen				8080;
@@ -19,6 +19,7 @@ server {
 
 	_. {
 		cgi				.php path;
+		cgi				.py ppath;
 		upload_path		path;
 		# basically same stuff as above except for the first ones
 	}
