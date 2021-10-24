@@ -6,13 +6,14 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:34:38 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/22 13:30:15 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 12:46:03 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef WCGI
 # define WCGI
 # include "Server.hpp"
+# include "../utils/random_access_iterator.hpp"
 # include <sstream>
 # include <cctype>
 # include <cstring>

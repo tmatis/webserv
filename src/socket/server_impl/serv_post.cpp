@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 11:08:20 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 11:31:14 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,13 @@ Server::_handle_post(Client &client, const Route& rules, const HTTPURI& uri)
 	cgi = _check_cgi_extension(rules, uri.getPath());
 	if (!cgi.first.empty())
 	{
-		// CGI cgi(*this, client, rules, client.request, cgi);
-		// cgi.construct().launch();
-		// cgi.send_request();
-		// cgi.get_response();
-		// _handle_cgi(uri, client);
+		this->_cgis.push_back(CGI((*this), client, rules, client.request(), cgi));
+		this->_cgis.back().construct();
+		try {
+			this->_cgis.back().launch();
+		} catch (std::exception &e) { this->_cgis.pop_back(); return(_handle_error(client, 500)); }
+		client.state(IDLE);
+		return (OK);
 	}
 
 	if (_handle_upload(client, rules) == true) // file has been created or an error occured

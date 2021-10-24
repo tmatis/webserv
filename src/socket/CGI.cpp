@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/24 10:20:09 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 12:46:09 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ CGI			&CGI::construct()
 		vars["CONTENT_TYPE"] = *(this->_request.getHeader().getValue("Content-Type"));
 	tampon = vars["SCRIPT_NAME"];
 	tampon.erase(0, this->_route.location.length());
-	tampon = this->_server._append_paths(this->_route._root, tampon);
+	tampon = HTTPGeneral::append_paths(this->_route._root, tampon);
 	memset(script_path, 0, 350);
 	realpath(tampon.c_str(), script_path); // douteux
 	vars["PATH_TRANSLATED"] = script_path;
@@ -133,7 +133,8 @@ CGI			&CGI::construct()
 
 CGI			&CGI::launch()
 {
-	char 			*argv[] = {NULL};
+	char 			*argv[] = {&this->cgi_infos.second[0], \
+	&this->_var_containers["PATH_TRANSLATED"][0], NULL};
 
 	if (pipe(this->_pipes_in) == -1)
 		throw std::runtime_error(strerror(errno));
@@ -143,7 +144,10 @@ CGI			&CGI::launch()
 		close(this->_pipes_in[1]);
 		throw std::runtime_error(strerror(errno));
 	}
-	// fcntl() placeholder l'intra déconne
+	fcntl(this->_pipes_in[0], F_SETFL, O_NONBLOCK);
+	fcntl(this->_pipes_in[1], F_SETFL, O_NONBLOCK);
+	fcntl(this->_pipes_out[1], F_SETFL, O_NONBLOCK);
+	fcntl(this->_pipes_out[0], F_SETFL, O_NONBLOCK);
 	this->_pid = fork();
 	if (this->_pid == -1)
 	{
@@ -158,11 +162,11 @@ CGI			&CGI::launch()
 		close(this->_pipes_in[0]);
 		close(this->_pipes_out[1]);
 		this->_server.get_files()\
-		.push_back(f_pollfd("cgi_input", this->_pipes_in[1], POLLOUT, "", true));
-		this->_fds.first = &(this->_server.get_files().back());
+		.push_back(new f_pollfd("cgi_input", this->_pipes_in[1], POLLOUT, "", true));
+		this->_fds.first = this->_server.get_files().back();
 		this->_server.get_files()\
-		.push_back(f_pollfd("cgi_output", this->_pipes_out[0], POLLIN, "", true));
-		this->_fds.second = &(this->_server.get_files().back());
+		.push_back(new f_pollfd("cgi_output", this->_pipes_out[0], POLLIN, "", true));
+		this->_fds.second = this->_server.get_files().back();
 	}
 	else
 	{
@@ -173,6 +177,8 @@ CGI			&CGI::launch()
 		if (execve(this->cgi_infos.second.c_str(), argv, this->_var_formatted) == -1)
 		{
 			write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15);
+			std::cerr << "cgi: \'" << this->cgi_infos.second << "\' error while launching : \'" << \
+			strerror(errno) << "\'" << std::endl;
 			exit(EXIT_SUCCESS);
 		}
 	}
@@ -183,11 +189,12 @@ bool			CGI::send_request(int const &revents)
 {
 	if (!this->_request.getBody().size())
 	{
-		for (std::vector<f_pollfd>::iterator it = \
+		for (std::vector<f_pollfd *>::iterator it = \
 		this->_server.get_files().begin() ; it != \
 		this->_server.get_files().end() ; it++)
-			if ((*it).pfd.fd == this->_fds.first->pfd.fd)
+			if ((*it)->pfd.fd == this->_fds.first->pfd.fd)
 			{
+				delete (*it);
 				this->_server.get_files().erase(it);
 				break ;
 			}
@@ -197,11 +204,12 @@ bool			CGI::send_request(int const &revents)
 	}
 	if (revents & POLLERR || revents & POLLHUP || revents & POLLNVAL)
 	{
-		for (std::vector<f_pollfd>::iterator it = \
+		for (std::vector<f_pollfd *>::iterator it = \
 		this->_server.get_files().begin() ; it != \
 		this->_server.get_files().end() ; it++)
-			if ((*it).pfd.fd == this->_fds.first->pfd.fd)
+			if ((*it)->pfd.fd == this->_fds.first->pfd.fd)
 			{
+				delete (*it);
 				this->_server.get_files().erase(it);
 				break ;
 			}
@@ -210,15 +218,16 @@ bool			CGI::send_request(int const &revents)
 	}
 	if (revents & POLLOUT)
 	{
-		for (std::vector<f_pollfd>::iterator it = \
+		for (std::vector<f_pollfd *>::iterator it = \
 		this->_server.get_files().begin() ; it != \
 		this->_server.get_files().end() ; it++)
-			if ((*it).pfd.fd == this->_fds.first->pfd.fd)
+			if ((*it)->pfd.fd == this->_fds.first->pfd.fd)
 			{
+				delete (*it);
 				this->_server.get_files().erase(it);
 				break ;
 			}
-		if (write(this->get_input_pipe(), this->_request.getBody().c_str(), \
+		if (write(this->get_input_pipe(), this->_request.getBody().data(), \
 		this->_request.getBody().size()) == -1)
 		{
 			close(this->get_input_pipe());
@@ -236,33 +245,38 @@ bool			CGI::get_response(int const &revents)
 	char		buffer[1024];
 	int			i = 1;
 
-	if (revents & POLLERR || (revents & POLLHUP && !(revents & POLLIN)) || \
-	revents & POLLNVAL)
+	if (revents & POLLERR || revents & POLLNVAL)
 	{
-		for (std::vector<f_pollfd>::iterator it = \
+		for (std::vector<f_pollfd *>::iterator it = \
 		this->_server.get_files().begin() ; it != \
 		this->_server.get_files().end() ; it++)
-			if ((*it).pfd.fd == this->_fds.second->pfd.fd)
+			if ((*it)->pfd.fd == this->_fds.second->pfd.fd)
 			{
+				delete (*it);
 				this->_server.get_files().erase(it);
 				break ;
 			}
 		close(this->get_output_pipe());
 		throw std::runtime_error("poll error res");
 	}
-	if (revents & POLLIN)
+	if (revents & POLLIN || !this->_response.empty())
 	{
 		memset(buffer, 0, 1024);
 		i = read(this->get_output_pipe(), buffer, 1023);
 		if (i != -1)
-			this->_response += buffer;
+		{
+			ft::random_access_iterator<char> it(buffer);
+			ft::random_access_iterator<char> ite(buffer + i);
+			this->_response.append(it, ite);
+		}
 		if (i > 0)
 			return (true);
-		for (std::vector<f_pollfd>::iterator it = \
+		for (std::vector<f_pollfd *>::iterator it = \
 		this->_server.get_files().begin() ; it != \
 		this->_server.get_files().end() ; it++)
-			if ((*it).pfd.fd == this->_fds.second->pfd.fd)
+			if ((*it)->pfd.fd == this->_fds.second->pfd.fd)
 			{
+				delete (*it);
 				this->_server.get_files().erase(it);
 				break ;
 			}
