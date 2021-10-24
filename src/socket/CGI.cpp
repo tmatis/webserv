@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/24 14:17:36 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 14:26:26 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,8 @@ CGI::~CGI()
 		delete[] this->_var_formatted;
 }
 
-CGI			&CGI::operator=(CGI const &rhs) { (void)rhs; return (*this); }
+CGI			&CGI::operator=(CGI const &rhs)
+{ (void)rhs; this->_var_formatted = NULL; return (*this); }
 
 CGI			&CGI::construct()
 {
@@ -136,8 +137,8 @@ CGI			&CGI::construct()
 		tampon = (*it).first + std::string("=") + (*it).second;
 		std::strcpy(this->_var_formatted[i], tampon.c_str());
 		this->_var_formatted[i][(*it).first.size() + (*it).second.size() + 1] = 0;
-		i++;
-		it++;
+		++i;
+		++it;
 	}
 	this->_var_containers = vars;
 	this->_var_formatted[vars.size()] = NULL;
