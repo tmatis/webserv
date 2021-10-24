@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/22 13:47:15 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 10:20:09 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,15 +134,25 @@ CGI			&CGI::construct()
 CGI			&CGI::launch()
 {
 	char 			*argv[] = {NULL};
-	std::string		error_case = "WEBSERV-CGI-ERROR: ";
 
 	if (pipe(this->_pipes_in) == -1)
 		throw std::runtime_error(strerror(errno));
 	if (pipe(this->_pipes_out) == -1)
+	{
+		close(this->_pipes_in[0]);
+		close(this->_pipes_in[1]);
 		throw std::runtime_error(strerror(errno));
+	}
+	// fcntl() placeholder l'intra déconne
 	this->_pid = fork();
 	if (this->_pid == -1)
+	{
+		close(this->_pipes_in[0]);
+		close(this->_pipes_out[1]);
+		close(this->_pipes_in[1]);
+		close(this->_pipes_out[0]);
 		throw std::runtime_error(strerror(errno));
+	}
 	if (this->_pid)
 	{
 		close(this->_pipes_in[0]);
@@ -162,8 +172,7 @@ CGI			&CGI::launch()
 		dup2(this->_pipes_out[1], STDOUT_FILENO);
 		if (execve(this->cgi_infos.second.c_str(), argv, this->_var_formatted) == -1)
 		{
-			error_case.append(strerror(errno));
-			write(STDOUT_FILENO, error_case.c_str(), error_case.size());
+			write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15);
 			exit(EXIT_SUCCESS);
 		}
 	}
@@ -224,7 +233,7 @@ bool			CGI::send_request(int const &revents)
 
 bool			CGI::get_response(int const &revents)
 {
-	char		buffer[200];
+	char		buffer[1024];
 	int			i = 1;
 
 	if (revents & POLLERR || (revents & POLLHUP && !(revents & POLLIN)) || \
@@ -243,13 +252,12 @@ bool			CGI::get_response(int const &revents)
 	}
 	if (revents & POLLIN)
 	{
-		while (i > 0)
-		{
-			memset(buffer, 0, 200);
-			i = read(this->get_output_pipe(), buffer, 199);
-			if (i != -1)
-				this->_response += buffer;
-		}
+		memset(buffer, 0, 1024);
+		i = read(this->get_output_pipe(), buffer, 1023);
+		if (i != -1)
+			this->_response += buffer;
+		if (i > 0)
+			return (true);
 		for (std::vector<f_pollfd>::iterator it = \
 		this->_server.get_files().begin() ; it != \
 		this->_server.get_files().end() ; it++)
