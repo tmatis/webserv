@@ -171,6 +171,18 @@ short HTTPResponse::getStatus(void) const
 	return _status;
 }
 
+HTTPConnectionType HTTPResponse::getConnection(void) const
+{
+	std::string const *connection = _header.getValue("Connection");
+	if (connection == NULL)
+		return (HTTP_CONNECTION_CLOSE);
+	else if (*connection == "keep-alive")
+		return (HTTP_CONNECTION_KEEP_ALIVE);
+	else
+		return (HTTP_CONNECTION_CLOSE);
+}
+
+
 /* ************************* SETTERS ************************* */
 
 void HTTPResponse::setReady(bool b)

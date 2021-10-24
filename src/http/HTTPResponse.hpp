@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HTTPResponse.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 20:01:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/23 20:27:27 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/24 00:24:17 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,7 @@ public:
 	
 	short getStatus(void) const;
 	bool isReady(void) const;
+	HTTPConnectionType getConnection(void) const;
 
 /* ************************* SETTERS ************************* */
 

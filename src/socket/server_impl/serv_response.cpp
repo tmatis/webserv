@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 00:21:58 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/24 00:29:14 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ Server::_define_content_type(Client& client, HTTPResponse& response)
 		// try to detect it from file content itself
 		mime_type = client.rules()->find_mime_type(response.getBody(), false);
 	}
-	response.getHeader().addValue("Content-Type", mime_type);
+	response.setContentType(mime_type);
 }
 
 std::string
