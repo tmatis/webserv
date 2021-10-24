@@ -19,6 +19,7 @@ server {
 
 	_. {
 		cgi				.php path;
+		cgi				.py ppath;
 		upload_path		path;
 		# basically same stuff as above except for the first ones
 	}

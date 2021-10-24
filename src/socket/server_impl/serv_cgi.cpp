@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:37 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/19 22:36:30 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 14:18:51 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,12 @@ Server::_check_cgi_extension(const Route& rules, const std::string& uri_path)
 {
 	std::pair<std::string, std::string>		ret;
 	unsigned long							pos = std::string::npos;
-	unsigned long							tmp_pos;
 	
 	for (std::map<std::string, std::string>::const_iterator \
-	it = rules.cgis.begin() ; it != rules.cgis.end() ; it++)
+	it = rules.cgis.begin() ; it != rules.cgis.end() ; ++it)
 	{
+		unsigned long							tmp_pos;
+		
 		tmp_pos = uri_path.find((*it).first);
 		while (tmp_pos != std::string::npos)
 		{

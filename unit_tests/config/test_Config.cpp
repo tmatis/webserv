@@ -39,13 +39,13 @@ car_test test_parseConfig(void)
 
 	// switch from 2 to 3 since default route "/" was added
 	car_assert_cmp(mconfig._configs[1].routes.size(), static_cast<unsigned long>(3));
-	car_assert_cmp(mconfig._configs[1].routes[0].cgi_extension, ".php");
-	car_assert_cmp(mconfig._configs[1].routes[0].cgi_path, "path");
+	car_assert_cmp(mconfig._configs[1].routes[0].cgis[".php"], "path");
+	car_assert_cmp(mconfig._configs[1].routes[0].cgis[".py"], "ppath");
 	car_assert_cmp(mconfig._configs[1].routes[0].upload_path, "path");
 	car_assert_cmp(mconfig._configs[1].routes[0].redirection.first, 0);
 	car_assert_cmp(mconfig._configs[1].routes[0]._uploadfiles, false);
 
-	car_assert_cmp(mconfig._configs[1].routes[1].cgi_extension, "");
+	car_assert_cmp(mconfig._configs[1].routes[1].cgis.size(), 0UL);
 	car_assert_cmp(mconfig._configs[1].routes[1]._uploadfiles, true);
 	car_assert_cmp(mconfig._configs[1].routes[1].upload_path, "res/images/");
 }

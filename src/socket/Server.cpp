@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 12:42:36 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 13:52:50 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,7 +228,7 @@ Server::create_file_response(Client& client)
 int
 Server::create_file_response(CGI& cgi)
 {
-	cgi.get_client().response().parseCGI(cgi.get_response());
+	// cgi.get_client().response().parseCGI(cgi.get_response());
 	// MISSING OTHER STATUS CODE FOR ERROR OR REDIRECTIONS
 	if (cgi.get_client().response().getStatus() == 500)
 		return (_handle_error(cgi.get_client(), 500));

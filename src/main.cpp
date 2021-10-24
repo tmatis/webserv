@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 13:13:59 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 14:12:45 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,7 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 	{
 
 		std::vector<CGI>::iterator it = host->get_cgis().begin();
-		for ( ; it != host->get_cgis().end() ; it++)
+		for ( ; it != host->get_cgis().end() ; ++it)
 		{
 			if (&((*it).get_client()) == &client)
 			{

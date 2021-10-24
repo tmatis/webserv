@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:46:26 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/19 22:26:42 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 14:11:13 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,6 @@ typedef struct Route : public Config
 
 	std::string								location;
 	std::map<std::string, std::string>		cgis;
-	// std::string								cgi_extension;
-	// std::string								cgi_path;
 	std::string								upload_path;
 }		Route;
 

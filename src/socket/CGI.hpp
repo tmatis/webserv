@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:34:38 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/24 12:46:03 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 14:01:03 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ class CGI
 	int									_pipes_out[2];
 	unsigned int						_var_count;
 	pid_t								_pid;
-	std::string							_response;
+	bool								_response_flag;
 	int									_state;
 	/* first = input ; second = output */
 	std::pair<f_pollfd *, f_pollfd *>	_fds;
@@ -65,7 +65,7 @@ class CGI
 	Client				&get_client();
 	char				**get_var_formatted();
 	std::map<std::string, std::string>	&get_vars();
-	std::string const	&get_response() const;
+	bool const			&get_response_flag() const;
 	int					get_state() const;
 };
 

@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/24 13:13:43 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 14:12:20 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -520,10 +520,10 @@ void \
 MasterConfig::set_timeout(std::pair<std::string, std::string> const &var_pair, \
 std::vector<std::string> const &values)
 {
-	double	raw_timeout;
 	(void)var_pair;
 	if (values.size() == 1 && MasterConfig::is_there_only_digits(values[0], true))
 	{
+		double	raw_timeout;
 		std::istringstream(values[0]) >> raw_timeout;
 		this->_timeout = static_cast<int>(raw_timeout * 1000);
 	}
