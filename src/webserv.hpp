@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:24 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/20 02:04:10 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/24 13:13:04 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,6 @@
 # include "socket/Server.hpp"
 
 # include "http/HTTPURI.hpp"
-
-# define POLL_TIMEOUT	15000
 
 /*** POLL *********************************************************************/
 

@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 12:46:46 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 13:13:59 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ int	main(int argc, char **argv)
 	}
 	
 	// create poll class
-	PollClass			pc(POLL_TIMEOUT);
+	PollClass			pc(mconfig._timeout);
 
 	for (size_t i = 0 ; i < hosts.size() ; i++)
 	{
