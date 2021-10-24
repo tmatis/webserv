@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/24 14:26:26 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/24 14:30:01 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ CGI::~CGI()
 }
 
 CGI			&CGI::operator=(CGI const &rhs)
-{ (void)rhs; this->_var_formatted = NULL; return (*this); }
+{ (void)rhs; return (*this); }
 
 CGI			&CGI::construct()
 {
