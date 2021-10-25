@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/24 14:12:20 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/25 11:33:47 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ MasterConfig	&MasterConfig::operator=(MasterConfig const &rhs)
 	this->_methods_supported = rhs._methods_supported;
 	this->_upload_rights = rhs._upload_rights;
 	this->_old_cerr = rhs._old_cerr;
+	this->_timeout = rhs._timeout;
 	return (*this);
 }
 
