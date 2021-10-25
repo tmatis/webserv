@@ -6,11 +6,12 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:59 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 15:46:44 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/25 12:06:00 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Server.hpp"
+#include <sstream>
 
 bool
 Server::_handle_redirection(Client& client, const Route& rules)
