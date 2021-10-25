@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:51:01 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/18 18:59:47 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/25 12:04:53 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
 #include "MasterConfig.hpp"
 #include "Route.hpp"
+#include "../utils/templates.hpp"
 
 Config::Config(void) : MasterConfig(), \
 	methods(this->_methods_supported), address(), port_str(), address_res(),
@@ -155,8 +156,9 @@ std::vector<std::string> const &values)
 			{
 				inet_pton(AF_INET, "0.0.0.0", &this->address_res);
 				this->address = "0.0.0.0";
-				long int port_readed = 0;
-				std::istringstream(values[0]) >> port_readed;
+
+				long int port_readed = aton<long int>(values[0]);
+				
 				if (port_readed >= 0 && port_readed <= 65535)
 				{
 					this->port = htons(port_readed);
@@ -171,8 +173,7 @@ std::vector<std::string> const &values)
 			{
 				this->address = values[0];
 				this->port_str = values[1];
-				long int port_readed = 0;
-				std::istringstream(values[1]) >> port_readed;
+				long int port_readed = aton<long int>(values[1]);
 				if (port_readed >= 0 && port_readed <= 65535)
 				{
 					this->port = htons(port_readed);
@@ -209,8 +210,7 @@ std::vector<std::string> const &values)
 	if (values.size() >= 2 && MasterConfig::is_there_only_digits(values[0]))
 	{
 		path.erase(0, values[0].size() + 1);
-		int	i = 0;
-		std::istringstream(values[0]) >> i;
+		int	i = aton<int>(values[0]);
 		this->redirection = std::make_pair(i, path);
 	}
 	else
@@ -223,7 +223,7 @@ std::vector<std::string> const &values)
 {
 	(void)var_pair;
 	if (values.size() == 1 && MasterConfig::is_there_only_digits(values[0]))
-		std::istringstream(values[0]) >> this->body_limit;
+		this->body_limit = aton<size_t>(values[0]);
 	else
 		std::cerr << "config > \'" << var_pair.first << "\' : this " << \
 		"directive needs a positive value (ignored)" << std::endl;

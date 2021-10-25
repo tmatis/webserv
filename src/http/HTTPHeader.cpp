@@ -3,15 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   HTTPHeader.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 11:30:52 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/22 12:55:32 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/25 11:59:16 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HTTPHeader.hpp"
-#include <sstream>
 
 /* ********************** CONSTRUCTORS *********************** */
 

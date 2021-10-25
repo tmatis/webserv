@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   serv_post.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 11:31:14 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/25 12:05:48 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Server.hpp"
 #include "../CGI.hpp"
+#include <sstream>
 
 int
 Server::_handle_post(Client &client, const Route& rules, const HTTPURI& uri)

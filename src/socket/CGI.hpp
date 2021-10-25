@@ -14,7 +14,6 @@
 # define WCGI
 # include "Server.hpp"
 # include "../utils/random_access_iterator.hpp"
-# include <sstream>
 # include <cctype>
 # include <cstring>
 # include <stdexcept>
