@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 00:29:14 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/25 11:34:34 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ void
 Server::_create_response(Client& client)
 {
 	HTTPResponse&		response	= client.response();
-	std::stringstream	ss;
 
 	// Content-Type
 	if (client.files().size() && response.getStatus() != CREATED)
