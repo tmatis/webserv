@@ -1,6 +1,6 @@
 #include "HTTPResponse.hpp"
-#include <sstream>
 #include <iostream>
+#include "../utils/templates.hpp"
 
 /* *********************** UTILITIES ************************* */
 
@@ -107,14 +107,6 @@ static std::string getDate(void)
 	char buff[128];
 	strftime(buff, sizeof(buff), "%a, %d %b %Y %H:%M:%S GMT", tmp);
 	return (std::string(buff));
-}
-
-template <typename T>
-std::string itoa(T value)
-{
-	std::ostringstream os;
-	os << value;
-	return os.str();
 }
 
 /* ********************** CONSTRUCTORS *********************** */

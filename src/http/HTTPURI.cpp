@@ -6,15 +6,15 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 18:41:58 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/17 13:00:44 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/25 11:52:42 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HTTPURI.hpp"
 #include <string>
-#include <sstream>
 #include <iostream>
 #include <cstdlib>
+#include "../utils/templates.hpp"
 
 /* ****************** EXCEPTION DEFINITIONS ****************** */
 
@@ -160,8 +160,7 @@ void HTTPURI::_decodeHost(std::string &uri)
 	{
 		this->_host = host.substr(0, pos2);
 		std::string port = host.substr(pos2 + 1, host.size());
-		std::stringstream ss(port);
-		ss >> this->_port;
+		this->_port = aton<short>(port);
 	}
 	else
 		this->_host = host;

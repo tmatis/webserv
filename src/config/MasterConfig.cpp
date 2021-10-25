@@ -6,14 +6,15 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 14:43:37 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/25 11:33:47 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/25 11:56:12 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include <fcntl.h>
+#include <fcntl.h>
 
-# include "MasterConfig.hpp"
-# include "Config.hpp"
+#include "MasterConfig.hpp"
+#include "Config.hpp"
+#include "../utils/templates.hpp"
 
 MasterConfig::MasterConfig() : _server_name_version("firewebserv/0.0"), \
 _flags(0), _autoindex(false), \
@@ -280,13 +281,13 @@ std::vector<std::string> const &values)
 			return ;
 		}
 		error_page.seekg(0, error_page.end);
-		unsigned int i = error_page.tellg();
+		size_t i = error_page.tellg();
 		error_page.seekg(0, error_page.beg);
 		buffer = new char[i + 1];
 		error_page.read(buffer, i);
 		buffer[error_page.gcount()] = 0;
 		i = 0;
-		std::istringstream(values[0]) >> i;
+		i = aton<size_t>(values[0]);
 		this->_error_pages[i] = buffer;
 		delete[] buffer;
 	}

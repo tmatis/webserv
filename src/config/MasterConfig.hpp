@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MasterConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 11:16:04 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/24 12:59:20 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/25 11:58:56 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@
 # include <utility>
 # include <stdexcept>
 # include <fstream>
-# include <sstream>
 
 struct Config;
 
