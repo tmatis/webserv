@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/24 14:30:01 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/25 11:37:33 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,10 @@ CGI::~CGI()
 		delete[] this->_var_formatted;
 }
 
-CGI			&CGI::operator=(CGI const &rhs)
-{ (void)rhs; return (*this); }
+CGI &CGI::operator=(CGI const &)
+{
+	return (*this);
+}
 
 CGI			&CGI::construct()
 {
