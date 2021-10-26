@@ -6,7 +6,7 @@
 /*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:04 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/23 15:47:37 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/26 19:16:56 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ bool
 Server::_read_request(Client &client)
 {
 	char	buffer[BUFFER_SIZE];
-	int		readBytes	= read(client.fd(), &buffer, BUFFER_SIZE);
+	ssize_t	readBytes	= read(client.fd(), &buffer, BUFFER_SIZE);
 
 	if (readBytes < 0)
 	{
