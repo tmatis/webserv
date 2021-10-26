@@ -6,24 +6,16 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/26 12:43:50 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/26 13:10:01 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserv.hpp"
 
-std::string		get_var_formatted_str(std::string const &var_name)
-{
-	std::string		res = var_name;
+bool	main_while_handler = true;
 
-	for (unsigned int i = 0 ; i < res.size() ; i++)
-	{
-		res[i] = toupper(res[i]);
-		if (res[i] == '-')
-			res[i] = '_';
-	}
-	return (res);
-}
+void	main_while_switch(int signal)
+{ (void)signal; std::cout << std::endl; main_while_handler = false; }
 
 int	main(int argc, char **argv)
 {
@@ -37,7 +29,9 @@ int	main(int argc, char **argv)
 	// create configurations for server
 	MasterConfig			mconfig;
 
-	mconfig.construct(argv[1]);
+	try { mconfig.construct(argv[1]); }
+	catch (std::exception &e) { std::cerr << "config > " << e.what() << \
+	" (fatal error)" << std::endl; return (1); }
 
 	// create servers
 	std::vector<Server*>	hosts;
@@ -70,9 +64,11 @@ int	main(int argc, char **argv)
 					<< "\n";		
 	}
 
-	while (true)
+	std::signal(SIGINT, &main_while_switch);
+	std::signal(SIGTERM, &main_while_switch);
+	while (main_while_handler)
 	{
-		if (pc.polling() == -1)
+		if (pc.polling() == -1 && main_while_handler)
 			print_error("webserv: poll");
 
 		// check events for each server
@@ -97,6 +93,8 @@ int	main(int argc, char **argv)
 			(*h)->flush_files();	// delete unused files
 		}
 	}
+	destroy_servers(hosts);
+	std::cout << "webserv closed, bye bye o/" << std::endl;
 	return (0);
 }
 
@@ -148,10 +146,17 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 		{
 			if (&((*it).get_client()) == &client)
 			{
-				if ((*it).get_state() == 0)
-					(*it).send_request(pc.get_raw_revents((*it).get_input_pipe()));
-				if ((*it).get_state() == 1)
-					(*it).get_response(pc.get_raw_revents((*it).get_output_pipe()));
+				try {
+					if ((*it).get_state() == 0)
+						(*it).send_request(pc.get_raw_revents((*it).get_input_pipe()));
+					if ((*it).get_state() == 1)
+						(*it).get_response(pc.get_raw_revents((*it).get_output_pipe()));
+				} catch (std::exception &e) {
+					std::cerr << "cgi > error while running cgi process : \'" \
+					<< e.what() << "\'" << std::endl;
+					(*it).get_client().response().setStatus(500);
+					(*it).set_state(2);
+				}
 				if ((*it).get_state() != 2)
 					return (0);
 				host->create_file_response((*it));

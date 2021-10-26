@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:24 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/26 12:42:36 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/26 13:10:08 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <iostream>
 # include <cerrno>
 # include <cstdio>
+# include <csignal>
 
 # include "polling/polling.hpp"
 # include "config/MasterConfig.hpp"

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/25 11:37:33 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/26 07:34:17 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,12 +39,18 @@ CGI::~CGI()
 		delete[] this->_var_formatted[i];
 	if (this->_var_count)
 		delete[] this->_var_formatted;
+	if (this->get_input_pipe())
+		close(this->get_input_pipe());
+	if (this->get_output_pipe())
+	{
+		close(this->get_output_pipe());
+		// if (!kill(this->_pid, 0))
+		// 	kill(this->_pid, SIGTERM);
+	}
 }
 
 CGI &CGI::operator=(CGI const &)
-{
-	return (*this);
-}
+{ return (*this); }
 
 CGI			&CGI::construct()
 {
@@ -177,10 +183,8 @@ CGI			&CGI::launch()
 		close(this->_pipes_out[1]);
 		this->_server.get_files()\
 		.push_back(new f_pollfd("cgi_input", this->_pipes_in[1], POLLOUT, "", true));
-		this->_fds.first = this->_server.get_files().back();
 		this->_server.get_files()\
 		.push_back(new f_pollfd("cgi_output", this->_pipes_out[0], POLLIN, "", true));
-		this->_fds.second = this->_server.get_files().back();
 	}
 	else
 	{
@@ -206,51 +210,24 @@ bool			CGI::send_request(int const &revents)
 {
 	if (!this->_request.getBody().size())
 	{
-		for (std::vector<f_pollfd *>::iterator it = \
-		this->_server.get_files().begin() ; it != \
-		this->_server.get_files().end() ; ++it)
-			if ((*it)->pfd.fd == this->_fds.first->pfd.fd)
-			{
-				delete (*it);
-				this->_server.get_files().erase(it);
-				break ;
-			}
-		close(this->get_input_pipe());
+		this->erase_pipe(&this->_pipes_in[1]);
 		this->_state++;
 		return (true);
 	}
 	if (revents & POLLERR || revents & POLLHUP || revents & POLLNVAL)
 	{
-		for (std::vector<f_pollfd *>::iterator it = \
-		this->_server.get_files().begin() ; it != \
-		this->_server.get_files().end() ; ++it)
-			if ((*it)->pfd.fd == this->_fds.first->pfd.fd)
-			{
-				delete (*it);
-				this->_server.get_files().erase(it);
-				break ;
-			}
-		close(this->get_input_pipe());
+		this->erase_pipe(&this->_pipes_in[1]);
 		throw std::runtime_error("poll error req");
 	}
 	if (revents & POLLOUT)
 	{
-		for (std::vector<f_pollfd *>::iterator it = \
-		this->_server.get_files().begin() ; it != \
-		this->_server.get_files().end() ; ++it)
-			if ((*it)->pfd.fd == this->_fds.first->pfd.fd)
-			{
-				delete (*it);
-				this->_server.get_files().erase(it);
-				break ;
-			}
 		if (write(this->get_input_pipe(), this->_request.getBody().data(), \
 		this->_request.getBody().size()) == -1)
 		{
-			close(this->get_input_pipe());
+			this->erase_pipe(&this->_pipes_in[1]);
 			throw std::runtime_error(strerror(errno));
 		}
-		close(this->get_input_pipe());
+		this->erase_pipe(&this->_pipes_in[1]);
 		this->_state++;
 		return (true);
 	}
@@ -261,16 +238,7 @@ bool			CGI::get_response(int const &revents)
 {
 	if (revents & POLLERR || revents & POLLNVAL)
 	{
-		for (std::vector<f_pollfd *>::iterator it = \
-		this->_server.get_files().begin() ; it != \
-		this->_server.get_files().end() ; ++it)
-			if ((*it)->pfd.fd == this->_fds.second->pfd.fd)
-			{
-				delete (*it);
-				this->_server.get_files().erase(it);
-				break ;
-			}
-		close(this->get_output_pipe());
+		this->erase_pipe(&this->_pipes_out[0]);
 		throw std::runtime_error("poll error res");
 	}
 	if (revents & POLLIN || this->_response_flag)
@@ -290,16 +258,7 @@ bool			CGI::get_response(int const &revents)
 		}
 		if (i > 0 && !parsecgi_ret)
 			return (true);
-		for (std::vector<f_pollfd *>::iterator it = \
-		this->_server.get_files().begin() ; it != \
-		this->_server.get_files().end() ; ++it)
-			if ((*it)->pfd.fd == this->_fds.second->pfd.fd)
-			{
-				delete (*it);
-				this->_server.get_files().erase(it);
-				break ;
-			}
-		close(this->get_output_pipe());
+		this->erase_pipe(&this->_pipes_out[0]);
 		if (i == -1)
 			throw std::runtime_error(strerror(errno));
 		this->_state++;
@@ -322,36 +281,40 @@ std::string		CGI::get_var_formatted_str(std::string const &var_name)
 }
 
 int				CGI::get_input_pipe()
-{
-	return (this->_pipes_in[1]);
-}
+{ return (this->_pipes_in[1]); }
 
 int				CGI::get_output_pipe()
-{
-	return (this->_pipes_out[0]);
-}
+{ return (this->_pipes_out[0]); }
 
 char			**CGI::get_var_formatted()
-{
-	return (this->_var_formatted);
-}
+{ return (this->_var_formatted); }
 
 Client			&CGI::get_client()
-{
-	return (this->_client);
-}
+{ return (this->_client); }
 
 std::map<std::string, std::string>	&CGI::get_vars()
-{
-	return (this->_var_containers);
-}
+{ return (this->_var_containers); }
 
 bool const		&CGI::get_response_flag() const
-{
-	return (this->_response_flag);
-}
+{ return (this->_response_flag); }
 
 int				CGI::get_state() const
+{ return (this->_state); }
+
+void			CGI::set_state(int state)
+{ this->_state = state; }
+
+void			CGI::erase_pipe(int *pipe)
 {
-	return (this->_state);
+	for (std::vector<f_pollfd *>::iterator it = \
+	this->_server.get_files().begin() ; it != \
+	this->_server.get_files().end() ; ++it)
+		if ((*it)->pfd.fd == *pipe)
+		{
+			delete (*it);
+			this->_server.get_files().erase(it);
+			break ;
+		}
+	close(*pipe);
+	*pipe = 0;
 }
