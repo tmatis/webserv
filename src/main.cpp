@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/26 07:40:04 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/26 07:42:06 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ int	main(int argc, char **argv)
 	}
 
 	std::signal(SIGINT, &main_while_switch);
+	std::signal(SIGTERM, &main_while_switch);
 	while (main_while_handler)
 	{
 		if (pc.polling() == -1 && main_while_handler)
