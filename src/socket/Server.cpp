@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/26 07:32:11 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/26 19:16:48 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,7 +200,7 @@ Server::create_file_response(Client& client)
 {
 	f_pollfd*	file;
 	char		buffer[BUFFER_SIZE];
-	int			bytes;
+	ssize_t		bytes;
 
 	file	= client.files().front();
 	bytes	= read(file->pfd.fd, buffer, BUFFER_SIZE);
