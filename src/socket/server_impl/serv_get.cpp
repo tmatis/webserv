@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:47 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/26 15:38:18 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/26 15:56:14 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,6 +127,7 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 	int fd = open(path.data(), O_RDONLY | O_NONBLOCK);
 	if (fd == -1)
 	{
+		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
 		std::cerr << "server > cannot open file \"" << path << "\": " << strerror(errno) << "\n";
 		return (INTERNAL_SERVER_ERROR);
 	}
