@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:48:00 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/24 14:11:09 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/26 20:33:54 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ Route::Route(Config const &base) : Config(base)
 	this->upload_path = ".";
 	// this->cgi_extension = std::string();
 }
-Route::Route(Route const &cp) { *this = cp; }
+Route::Route(Route const &cp) : Config() { *this = cp; }
 Route::~Route() {}
 
 Route		&Route::operator=(Route const &rhs)
