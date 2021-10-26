@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_get.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:47 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 11:08:16 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/26 05:32:28 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,6 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 				break ; // index file found !
 			dirls.push_back(*file);
 		}
-		closedir(dirptr);
 		if (errno) // readdir failed
 		{
 			std::cerr << "server > cannot read directory \"" << path << "\": " << strerror(errno) << "\n";
@@ -105,6 +104,7 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 
 		if (!file) // index file not found...
 		{
+			closedir(dirptr);
 			if (rules._autoindex) // autoindex enabled
 			{
 				client.response().gen_autoindex(dirls, path, uri_path);
@@ -115,6 +115,7 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 		}
 		else
 			path = HTTPGeneral::append_paths(path, file->d_name); // path + filename
+		closedir(dirptr);
 	}
 	
 	if (_file_already_requested(client, path))

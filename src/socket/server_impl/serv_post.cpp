@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_post.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/25 12:05:48 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/25 22:38:17 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -291,17 +291,17 @@ Server::_check_existing_file(std::vector<std::string>& files, std::string& filen
 	size_t								ext_pos	= filename.rfind('.');
 	int									n		= 0;
 	std::vector<std::string>::iterator	it		= files.begin();
-	std::stringstream					ss;
+
+	if (ext_pos == std::string::npos)
+		ext_pos = filename.length();
 
 	while (it != files.end())
 	{
 		if (*it == curr)
 		{
 			n++;
-			ss << n;
 			curr = filename;
-			curr.insert(ext_pos, " (" + ss.str() + ")");
-			ss.str("");
+			curr.insert(ext_pos, " (" + itoa(n) + ")");
 			it = files.begin();
 		}
 		else

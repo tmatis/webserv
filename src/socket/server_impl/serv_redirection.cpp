@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_redirection.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:59 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/25 12:06:00 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/25 22:33:09 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,12 +46,7 @@ Server::_replace_conf_vars(Client& client, const std::string& redirection)
  	// replace "$server_port"
 	pos = url.find("$server_port");
 	if (pos != std::string::npos)
-	{
-		std::stringstream	ss;
-
-		ss << ntohs(_config.port);
-		url.replace(pos, 12, ss.str());
-	}
+		url.replace(pos, 12, itoa(ntohs(_config.port)));
 
  	// replace "$uri"
 	pos = url.find("$uri");
