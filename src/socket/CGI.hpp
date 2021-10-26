@@ -15,7 +15,8 @@
 # include "Server.hpp"
 # include "../utils/random_access_iterator.hpp"
 # include <cctype>
-# include <cstring>
+# include <cstdlib>
+# include <signal.h>
 # include <stdexcept>
 
 class Server;
@@ -36,8 +37,6 @@ class CGI
 	pid_t								_pid;
 	bool								_response_flag;
 	int									_state;
-	/* first = input ; second = output */
-	std::pair<f_pollfd *, f_pollfd *>	_fds;
 
 	public:
 	CGI(Server &server, Client &client, Route const &route, HTTPRequest const &httpreq, \
@@ -59,6 +58,7 @@ class CGI
 	bool					send_request(int const &revents);
 	bool					get_response(int const &revents);
 
+	void				erase_pipe(int *pipe);
 	int					get_input_pipe();
 	int					get_output_pipe();
 	Client				&get_client();
@@ -66,6 +66,7 @@ class CGI
 	std::map<std::string, std::string>	&get_vars();
 	bool const			&get_response_flag() const;
 	int					get_state() const;
+	void				set_state(int state);
 };
 
 
