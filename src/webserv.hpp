@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:24 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 13:13:04 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/26 06:30:11 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <iostream>
 # include <cerrno>
 # include <cstdio>
+# include <csignal>
 
 # include "polling/polling.hpp"
 # include "config/MasterConfig.hpp"
