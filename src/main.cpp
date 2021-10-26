@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/26 07:42:06 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/26 15:45:42 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,15 +53,18 @@ int	main(int argc, char **argv)
 
 	for (size_t i = 0 ; i < hosts.size() ; i++)
 	{
+		if (pc.polling() == -1 && main_while_handler)
+			perror("webserv: poll: ");
 		// add server to poll class
 		pc.add_server(*hosts[i]);
 		
 		// print server listener info
-		std::cout	<< "Listen on "
-					<< inet_ntoa(hosts[i]->get_listener().addr().sin_addr)
-					<< ":"
-					<< ntohs(hosts[i]->get_listener().addr().sin_port)
-					<< "\n";		
+		if (PollClass::get_pollclass()->get_raw_revents(1) == POLLOUT)
+			std::cout	<< "Listen on "
+						<< inet_ntoa(hosts[i]->get_listener().addr().sin_addr)
+						<< ":"
+						<< ntohs(hosts[i]->get_listener().addr().sin_port)
+						<< "\n";		
 	}
 
 	std::signal(SIGINT, &main_while_switch);
@@ -94,7 +97,8 @@ int	main(int argc, char **argv)
 		}
 	}
 	destroy_servers(hosts);
-	std::cout << "webserv closed, bye bye o/" << std::endl;
+	if (PollClass::get_pollclass()->get_raw_revents(1) == POLLOUT)
+		std::cout << "webserv closed, bye bye o/" << std::endl;
 	return (0);
 }
 
@@ -152,8 +156,9 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 					if ((*it).get_state() == 1)
 						(*it).get_response(pc.get_raw_revents((*it).get_output_pipe()));
 				} catch (std::exception &e) {
-					std::cerr << "cgi > error while running cgi process : \'" \
-					<< e.what() << "\'" << std::endl;
+					if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+						std::cerr << "cgi > error while running cgi process : \'" \
+						<< e.what() << "\'" << std::endl;
 					(*it).get_client().response().setStatus(500);
 					(*it).set_state(2);
 				}

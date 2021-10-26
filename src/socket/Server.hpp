@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 10:59:59 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/26 15:36:18 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,10 @@
 # include "../http/HTTPURI.hpp"
 # include "../config/Route.hpp"
 # include "CGI.hpp"
+# include "../polling/polling.hpp"
 
 class CGI;
+class PollClass;
 
 # define SERVER_TIMEOUT 15.0 // seconds
 

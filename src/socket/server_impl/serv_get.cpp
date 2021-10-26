@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:47 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 11:08:16 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/26 15:38:18 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,8 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 			return (NOT_FOUND); // path doesn't exist
 		else
 		{
-			std::cerr << "server > stat() failed: " << strerror(errno) << "\n";
+			if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+				std::cerr << "server > stat() failed: " << strerror(errno) << "\n";
 			return (INTERNAL_SERVER_ERROR); // other error
 		}
 	}
@@ -85,7 +86,8 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 		// open directory
 		if (!(dirptr = opendir(path.data())))
 		{
-			std::cerr << "server > cannot open directory \"" << path << "\": " << strerror(errno) << "\n";
+			if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+				std::cerr << "server > cannot open directory \"" << path << "\": " << strerror(errno) << "\n";
 			return (INTERNAL_SERVER_ERROR);
 		}
 
@@ -99,7 +101,8 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 		closedir(dirptr);
 		if (errno) // readdir failed
 		{
-			std::cerr << "server > cannot read directory \"" << path << "\": " << strerror(errno) << "\n";
+			if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+				std::cerr << "server > cannot read directory \"" << path << "\": " << strerror(errno) << "\n";
 			return (INTERNAL_SERVER_ERROR);
 		}
 

@@ -3,17 +3,28 @@
 /*                                                        :::      ::::::::   */
 /*   polling.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:03:40 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/20 02:27:28 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/26 15:33:43 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #	include "polling.hpp"
 
+PollClass *PollClass::pc_ptr = NULL;
+
 PollClass::PollClass(int const &timeout) : \
-_timeout(timeout), _pfd_list(), _server_list() {}
+_timeout(timeout), _pfd_list(), _server_list()
+{
+	fcntl(0, F_SETFL, O_NONBLOCK);
+	fcntl(1, F_SETFL, O_NONBLOCK);
+	fcntl(2, F_SETFL, O_NONBLOCK);
+	this->_pfd_list.push_back(this->make_pollfd(0, POLLIN));
+	this->_pfd_list.push_back(this->make_pollfd(1, POLLOUT));
+	this->_pfd_list.push_back(this->make_pollfd(2, POLLOUT));
+	PollClass::pc_ptr = this;
+}
 PollClass::PollClass(PollClass const &cp) { *this = cp; }
 PollClass::~PollClass() {}
 
@@ -37,7 +48,7 @@ void				PollClass::add_server(server &new_server)
 	this->_server_data_size.push_back(std::make_pair(new_server.get_clients().size(), \
 	new_server.get_files().size()));
 	this->_pfd_list.insert(this->_pfd_list.begin() + \
-	(this->_pfd_list.empty() ? 0 : this->_server_list.size() - 1), \
+	(this->_pfd_list.size() == BASE_OFFSET ? BASE_OFFSET : BASE_OFFSET + this->_server_list.size() - 1), \
 	PollClass::make_pollfd(this->_server_list.back()->get_listener().fd()));
 
 	this->_pfd_list.insert(this->_pfd_list.end(), new_server.get_clients().begin(), \
@@ -60,7 +71,7 @@ void				PollClass::remove_server(server *server)
 	for (unsigned int i = 0 ; i < index ; i++)
 		data_offset += this->_server_data_size[i].first + \
 		this->_server_data_size[i].second;
-	data_offset += this->_server_list.size();
+	data_offset += this->_server_list.size() + BASE_OFFSET;
 	
 	this->_pfd_list.erase(this->_pfd_list.begin() + data_offset, \
 	this->_pfd_list.begin() + data_offset + \
@@ -83,7 +94,7 @@ PollClass::pfd		PollClass::make_pollfd(int fd, int events)
 void				PollClass::update_server_pfd(unsigned int index)
 {
 	unsigned int	i = 0;
-	unsigned int	offset = 0;
+	unsigned int	offset = BASE_OFFSET;
 	unsigned int	new_cfd_size = this->_server_list[index]->get_clients().size();
 	unsigned int	new_fst_size = this->_server_list[index]->get_files().size();
 
@@ -196,3 +207,6 @@ int					PollClass::get_raw_revents(int const &fd, server *server)
 
 int					PollClass::get_raw_revents(client const &cl, server *server)
 { return (this->get_raw_revents(cl.fd(), server)); }
+
+PollClass			*PollClass::get_pollclass()
+{ return (pc_ptr); }
