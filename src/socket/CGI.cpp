@@ -3,10 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2021/10/26 15:24:31 by nouchata         ###   ########.fr       */
+=======
+/*   Updated: 2021/10/26 19:16:30 by tmatis           ###   ########.fr       */
+>>>>>>> master
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -244,7 +248,7 @@ bool			CGI::get_response(int const &revents)
 	if (revents & POLLIN || this->_response_flag)
 	{
 		char		buffer[1024];
-		int			i;
+		ssize_t			i;
 		bool		parsecgi_ret = false;
 
 		memset(buffer, 0, 1024);

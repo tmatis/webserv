@@ -3,10 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2021/10/26 15:45:42 by nouchata         ###   ########.fr       */
+=======
+/*   Updated: 2021/10/26 13:10:01 by mamartin         ###   ########.fr       */
+>>>>>>> master
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +76,7 @@ int	main(int argc, char **argv)
 	while (main_while_handler)
 	{
 		if (pc.polling() == -1 && main_while_handler)
-			perror("webserv: poll: ");
+			print_error("webserv: poll");
 
 		// check events for each server
 		for (std::vector<Server*>::iterator h = hosts.begin();
@@ -85,12 +89,12 @@ int	main(int argc, char **argv)
 					++cl)
 			{
 				if (handle_events(pc, *h, *cl) == -1)
-					perror("webserv: client event: ");
+					print_error("webserv: client event");
 			}
 
 			// check connection on server
 			if (handle_events(pc, *h) == -1)
-				perror("webserv: client connection: ");
+				print_error("webserv: client connection");
 
 			(*h)->flush_clients();	// delete disconnected clients
 			(*h)->flush_files();	// delete unused files
@@ -179,7 +183,6 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 				host->write_uploaded_file(client, i);
 		}
 	}
-
 	return (0);
 }
 
@@ -189,4 +192,9 @@ void destroy_servers(std::vector<Server*>& list)
 			it != list.end();
 			++it)
 		delete *it;
+}
+
+void print_error(const char* message)
+{
+	std::cerr << message << ": " << strerror(errno) << "\n";
 }
