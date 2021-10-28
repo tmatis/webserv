@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:04 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/27 21:38:17 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/28 16:06:23 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,12 @@ bool
 Server::_read_request(Client &client)
 {
 	char	buffer[BUFFER_SIZE];
-	int		readBytes	= read(client.fd(), &buffer, BUFFER_SIZE);
+	ssize_t	readBytes	= read(client.fd(), &buffer, BUFFER_SIZE);
 
 	if (readBytes < 0)
 	{
-		std::cerr << "server > reading client request failed: " << strerror(errno) << "\n";
+		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+			std::cerr << "server > reading client request failed: " << strerror(errno) << "\n";
 		_handle_error(client, INTERNAL_SERVER_ERROR);
 		return (false);
 	}

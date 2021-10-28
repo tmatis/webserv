@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/26 07:34:17 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/28 10:07:40 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -244,7 +244,7 @@ bool			CGI::get_response(int const &revents)
 	if (revents & POLLIN || this->_response_flag)
 	{
 		char		buffer[1024];
-		int			i;
+		ssize_t			i;
 		bool		parsecgi_ret = false;
 
 		memset(buffer, 0, 1024);
@@ -259,7 +259,7 @@ bool			CGI::get_response(int const &revents)
 		if (i > 0 && !parsecgi_ret)
 			return (true);
 		this->erase_pipe(&this->_pipes_out[0]);
-		if (i == -1)
+		if (i == -1 && errno != EAGAIN)
 			throw std::runtime_error(strerror(errno));
 		this->_state++;
 		return (true);

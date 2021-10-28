@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/27 20:50:47 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/28 16:06:22 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -237,7 +237,8 @@ Server::_create_file(const std::string& filename, const std::string& data, uint 
 	fd = open(filename.data(), O_WRONLY | O_CREAT | O_NONBLOCK | O_APPEND, mode);
 	if (fd == -1)
 	{
-		std::cerr << "server > cannot open file \"" << filename << "\": " << strerror(errno) << "\n";
+		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+			std::cerr << "server > cannot open file \"" << filename << "\": " << strerror(errno) << "\n";
 		return (NULL);
 	}
 
@@ -264,7 +265,8 @@ Server::_list_directory(std::vector<std::string>& files, const std::string& path
 	// open directory
 	if (!(dirptr = opendir(path.data())))
 	{
-		std::cerr << "server > cannot open directory \"" << path << "\": " << strerror(errno) << "\n";
+		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+			std::cerr << "server > cannot open directory \"" << path << "\": " << strerror(errno) << "\n";
 		return (-1);
 	}
 
@@ -274,7 +276,8 @@ Server::_list_directory(std::vector<std::string>& files, const std::string& path
 	closedir(dirptr);
 	if (errno) // readdir failed
 	{
-		std::cerr << "server > cannot read directory \"" << path << "\": " << strerror(errno) << "\n";
+		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+			std::cerr << "server > cannot read directory \"" << path << "\": " << strerror(errno) << "\n";
 		return (-1);
 	}
 	return (0);
