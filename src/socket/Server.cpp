@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 14:42:21 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/28 15:46:01 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,16 @@ Server::Server(const Config& conf) :
 
 Server::~Server(void)
 {
+	// free files
+	for (std::vector<f_pollfd*>::iterator it = _files.begin();
+		it != _files.end();
+		++it)
+			delete *it;
+}
+
+void
+Server::close_fds(void)
+{
 	// close all sockets
 	close(_host.fd());
 	for (client_iterator it = _clients.begin(); it != _clients.end(); it++)
@@ -29,10 +39,7 @@ Server::~Server(void)
 	for (std::vector<f_pollfd*>::iterator it = _files.begin();
 		it != _files.end();
 		++it)
-	{
-		close((*it)->pfd.fd);
-		delete *it;
-	}
+			close((*it)->pfd.fd);
 }
 
 /*** CONNECTIONS **************************************************************/

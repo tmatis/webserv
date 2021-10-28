@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 14:42:21 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/28 15:46:01 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,29 +14,21 @@
 #include "../CGI.hpp"
 #include <sstream>
 
-int
+pid_t
 Server::_handle_post(Client &client, const Route& rules, const HTTPURI& uri)
 {
 	std::pair<std::string, std::string>		cgi;
+
 	cgi = _check_cgi_extension(rules, uri.getPath());
 	if (!cgi.first.empty())
-	{
-		this->_cgis.push_back(CGI((*this), client, rules, client.request(), cgi));
-		this->_cgis.back().construct();
-		try {
-			this->_cgis.back().launch();
-		} catch (std::exception &e) { this->_cgis.pop_back(); return(_handle_error(client, 500)); }
-		client.state(IDLE);
-		return (OK);
-	}
+		return (_handle_cgi(client, cgi));
 
 	if (_handle_upload(client, rules) == true) // file has been created or an error occured
-		return (OK); // client state == (IDLE || WAITING_ANSWER)
+		return (getpid()); // client state == (IDLE || WAITING_ANSWER)
 	
-	// what if it's a post request but it's not cgi or upload ????
-	_handle_error(client, METHOD_NOT_ALLOWED); // ???
-
-	return (OK);
+	// post request is not accepted
+	_handle_error(client, METHOD_NOT_ALLOWED);
+	return (getpid());
 }
 
 bool

@@ -6,14 +6,14 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:47 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 14:42:21 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/28 15:46:01 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Server.hpp"
 #include "../CGI.hpp"
 
-int
+pid_t
 Server::_handle_get(Client &client, const Route& rules, const HTTPURI& uri)
 {
 	std::pair<std::string, std::string>		cgi;
@@ -21,37 +21,16 @@ Server::_handle_get(Client &client, const Route& rules, const HTTPURI& uri)
 
 	cgi = _check_cgi_extension(rules, uri.getPath());
 	if (!cgi.first.empty())
-	{
-		this->_cgis.push_back(CGI((*this), client, rules, client.request(), cgi));
-		this->_cgis.back().construct();
-		{ // fast 404 check
-			struct stat buffer;
-			code = stat(this->_cgis.back().get_vars()["PATH_TRANSLATED"].c_str(), &buffer);
-		}
-		if (code)
-		{
-			this->_cgis.pop_back();
-			return (_handle_error(client, 404));
-		}
-		try {
-			this->_cgis.back().launch();
-		} catch (std::exception &e) { this->_cgis.pop_back(); return(_handle_error(client, 500)); }
-		// char **src = this->_cgis.back().get_var_formatted();
-		// for (unsigned int i = 0 ; src[i] ; i++)
-			// std::cout << src[i] << std::endl;
-		// _handle_cgi(uri, client);
-		// this->_cgis.pop_back();
-		client.state(IDLE);
-		return (OK);
-	}
+		return (_handle_cgi(client, cgi));
 
 	// search content requested by the client
 	code = _find_resource(rules, uri.getPath(), client);
 	if (code != OK)
-		return (_handle_error(client, code));
+		_handle_error(client, code);
 	else if (client.files().size()) // resource found
 		client.state(IDLE);
-	return (OK);
+		
+	return (getpid());
 }
 
 int

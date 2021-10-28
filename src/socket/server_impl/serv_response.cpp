@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_response.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/25 11:34:34 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/28 15:03:32 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ Server::_handle_error(Client& client, int status, bool autogen)
 			client.response().setStatus((status_code)status);
 			client.response().setBody(errpage->second);
 			_create_response(client);
-			return (0);
+			return (1);
 		}
 		else // doesn't exist
 			return (_handle_error(client, status, true)); // retry with auto-generation enabled
@@ -35,7 +35,7 @@ Server::_handle_error(Client& client, int status, bool autogen)
 		client.response().gen_error_page(status);
 		_create_response(client);
 	}
-	return (0);
+	return (1);
 }
 
 void
