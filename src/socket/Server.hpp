@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 15:22:11 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/28 16:07:17 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ class Server
 		const Route&	_resolve_routes(const std::string& uri_path);
 		int				_check_request_validity(const Route& rules, HTTPRequest& request);
 		bool			_is_mime_type_supported(const Route& rules, const std::string& mime_type);
+		bool			_check_http_version(const std::string& version);
 		/*** RESPONSES ********************************************************/
 		int				_handle_error(Client& client, int status, bool autogen = false);
 		void			_create_response(Client& client);

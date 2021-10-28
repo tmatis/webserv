@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 15:46:01 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/28 16:07:17 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ Server::_handle_upload(Client& client, const Route& rules)
 		return (false);
 
 	const std::string*	content_type	= client.request().getContentType();
-	std::string			mime_type		= "application/octet-stream"; // default content-type if not provided
+	std::string			mime_type		= rules._default_mime; // default content-type if not provided
 
 	if (content_type)
 	{
@@ -121,6 +121,7 @@ Server::_form_upload(Client& client)
 			std::string	data;
 			f_pollfd*	fpfd;
 
+			type		= client.rules()->_default_mime;
 			filename	= _get_file_info(body, type, &start);
 
 			// check that the server supports this content-type
@@ -197,11 +198,6 @@ Server::_get_file_info(const std::string& body, std::string& type, size_t *start
 			type = line.substr(14, line.length() - 14);
 		line = _get_next_line(body, start);
 	}
-	
-	// set a default type if none
-	if (!type.size())
-		type = "application/octet-stream";
-
 	return (filename);
 }
 

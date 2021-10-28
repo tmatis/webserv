@@ -373,7 +373,7 @@ std::string const &dir, std::string const &uri_path)
 	std::set<std::string>							sfiles;
 	std::set<std::string>::iterator					it;
 
-	tmplate += "<html>\n<head><title>Index of " + dir + "</title></head>\n";
+	tmplate += "<html>\n<head><title>Index of " + uri_path + "</title></head>\n";
 	tmplate += "<body>\n<h1>Index of " + uri_path + "</h1>\n<hr>\n<pre>";
 	tmplate += "<a href=\"../\">../</a>\n";
 
