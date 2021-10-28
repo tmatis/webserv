@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 10:07:37 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/28 14:42:21 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,11 +156,11 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 					if ((*it).get_state() == 1)
 						(*it).get_response(pc.get_raw_revents((*it).get_output_pipe()));
 				} catch (std::exception &e) {
-					if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+					if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 						std::cerr << "cgi > error while running cgi process : \'" \
 						<< e.what() << "\'" << std::endl;
 					(*it).get_client().response().setStatus(500);
-					(*it).set_state(2);
+					(*it).set_state(STDERR_FILENO);
 				}
 				if ((*it).get_state() != 2)
 					return (0);

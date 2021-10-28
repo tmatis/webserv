@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 10:08:12 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/28 14:42:21 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ Server::add_new_client(void)
 
 	if (client.connect(_host.fd()) == -1)
 	{
-		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+		if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 			std::cerr << "server > client connection failed: " << strerror(errno) << "\n";
 		return (-1);
 	}
@@ -167,11 +167,11 @@ Server::send_response(Client& client)
 	if (write(client.fd(), response.data(), response.size()) < 0)
 	{
 		client.write_trials++;
-		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+		if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 			std::cerr << "server > sending client response failed: " << strerror(errno) << "\n";
 		if (client.write_trials == 5) // too much fails
 		{
-			if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+			if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 				std::cerr << "server > client disconnected.\n";
 			client.state(DISCONNECTED);
 		}
@@ -220,7 +220,7 @@ Server::create_file_response(Client& client)
 	}
 	else
 	{
-		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+		if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 			std::cerr << "server > reading file requested failed: " << strerror(errno) << "\n";
 		client.files().clear();
 		_handle_error(client, INTERNAL_SERVER_ERROR);
@@ -246,7 +246,7 @@ Server::write_uploaded_file(Client& client, int index)
 	if (write(fpfd->pfd.fd, fpfd->data.c_str(), fpfd->data.length()) < 0)
 	{
 		_clear_previous_files(client); // delete all files created
-		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+		if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 			std::cerr << "server > cannot write uploaded file: " << strerror(errno) << "\n";
 		_handle_error(client, INTERNAL_SERVER_ERROR);
 		return (-1);

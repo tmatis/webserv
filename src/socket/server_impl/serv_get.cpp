@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_get.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:47 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 10:08:16 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/28 14:42:21 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 			return (NOT_FOUND); // path doesn't exist
 		else
 		{
-			if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+			if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 				std::cerr << "server > stat() failed: " << strerror(errno) << "\n";
 			return (INTERNAL_SERVER_ERROR); // other error
 		}
@@ -86,7 +86,7 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 		// open directory
 		if (!(dirptr = opendir(path.data())))
 		{
-			if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+			if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 				std::cerr << "server > cannot open directory \"" << path << "\": " << strerror(errno) << "\n";
 			return (INTERNAL_SERVER_ERROR);
 		}
@@ -100,7 +100,7 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 		}
 		if (errno) // readdir failed
 		{
-			if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+			if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 				std::cerr << "server > cannot read directory \"" << path << "\": " << strerror(errno) << "\n";
 			return (INTERNAL_SERVER_ERROR);
 		}
@@ -128,7 +128,7 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 	int fd = open(path.data(), O_RDONLY | O_NONBLOCK);
 	if (fd == -1)
 	{
-		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+		if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 		std::cerr << "server > cannot open file \"" << path << "\": " << strerror(errno) << "\n";
 		return (INTERNAL_SERVER_ERROR);
 	}
