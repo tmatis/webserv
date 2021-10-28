@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Route.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/13 21:48:00 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/26 20:33:54 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/28 18:55:45 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "Route.hpp"
 # include "Config.hpp"
+# include "../http/HTTPGeneral.hpp"
 
 Route::Route(Config const &base) : Config(base)
 {
@@ -37,7 +38,7 @@ void		Route::construct(std::pair<std::string, std::string> &config_str)
 	std::pair<std::string, std::string>					parsing_res;
 
 	try {
-		this->location = config_str.first.substr(1);
+		this->location = HTTPGeneral::append_paths(config_str.first.substr(1), "/");
 		parsing_res = this->extract_key_value(config_str.second);
 		while (!parsing_res.first.empty())
 		{

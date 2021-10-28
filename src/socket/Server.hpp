@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 16:07:17 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/28 19:10:29 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,9 +64,6 @@ class Server
 
 		// other
 		void							close_fds(void);
-
-		/*** RESPONSES PUBLIC ********************************************************/
-		std::string		_append_paths(const std::string& str1, const std::string& str2);
 
 		static const int				timeout;
 
