@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 15:55:51 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/09 13:56:35 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/26 15:36:42 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,9 @@
 # include "poll.h"
 # include "../socket/Server.hpp"
 
-class ServerClass;
-class ClientClass;
+# define BASE_OFFSET 3
+
+class Server;
 
 class PollClass
 {
@@ -43,6 +44,10 @@ class PollClass
 	void			update_pfd();
 
 	public:
+
+	// edgy static
+	static PollClass *pc_ptr;
+
 	PollClass(int const &timeout = 30000);
 	PollClass(PollClass const &cp);
 	~PollClass();
@@ -57,7 +62,8 @@ class PollClass
 	int				get_raw_revents(int const &fd, server *server = NULL);
 	int				get_raw_revents(client const &cl, server *server = NULL);
 
-	static pfd		make_pollfd(int fd, int events = POLLIN);
+	static pfd			make_pollfd(int fd, int events = POLLIN);
+	static PollClass	*get_pollclass();
 };
 
 #endif

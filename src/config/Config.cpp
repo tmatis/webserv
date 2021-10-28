@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:51:01 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/25 12:04:53 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/26 20:33:45 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ Config::Config(MasterConfig const &master) : MasterConfig(master), \
 	methods(this->_methods_supported), address(), port_str(), address_res(),
 	port(), redirection(), server_names(), body_limit(0), routes() {}
 
-Config::Config(Config const &cp)  { *this = cp; }
+Config::Config(Config const &cp) : MasterConfig() { *this = cp; }
 
 Config::~Config() {}
 

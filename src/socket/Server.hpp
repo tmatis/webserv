@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/25 22:32:24 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/28 10:08:13 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,10 @@
 # include "../config/Route.hpp"
 # include "../utils/templates.hpp"
 # include "CGI.hpp"
+# include "../polling/polling.hpp"
 
 class CGI;
+class PollClass;
 
 # define SERVER_TIMEOUT 15.0 // seconds
 

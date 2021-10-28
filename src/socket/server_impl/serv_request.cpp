@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_request.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:04 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/26 19:16:56 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/28 10:08:12 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ Server::_read_request(Client &client)
 
 	if (readBytes < 0)
 	{
-		std::cerr << "server > reading client request failed: " << strerror(errno) << "\n";
+		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+			std::cerr << "server > reading client request failed: " << strerror(errno) << "\n";
 		_handle_error(client, INTERNAL_SERVER_ERROR);
 		return (false);
 	}
