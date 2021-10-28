@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:04 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 16:07:18 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/28 22:35:18 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,13 +41,14 @@ Server::_read_request(Client &client)
 const Route&
 Server::_resolve_routes(const std::string& uri_path)
 {
-	const Route* matching = NULL;
+	const Route*	matching	= NULL;
+	std::string		path		= HTTPGeneral::append_paths(uri_path, "/");
 
 	for (std::vector<Route>::const_iterator it = _config.routes.begin();
 			it != _config.routes.end();
 			++it)
 	{
-		if (uri_path.find(it->location) == 0) // prefix found in uri
+		if (path.find(it->location) == 0) // prefix found in uri
 		{
 			if (!matching)
 				matching = &(*it); // first prefix matching
