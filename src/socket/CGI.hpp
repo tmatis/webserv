@@ -51,7 +51,7 @@ class CGI
 	/* in the case where execve could fail, the get_output_pipe() would be
 	 * filled with "WEBSERV-CGI-ERROR: <strerror>"
 	 * */
-	CGI						&launch();
+	pid_t					launch();
 
 	/* needs to be run, if there's no body to send the function returns true
 	 * */
@@ -67,6 +67,7 @@ class CGI
 	bool const			&get_response_flag() const;
 	int					get_state() const;
 	void				set_state(int state);
+	pid_t				get_pid() const;
 };
 
 

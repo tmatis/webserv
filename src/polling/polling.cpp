@@ -39,9 +39,6 @@ PollClass			&PollClass::operator=(PollClass const &rhs)
 int					PollClass::polling()
 {
 	this->update_pfd();
-	for (unsigned int i = 0 ; i < this->_pfd_list.size() ; i++)
-		std::cout << this->_pfd_list[i].fd << " ";
-	std::cout << std::endl;
 	return (poll(&(this->_pfd_list[0]), this->_pfd_list.size(), this->_timeout));
 }
 

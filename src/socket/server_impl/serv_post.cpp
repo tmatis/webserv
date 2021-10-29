@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_post.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 10:07:49 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/28 16:07:17 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,29 +14,21 @@
 #include "../CGI.hpp"
 #include <sstream>
 
-int
+pid_t
 Server::_handle_post(Client &client, const Route& rules, const HTTPURI& uri)
 {
 	std::pair<std::string, std::string>		cgi;
+
 	cgi = _check_cgi_extension(rules, uri.getPath());
 	if (!cgi.first.empty())
-	{
-		this->_cgis.push_back(CGI((*this), client, rules, client.request(), cgi));
-		this->_cgis.back().construct();
-		try {
-			this->_cgis.back().launch();
-		} catch (std::exception &e) { this->_cgis.pop_back(); return(_handle_error(client, 500)); }
-		client.state(IDLE);
-		return (OK);
-	}
+		return (_handle_cgi(client, cgi));
 
 	if (_handle_upload(client, rules) == true) // file has been created or an error occured
-		return (OK); // client state == (IDLE || WAITING_ANSWER)
+		return (getpid()); // client state == (IDLE || WAITING_ANSWER)
 	
-	// what if it's a post request but it's not cgi or upload ????
-	_handle_error(client, METHOD_NOT_ALLOWED); // ???
-
-	return (OK);
+	// post request is not accepted
+	_handle_error(client, METHOD_NOT_ALLOWED);
+	return (getpid());
 }
 
 bool
@@ -46,7 +38,7 @@ Server::_handle_upload(Client& client, const Route& rules)
 		return (false);
 
 	const std::string*	content_type	= client.request().getContentType();
-	std::string			mime_type		= "application/octet-stream"; // default content-type if not provided
+	std::string			mime_type		= rules._default_mime; // default content-type if not provided
 
 	if (content_type)
 	{
@@ -129,6 +121,7 @@ Server::_form_upload(Client& client)
 			std::string	data;
 			f_pollfd*	fpfd;
 
+			type		= client.rules()->_default_mime;
 			filename	= _get_file_info(body, type, &start);
 
 			// check that the server supports this content-type
@@ -205,11 +198,6 @@ Server::_get_file_info(const std::string& body, std::string& type, size_t *start
 			type = line.substr(14, line.length() - 14);
 		line = _get_next_line(body, start);
 	}
-	
-	// set a default type if none
-	if (!type.size())
-		type = "application/octet-stream";
-
 	return (filename);
 }
 
@@ -241,7 +229,7 @@ Server::_create_file(const std::string& filename, const std::string& data, uint 
 	fd = open(filename.data(), O_WRONLY | O_CREAT | O_NONBLOCK | O_APPEND, mode);
 	if (fd == -1)
 	{
-		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+		if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 			std::cerr << "server > cannot open file \"" << filename << "\": " << strerror(errno) << "\n";
 		return (NULL);
 	}
@@ -269,7 +257,7 @@ Server::_list_directory(std::vector<std::string>& files, const std::string& path
 	// open directory
 	if (!(dirptr = opendir(path.data())))
 	{
-		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+		if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 			std::cerr << "server > cannot open directory \"" << path << "\": " << strerror(errno) << "\n";
 		return (-1);
 	}
@@ -280,7 +268,7 @@ Server::_list_directory(std::vector<std::string>& files, const std::string& path
 	closedir(dirptr);
 	if (errno) // readdir failed
 	{
-		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+		if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 			std::cerr << "server > cannot read directory \"" << path << "\": " << strerror(errno) << "\n";
 		return (-1);
 	}

@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 10:07:37 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/28 15:57:05 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,8 +84,14 @@ int	main(int argc, char **argv)
 					cl != (*h)->get_clients().end();
 					++cl)
 			{
-				if (handle_events(pc, *h, *cl) == -1)
+				int	ret = handle_events(pc, *h, *cl);
+				if (ret == -1)
 					print_error("webserv: client event");
+				else if (ret == 0) // child process
+				{
+					destroy_servers(hosts);
+					return (0);
+				}
 			}
 
 			// check connection on server
@@ -96,7 +102,11 @@ int	main(int argc, char **argv)
 			(*h)->flush_files();	// delete unused files
 		}
 	}
+
+	// close sockets/files and free all memory allocated on the heap
+	close_all_fds(hosts);
 	destroy_servers(hosts);
+
 	if (PollClass::get_pollclass()->get_raw_revents(1) == POLLOUT)
 		std::cout << "webserv closed, bye bye o/" << std::endl;
 	return (0);
@@ -144,7 +154,6 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 
 	if (client.state() == IDLE) // client has requested a file
 	{
-
 		std::vector<CGI>::iterator it = host->get_cgis().begin();
 		for ( ; it != host->get_cgis().end() ; ++it)
 		{
@@ -156,17 +165,17 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 					if ((*it).get_state() == 1)
 						(*it).get_response(pc.get_raw_revents((*it).get_output_pipe()));
 				} catch (std::exception &e) {
-					if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+					if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 						std::cerr << "cgi > error while running cgi process : \'" \
 						<< e.what() << "\'" << std::endl;
 					(*it).get_client().response().setStatus(500);
 					(*it).set_state(2);
 				}
 				if ((*it).get_state() != 2)
-					return (0);
+					return (1);
 				host->create_file_response((*it));
 				host->get_cgis().erase(it);
-				return (0);
+				return (1);
 			}
 		}
 		for (size_t i = 0; i < client.files().size(); i++)
@@ -179,7 +188,15 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 				host->write_uploaded_file(client, i);
 		}
 	}
-	return (0);
+	return (1);
+}
+
+void close_all_fds(std::vector<Server*>& list)
+{
+	for (std::vector<Server*>::iterator it = list.begin();
+		it != list.end();
+		++it)
+			(*it)->close_fds();
 }
 
 void destroy_servers(std::vector<Server*>& list)

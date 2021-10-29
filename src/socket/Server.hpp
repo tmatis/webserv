@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 10:08:13 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/28 16:07:17 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,9 @@ class Server
 		const Config&					get_config(void) const;
 		std::vector<CGI>&				get_cgis(void);
 
+		// other
+		void							close_fds(void);
+
 		/*** RESPONSES PUBLIC ********************************************************/
 		std::string		_append_paths(const std::string& str1, const std::string& str2);
 
@@ -77,6 +80,7 @@ class Server
 		const Route&	_resolve_routes(const std::string& uri_path);
 		int				_check_request_validity(const Route& rules, HTTPRequest& request);
 		bool			_is_mime_type_supported(const Route& rules, const std::string& mime_type);
+		bool			_check_http_version(const std::string& version);
 		/*** RESPONSES ********************************************************/
 		int				_handle_error(Client& client, int status, bool autogen = false);
 		void			_create_response(Client& client);
@@ -84,8 +88,8 @@ class Server
 		std::string		_get_uri_reference(const std::string& filename);
 
 		/* METHOD HANDLERS ================================================== */
-		int				_handle_get(Client &client, const Route& rules, const HTTPURI& uri);
-		int				_handle_post(Client &client, const Route& rules, const HTTPURI& uri);
+		pid_t			_handle_get(Client &client, const Route& rules, const HTTPURI& uri);
+		pid_t			_handle_post(Client &client, const Route& rules, const HTTPURI& uri);
 		int				_handle_delete(Client &client, const Route& rules, const HTTPURI& uri);
 		/*** GET **************************************************************/
 		int				_find_resource(const Route& rules, const std::string& uri_path, Client& client);
@@ -106,6 +110,7 @@ class Server
 		/* OTHER ============================================================ */
 		/*** CGI **************************************************************/
 		std::pair<std::string, std::string>	_check_cgi_extension(const Route& rules, const std::string& uri_path);
+		pid_t								_handle_cgi(Client& client, std::pair<std::string, std::string>& cgi);
 		/*** REDIRECTIONS *****************************************************/
 		bool			_handle_redirection(Client& client, const Route& rules);
 		std::string		_replace_conf_vars(Client& client, const std::string& redirection);

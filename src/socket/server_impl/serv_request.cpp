@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_request.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:04 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 10:08:12 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/28 16:07:18 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ Server::_read_request(Client &client)
 
 	if (readBytes < 0)
 	{
-		if (PollClass::get_pollclass()->get_raw_revents(2) == POLLOUT)
+		if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 			std::cerr << "server > reading client request failed: " << strerror(errno) << "\n";
 		_handle_error(client, INTERNAL_SERVER_ERROR);
 		return (false);
@@ -61,8 +61,7 @@ Server::_resolve_routes(const std::string& uri_path)
 int
 Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 {
-	// check HTTP protocol version
-	if (request.getVersion() != "HTTP/1.1")
+	if (!_check_http_version(request.getVersion()))
 		return (HTTP_VERSION_NOT_SUPPORTED);
 
 	// check host header field
@@ -118,6 +117,19 @@ Server::_is_mime_type_supported(const Route& rules, const std::string& mime_type
 	{
 		if (it->second == mime_type)
 			return (true);
+	}
+	return (false);
+}
+
+bool
+Server::_check_http_version(const std::string& version)
+{
+	char	vnum = version[version.length() - 1];
+
+	if ((vnum == '1' || vnum == '0') && version.length() == 8)
+	{
+		if (version.find("HTTP/1.") == 0)
+				return (true);
 	}
 	return (false);
 }

@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/07 17:52:22 by tmatis            #+#    #+#             */
-/*   Updated: 2021/10/14 22:46:01 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/28 15:16:03 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,21 +14,20 @@
 
 int event_pollin(Server* host, Client& client)
 {
-	host->handle_request(client);
-	return (0);
+	return (host->handle_request(client));
 }
 
 int event_pollout(Server* host, Client& client)
 {
 	host->send_response(client);
-	return (0);
+	return (1);
 }
 
 int event_pollhup(Server* host, Client& client)
 {
 	(void)host;
 	client.state(DISCONNECTED);
-	return (0);
+	return (1);
 }
 
 int event_pollerr(Server* host, Client& client)

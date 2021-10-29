@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_cgi.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:37 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 14:18:51 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/28 14:56:56 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,4 +40,28 @@ Server::_check_cgi_extension(const Route& rules, const std::string& uri_path)
 		}
 	}
 	return (ret);
+}
+
+pid_t
+Server::_handle_cgi(Client& client, std::pair<std::string, std::string>& cgi)
+{
+	int code = 0;
+
+	this->_cgis.push_back(CGI((*this), client, *client.rules(), client.request(), cgi));
+	this->_cgis.back().construct();
+	{ // fast 404 check
+		struct stat buffer;
+		code = stat(this->_cgis.back().get_vars()["PATH_TRANSLATED"].c_str(), &buffer);
+	}
+	if (code)
+	{
+		this->_cgis.pop_back();
+		return (_handle_error(client, 404));
+	}
+	try {
+		this->_cgis.back().launch();
+	} catch (std::exception &e) { this->_cgis.pop_back(); return(_handle_error(client, 500)); }
+
+	client.state(IDLE);
+	return (this->_cgis.back().get_pid());
 }

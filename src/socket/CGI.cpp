@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/28 10:07:40 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/28 14:48:43 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,7 @@ CGI			&CGI::construct()
 	return (*this);
 }
 
-CGI			&CGI::launch()
+pid_t			CGI::launch()
 {
 
 	if (pipe(this->_pipes_in) == -1)
@@ -200,10 +200,10 @@ CGI			&CGI::launch()
 			write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15);
 			std::cerr << "cgi: \'" << this->cgi_infos.second << "\' error while launching : \'" << \
 			strerror(errno) << "\'" << std::endl;
-			exit(EXIT_SUCCESS);
+			return(this->_pid);
 		}
 	}
-	return (*this);
+	return (this->_pid);
 }
 
 bool			CGI::send_request(int const &revents)
@@ -317,4 +317,9 @@ void			CGI::erase_pipe(int *pipe)
 		}
 	close(*pipe);
 	*pipe = 0;
+}
+
+pid_t			CGI::get_pid() const
+{
+	return (_pid);
 }
