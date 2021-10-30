@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/30 16:00:48 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/31 00:54:48 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,30 +33,31 @@ int	main(int argc, char **argv)
 	catch (std::exception &e) { std::cerr << "config > " << e.what() << \
 	" (fatal error)" << std::endl; return (1); }
 
-	// create servers
+	// create servers & poll class
 	std::vector<Server*>	hosts;
+	PollClass				pc;
 
-	try
-	{
+	try {
 		for (size_t i = 0; i < mconfig._configs.size(); i++)
 			hosts.push_back(new Server(mconfig._configs[i]));
+		pc = PollClass(mconfig._timeout);
+		PollClass::pc_ptr = &pc;
+	} catch(const std::exception& e) {
+		std::cerr << "poll & server creation > " << e.what() << \
+	" (fatal error)" << std::endl; destroy_servers(hosts); return (1);
 	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-		destroy_servers(hosts);
-		return (EXIT_FAILURE);
-	}
-	
-	// create poll class
-	PollClass			pc(mconfig._timeout);
 
 	for (size_t i = 0 ; i < hosts.size() ; i++)
 	{
-		if (pc.polling() == -1 && main_while_handler)
-			perror("webserv: poll: ");
-		// add server to poll class
-		pc.add_server(*hosts[i]);
+		try {
+			if (pc.polling() == -1 && main_while_handler)
+				perror("webserv: poll: ");
+			// add server to poll class
+			pc.add_server(*hosts[i]);
+		} catch (std::exception &e) { // only a dead try can be catched here
+			std::cerr << "polling > " << e.what() << \
+			" (fatal error)" << std::endl; destroy_servers(hosts); return (1);
+		}
 		
 		// print server listener info
 		if (PollClass::get_pollclass()->get_raw_revents(1) == POLLOUT)
@@ -64,15 +65,18 @@ int	main(int argc, char **argv)
 						<< inet_ntoa(hosts[i]->get_listener().addr().sin_addr)
 						<< ":"
 						<< ntohs(hosts[i]->get_listener().addr().sin_port)
-						<< "\n";		
+						<< "\n";	
 	}
 
 	std::signal(SIGINT, &main_while_switch);
 	std::signal(SIGTERM, &main_while_switch);
 	while (main_while_handler)
 	{
-		if (pc.polling() == -1 && main_while_handler)
-			print_error("webserv: poll");
+		try {
+			if (pc.polling() == -1 && main_while_handler)
+				perror("webserv: poll: ");
+		} catch (std::exception &e) { std::cerr << "polling > " << e.what() << \
+		" (fatal error)" << std::endl; destroy_servers(hosts); return (1); }
 
 		// check events for each server
 		for (std::vector<Server*>::iterator h = hosts.begin();
