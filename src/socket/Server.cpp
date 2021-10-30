@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 15:46:01 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/30 05:05:11 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,9 +169,15 @@ Server::handle_request(Client& client)
 void
 Server::send_response(Client& client)
 {
-	std::string	response = client.response().toString();
+	// get response as a std::string
+	str_response& response = client.string_response();
+	if (response.written == 0) // first time trying to send the response
+		response.data = client.response().toString();
 
-	if (write(client.fd(), response.data(), response.size()) < 0)
+	size_t	count	= response.data.length() - response.written; // remaining bytes to send
+	ssize_t	bytes	= write(client.fd(), response.data.c_str() + response.written, count);
+
+	if (bytes < 0) // write failed
 	{
 		client.write_trials++;
 		if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
@@ -184,6 +190,10 @@ Server::send_response(Client& client)
 		}
 		return ;
 	}
+
+	response.written += bytes;
+	if (response.written != response.data.length())
+		return ; // will try to send the bytes left after next poll()
 
 	if (client.response().getConnection() == HTTP_CONNECTION_CLOSE)
 	{
