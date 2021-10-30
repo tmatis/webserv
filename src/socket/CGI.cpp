@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/28 14:48:43 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/30 10:56:19 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,7 +137,7 @@ CGI			&CGI::construct()
 	}
 	it = vars.begin();
 	this->_var_formatted = new char *[vars.size() + 1];
-	this->_var_count = vars.size();
+	this->_var_count = 0;
 	while (it != vars.end())
 	{
 		this->_var_formatted[i] = new char[(*it).first.size() + \
@@ -146,16 +146,17 @@ CGI			&CGI::construct()
 		std::strcpy(this->_var_formatted[i], tampon.c_str());
 		this->_var_formatted[i][(*it).first.size() + (*it).second.size() + 1] = 0;
 		++i;
+		this->_var_count++;
 		++it;
 	}
-	this->_var_containers = vars;
 	this->_var_formatted[vars.size()] = NULL;
+	this->_var_count = vars.size();
+	this->_var_containers = vars;
 	return (*this);
 }
 
 pid_t			CGI::launch()
 {
-
 	if (pipe(this->_pipes_in) == -1)
 		throw std::runtime_error(strerror(errno));
 	if (pipe(this->_pipes_out) == -1)
@@ -164,10 +165,17 @@ pid_t			CGI::launch()
 		close(this->_pipes_in[1]);
 		throw std::runtime_error(strerror(errno));
 	}
-	fcntl(this->_pipes_in[0], F_SETFL, O_NONBLOCK);
-	fcntl(this->_pipes_in[1], F_SETFL, O_NONBLOCK);
-	fcntl(this->_pipes_out[1], F_SETFL, O_NONBLOCK);
-	fcntl(this->_pipes_out[0], F_SETFL, O_NONBLOCK);
+	if (fcntl(this->_pipes_in[0], F_SETFL, O_NONBLOCK) == -1 || \
+	fcntl(this->_pipes_in[1], F_SETFL, O_NONBLOCK) == -1 || \
+	fcntl(this->_pipes_out[1], F_SETFL, O_NONBLOCK) == -1 || \
+	fcntl(this->_pipes_out[0], F_SETFL, O_NONBLOCK) == -1)
+	{
+		close(this->_pipes_in[0]);
+		close(this->_pipes_out[1]);
+		close(this->_pipes_in[1]);
+		close(this->_pipes_out[0]);
+		throw std::runtime_error(strerror(errno));
+	}
 	this->_pid = fork();
 	if (this->_pid == -1)
 	{
@@ -179,12 +187,25 @@ pid_t			CGI::launch()
 	}
 	if (this->_pid)
 	{
+		unsigned int tries = 0;
+
 		close(this->_pipes_in[0]);
 		close(this->_pipes_out[1]);
-		this->_server.get_files()\
-		.push_back(new f_pollfd("cgi_input", this->_pipes_in[1], POLLOUT, "", true));
-		this->_server.get_files()\
-		.push_back(new f_pollfd("cgi_output", this->_pipes_out[0], POLLIN, "", true));
+		for (unsigned int i = 2 ; i ; )
+		{
+			try {
+				this->_server.get_files()\
+				.push_back(new f_pollfd("cgi_input", this->_pipes_in[1], POLLOUT, "", true));
+				i--;
+				this->_server.get_files()\
+				.push_back(new f_pollfd("cgi_output", this->_pipes_out[0], POLLIN, "", true));
+				i--;
+			} catch (std::exception &e) {
+				tries++;
+				if (tries == 5)
+					throw std::bad_alloc();
+			}
+		}
 	}
 	else
 	{
@@ -193,9 +214,9 @@ pid_t			CGI::launch()
 
 		close(this->_pipes_in[1]);
 		close(this->_pipes_out[0]);
-		dup2(this->_pipes_in[0], STDIN_FILENO);
-		dup2(this->_pipes_out[1], STDOUT_FILENO);
-		if (execve(this->cgi_infos.second.c_str(), argv, this->_var_formatted) == -1)
+		if (dup2(this->_pipes_in[0], STDIN_FILENO) == -1 || \
+		dup2(this->_pipes_out[1], STDOUT_FILENO) == -1 || \
+		execve(this->cgi_infos.second.c_str(), argv, this->_var_formatted) == -1)
 		{
 			write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15);
 			std::cerr << "cgi: \'" << this->cgi_infos.second << "\' error while launching : \'" << \
@@ -244,7 +265,7 @@ bool			CGI::get_response(int const &revents)
 	if (revents & POLLIN || this->_response_flag)
 	{
 		char		buffer[1024];
-		ssize_t			i;
+		ssize_t		i;
 		bool		parsecgi_ret = false;
 
 		memset(buffer, 0, 1024);
@@ -254,7 +275,8 @@ bool			CGI::get_response(int const &revents)
 			ft::random_access_iterator<char> it(buffer);
 			ft::random_access_iterator<char> ite(buffer + i);
 			this->_response_flag = true;
-			parsecgi_ret = this->get_client().response().parseCGI(std::string(it, ite));
+			try { parsecgi_ret = this->get_client().response().parseCGI\
+			(std::string(it, ite)); } catch (std::exception &e) { i = -1; }
 		}
 		if (i > 0 && !parsecgi_ret)
 			return (true);
