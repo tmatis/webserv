@@ -1,0 +1,73 @@
+body
+{
+	background-color: rgb(42, 60, 105);
+}
+
+h1
+{
+	text-align: center;
+	font-size: 2.9em;
+	font-family: monospace;
+	outline: none;
+	color: rgb(5, 13, 32);	
+}
+
+hr
+{
+	border-color: rgb(5, 13, 32);
+	border: 3px solid rgb(5, 13, 32);
+	border-radius: 3px;
+}
+
+a
+{
+	color: rgb(5, 13, 32);	
+	text-decoration: underline;
+}
+
+form
+{
+	font-family: monospace;
+	color: silver;
+}
+
+input
+{
+	font-family: monospace;
+	border-radius: 10px;
+}
+
+h3
+{
+	font-size: 1.7em;
+	font-family: monospace;
+	outline: none;
+	color: rgb(5, 13, 32);	
+}
+
+button
+{
+	width: 50%;
+	height: 6vh;
+	margin-top: 1em;
+	margin-left: 25%;
+
+	box-shadow: 7px 7px 0px 0px rgba(0,0,0,0.6);
+	border: none;
+	border-radius: 30px 30px;
+	font-size: 2.9em;
+	font-family: monospace;
+	background-color: rgb(39, 60, 117);
+	outline: none;
+	color: rgb(12, 21, 43);
+}
+
+button:hover
+{
+	transform: scale(1.01);
+}
+
+button:active
+{
+	transform: scale(0.99);
+}

@@ -9,8 +9,4 @@ webserv
 bin_test
 vscode/
 .vscode/
-www
-*.cnf
 *.log
-supported.mime
-webserv.cnf

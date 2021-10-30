@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" href="style.css" />
+		<title> CGI </title>
+	</head>
+
+	<body>
+
+		<h1>I think of a number between 1 and 5, which one is it ?</h1>
+
+		<hr>
+		<h3>Call CGI with GET method</h3>
+		<form method="GET" action="/cgi/number_guesser.php">
+			Your guess : <input type="text" name="num" autofocus required><br><br>
+			<input type="submit" value="Send">
+		</form>
+
+		<h3>Call CGI with POST method</h3>
+		<form method="POST" action="/cgi/number_guesser.php">
+			Your guess : <input type="text" name="num" autofocus required><br><br>
+			<input type="submit" value="Send">
+		</form>
+
+		<hr>
+		<button onclick="window.location.href='/cgi/index.php'">index.php</button>
+		<button onclick="window.location.href='/cgi/cookie.php'">test cookie</button>
+
+		<p><a href="/">previous page...</a></p>
+
+	</body>
+</html>

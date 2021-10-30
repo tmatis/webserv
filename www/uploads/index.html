@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" href="style.css" />
+		<title>Uploads</title>
+	</head>
+
+	<body>
+		
+		<h1>Upload files</h1><hr>
+
+		<center><form method="POST" enctype="multipart/form-data">
+			<input type="file" name="img" accept="*/*" multiple>
+			<button>Send</button>
+		</form></center>
+
+		<p>To upload a file use: <span class="cmd">curl -i -X POST HOST:PORT/FILENAME --data-binary "@PATH/TO/FILE" -H "Content-Type:"</span></p>
+		<p>To delete a file use: <span class="cmd">curl -i -X DELETE HOST:PORT/tmp/FILENAME</span></p>
+
+	</body>
+</html>
