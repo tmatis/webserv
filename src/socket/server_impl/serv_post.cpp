@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:54 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 16:07:17 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/30 05:58:51 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,13 @@ Server::_form_upload(Client& client)
 			client.add_file(fpfd);
 		}
 	}
-	client.state(IDLE);
+	if (client.files().size())
+		client.state(IDLE);
+	else
+	{
+		client.response().setStatus(NO_CONTENT);
+		client.state(WAITING_ANSWER);
+	}
 }
 
 std::string
