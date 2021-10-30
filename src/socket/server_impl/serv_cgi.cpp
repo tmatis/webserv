@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_cgi.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:37 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 14:56:56 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/30 10:24:49 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,15 @@ Server::_handle_cgi(Client& client, std::pair<std::string, std::string>& cgi)
 {
 	int code = 0;
 
-	this->_cgis.push_back(CGI((*this), client, *client.rules(), client.request(), cgi));
-	this->_cgis.back().construct();
+	try {
+		this->_cgis.push_back(CGI((*this), client, *client.rules(), client.request(), cgi));
+		code = 1;
+		this->_cgis.back().construct();
+	} catch (std::exception &e) {
+		if (code)
+			this->_cgis.pop_back();
+		return(_handle_error(client, 500));
+	}
 	{ // fast 404 check
 		struct stat buffer;
 		code = stat(this->_cgis.back().get_vars()["PATH_TRANSLATED"].c_str(), &buffer);
