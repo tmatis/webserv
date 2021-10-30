@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:47 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 15:46:01 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/30 03:19:51 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,8 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 		{
 			if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
 				std::cerr << "server > cannot open directory \"" << path << "\": " << strerror(errno) << "\n";
+			if (errno == EACCES)
+				return (FORBIDDEN);
 			return (INTERNAL_SERVER_ERROR);
 		}
 
@@ -108,7 +110,9 @@ Server::_find_resource(const Route& rules, const std::string& uri_path, Client& 
 	if (fd == -1)
 	{
 		if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
-		std::cerr << "server > cannot open file \"" << path << "\": " << strerror(errno) << "\n";
+			std::cerr << "server > cannot open file \"" << path << "\": " << strerror(errno) << "\n";
+		if (errno == EACCES)
+			return (FORBIDDEN);
 		return (INTERNAL_SERVER_ERROR);
 	}
 

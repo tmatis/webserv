@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/30 11:10:35 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/31 00:54:48 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,20 +131,20 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 	typedef int (*event_handlers)(Server*, Client&);
 	
 	static event_handlers const handlers[] = {
-		event_pollin,
-		event_pollout,
 		event_pollhup,
 		event_pollerr,
 		event_pollnval,
+		event_pollin,
+		event_pollout,
 		NULL
 	};
 	
 	 static short const events[] = {
-		POLLIN,
-		POLLOUT,
 		POLLHUP,
 		POLLERR,
-		POLLNVAL
+		POLLNVAL,
+		POLLIN,
+		POLLOUT
 	};
 
 	int	fd		= client.fd();

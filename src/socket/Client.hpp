@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 16:19:23 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/25 11:59:17 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/10/30 04:36:29 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,13 +28,21 @@ typedef struct f_pollfd
 {
 	f_pollfd(const std::string& filename, int fd, int event = POLLIN, const std::string& data = "", bool cgi = false);
 
-	operator pollfd() const;
+	operator pollfd(void) const;
 
 	std::string	name;
 	std::string	data;
 	pollfd		pfd;
 	bool		cgi_file;
 }		f_pollfd;
+
+typedef struct string_response
+{
+	string_response(void);
+
+	std::string	data;
+	size_t		written;
+}		str_response;
 
 typedef	enum e_client_state
 {
@@ -61,6 +69,7 @@ class Client : public TCP_Socket
 		HTTPRequest&					request(void);
 		HTTPResponse&					response(void);
 		std::vector<f_pollfd*>&			files(void);
+		str_response&					string_response(void);
 		int&							files_number(void);
 
 		// setters
@@ -80,6 +89,7 @@ class Client : public TCP_Socket
 		std::vector<f_pollfd*>			_files;
 		const Route*					_route;
 		int								_n_files;
+		str_response					_str;
 };
 
 #endif

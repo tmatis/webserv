@@ -6,17 +6,15 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 15:46:01 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/30 06:10:14 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "../utils/random_access_iterator.hpp"
 
-const int Server::timeout = REQUEST_TIMEOUT;
-
 Server::Server(const Config& conf) :
-	_host(Listener(conf.address_res, conf.port)), _config(conf) {}
+	_host(Listener(conf.address_res, conf.port)), _config(conf), _timeout(conf._timeout / 1000) {}
 
 Server::~Server(void)
 {
@@ -73,7 +71,7 @@ Server::flush_clients(void)
 		}
 		else
 		{
-			if (std::difftime(time(NULL), it->last_request) >= Server::timeout)
+			if (std::difftime(time(NULL), it->last_request) >= _timeout)
 				_handle_error(*it, REQUEST_TIMEOUT);
 			++it;
 		}
@@ -169,9 +167,15 @@ Server::handle_request(Client& client)
 void
 Server::send_response(Client& client)
 {
-	std::string	response = client.response().toString();
+	// get response as a std::string
+	str_response& response = client.string_response();
+	if (response.written == 0) // first time trying to send the response
+		response.data = client.response().toString();
 
-	if (write(client.fd(), response.data(), response.size()) < 0)
+	size_t	count	= response.data.length() - response.written; // remaining bytes to send
+	ssize_t	bytes	= write(client.fd(), response.data.c_str() + response.written, count);
+
+	if (bytes < 0) // write failed
 	{
 		client.write_trials++;
 		if (PollClass::get_pollclass()->get_raw_revents(STDERR_FILENO) == POLLOUT)
@@ -184,6 +188,10 @@ Server::send_response(Client& client)
 		}
 		return ;
 	}
+
+	response.written += bytes;
+	if (response.written != response.data.length())
+		return ; // will try to send the bytes left after next poll()
 
 	if (client.response().getConnection() == HTTP_CONNECTION_CLOSE)
 	{

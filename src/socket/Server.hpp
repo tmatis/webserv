@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 16:07:17 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/10/30 06:04:14 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,6 @@
 
 class CGI;
 class PollClass;
-
-# define SERVER_TIMEOUT 15.0 // seconds
 
 class Server
 {
@@ -64,11 +62,6 @@ class Server
 
 		// other
 		void							close_fds(void);
-
-		/*** RESPONSES PUBLIC ********************************************************/
-		std::string		_append_paths(const std::string& str1, const std::string& str2);
-
-		static const int				timeout;
 
 	private:
 	
@@ -120,6 +113,7 @@ class Server
 		std::vector<CGI>			_cgis;		// running cgis
 		std::vector<f_pollfd *>		_files;		// files opened
 		const Config&				_config;	// configuration of the server
+		const int					_timeout;
 };
 
 #endif

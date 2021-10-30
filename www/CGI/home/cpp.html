@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" href="style.css" />
+		<title> CGI </title>
+	</head>
+
+	<body>
+
+		<h1>Hi, what's your name ?</h1>
+
+		<hr>
+		<h3>Call CGI with GET method</h3>
+		<form method="GET" action="/cgi/cgi.out">
+			Your name : <input type="text" name="name" autofocus required><br><br>
+			<input type="submit" value="Send">
+		</form>
+
+		<hr>
+		<h3>Call CGI with POST method</h3>
+		<form method="POST" action="/cgi/cgi.out">
+			Your name : <input type="text" name="name" autofocus required><br><br>
+			<input type="submit" value="Send">
+		</form>
+
+		<hr>
+		<p><a href="/">previous page...</a></p>
+
+	</body>
+</html>

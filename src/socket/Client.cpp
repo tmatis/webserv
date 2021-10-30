@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:21:45 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/24 11:08:06 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/10/30 04:36:25 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,13 @@ const std::string& data, bool cgi) : name(filename), data(data), cgi_file(cgi)
 	pfd.events	= event; // fd is read only
 }
 
-f_pollfd::operator pollfd() const
+f_pollfd::operator pollfd(void) const
 {
 	return (pfd);
 }
+
+string_response::string_response(void) :
+	data(""), written(0) {}
 
 /*** CLIENT *******************************************************************/
 
@@ -94,6 +97,12 @@ Client::files_number(void)
 	return (_n_files);
 }
 
+str_response&
+Client::string_response(void)
+{
+	return (_str);
+}
+
 /*** SETTERS ******************************************************************/
 
 void
@@ -118,11 +127,14 @@ Client::add_file(f_pollfd* fpfd)
 void
 Client::clear(void)
 {
-	write_trials	= 0;
 	_state			= PENDING_REQUEST;
 	_route			= NULL;
 	_n_files		= 0;
+	_str.written 	= 0;
+	write_trials	= 0;
+	
 	_files.clear();
 	_response.clear();
 	_request.clear();
+	_str.data.clear();
 }

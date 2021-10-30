@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" href="style.css" />
+		<title>Basic features</title>
+	</head>
+
+	<body>
+
+		<h1>Try to provoke a client error (4xx)</h1>
+		<h2>With a beautiful page set in configuration</h2>
+		<button onclick="window.location.href='/do_not_exist.404'">try 404 error</button>
+		<button onclick="window.location.href='/bad_method'">try 405 error</button>
+		
+		<h2>With an ugly server-generated page</h2>
+		<button onclick="window.location.href='/forbidden'">try 403 error</button>
+
+		<h1>We also have directory listings</h1>
+		<button onclick="window.location.href='/list'">see autoindex</button>
+
+	</body>
+
+</html>
