@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/30 10:56:19 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/11/01 18:38:37 by tmatis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@ CGI			&CGI::construct()
 	vars["SERVER_PORT"] = this->_server.get_config().port_str;
 	vars["REQUEST_METHOD"] = this->_request.getMethod();
 	vars["REMOTE_ADDR"] = inet_ntoa(this->_client.addr().sin_addr);
+	vars["REDIRECT_STATUS"] = "200";
 	while (pos != std::string::npos)
 	{
 		if (pos + this->cgi_infos.first.size() == tampon.size())
