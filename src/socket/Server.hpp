@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 17:57:16 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/30 06:04:14 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/11/02 13:32:23 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ class Server
 		explicit Server(const Config& conf);
 		virtual ~Server(void);
 
+		void	add_virtual_server(const Config& vserv);
+
 		// handle connections
 		int		add_new_client(void);
 		void	flush_clients(void);
@@ -57,7 +59,6 @@ class Server
 		const std::vector<f_pollfd *>&	get_files(void) const;
 		std::vector<f_pollfd *>&		get_files(void);
 		const Listener&					get_listener(void) const;
-		const Config&					get_config(void) const;
 		std::vector<CGI>&				get_cgis(void);
 
 		// other
@@ -70,7 +71,8 @@ class Server
 		/* GLOBAL USAGE ===================================================== */
 		/*** REQUESTS *********************************************************/
 		bool			_read_request(Client &client);
-		const Route&	_resolve_routes(const std::string& uri_path);
+		const Config&	_resolve_host(std::string host);
+		const Route&	_resolve_routes(const Config& conf, const std::string& uri_path);
 		int				_check_request_validity(const Route& rules, HTTPRequest& request);
 		bool			_is_mime_type_supported(const Route& rules, const std::string& mime_type);
 		bool			_check_http_version(const std::string& version);
@@ -78,7 +80,7 @@ class Server
 		int				_handle_error(Client& client, int status, bool autogen = false);
 		void			_create_response(Client& client);
 		void			_define_content_type(Client& client, HTTPResponse& response);
-		std::string		_get_uri_reference(const std::string& filename);
+		std::string		_get_uri_reference(const Config* rules, const std::string& filename);
 
 		/* METHOD HANDLERS ================================================== */
 		pid_t			_handle_get(Client &client, const Route& rules, const HTTPURI& uri);
@@ -112,7 +114,7 @@ class Server
 		std::vector<Client>			_clients;	// list of clients connected
 		std::vector<CGI>			_cgis;		// running cgis
 		std::vector<f_pollfd *>		_files;		// files opened
-		const Config&				_config;	// configuration of the server
+		std::vector<Config>			_config;	// configuration of the server
 		const int					_timeout;
 };
 

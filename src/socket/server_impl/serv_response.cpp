@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   serv_response.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tmatis <tmatis@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/11/01 19:30:51 by tmatis           ###   ########.fr       */
+/*   Updated: 2021/11/02 14:37:48 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,12 @@ Server::_handle_error(Client& client, int status, bool autogen)
 	{
 		std::map<int, std::string>::const_iterator	errpage;
 	
-		errpage = _config._error_pages.find(status);
-		if (errpage != _config._error_pages.end()) // page exists
+		if (client.rules())
+			errpage = client.rules()->_error_pages.find(status);
+		else
+			return (_handle_error(client, status, true));
+
+		if (errpage != client.rules()->_error_pages.end()) // page exists
 		{
 			client.response().setStatus((status_code)status);
 			client.response().setBody(errpage->second);
@@ -79,7 +83,7 @@ Server::_create_response(Client& client)
 	// Location in case of file uploads (201 status)
 	else if (response.getStatus() == CREATED)
 	{
-		std::string ref = _get_uri_reference(client.files().front()->name);
+		std::string ref = _get_uri_reference(client.rules(), client.files().front()->name);
 		if (ref.length()) // new file can be referenced as an uri
 		{
 			std::vector<std::string> file_links;
@@ -88,7 +92,7 @@ Server::_create_response(Client& client)
 			for (std::vector<f_pollfd*>::iterator it = client.files().begin() + 1;
 					it != client.files().end();
 					++it)
-						file_links.push_back(_get_uri_reference((*it)->name));
+						file_links.push_back(_get_uri_reference(client.rules(), (*it)->name));
 
 			response.gen_upload_response(client.request().getURI().getPath(), file_links);
 			response.setLocation(ref); // add this uri reference to the response
@@ -120,12 +124,12 @@ Server::_define_content_type(Client& client, HTTPResponse& response)
 }
 
 std::string
-Server::_get_uri_reference(const std::string& filename)
+Server::_get_uri_reference(const Config* rules, const std::string& filename)
 {
 	std::string	ref = filename;
 
-	for (std::vector<Route>::const_iterator it = _config.routes.begin();
-			it != _config.routes.end();
+	for (std::vector<Route>::const_iterator it = rules->routes.begin();
+			it != rules->routes.end();
 			++it)
 	{
 		if (filename.find(it->_root) == 0) // root path found in filename
