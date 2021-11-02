@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/11/02 15:54:11 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/11/02 16:23:26 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ int	main(int argc, char **argv)
 		PollClass::pc_ptr = &pc;
 	} catch(const std::exception& e) {
 		std::cerr << "poll & server creation > " << e.what() << \
-	" (fatal error)" << std::endl; destroy_servers(hosts); return (1);
+	" (fatal error)" << std::endl; destroy_servers(hosts); close_all_fds(hosts); return (1);
 	}
 
 	std::signal(SIGINT, &main_while_switch);
@@ -73,14 +73,14 @@ int	main(int argc, char **argv)
 			if (pc.polling() == -1 && main_while_handler)
 				perror("webserv: poll: ");
 		} catch (std::exception &e) { std::cerr << "polling > " << e.what() << \
-		" (fatal error)" << std::endl; destroy_servers(hosts); return (1); }
+		" (fatal error)" << std::endl; destroy_servers(hosts); close_all_fds(hosts); return (1); }
 		
 		// poll class server injection + server listener info
 		if (server_injection)
 		{
 			try { pc.add_server(*hosts[si]); } catch (std::exception &e) { // only a dead try can be catched here
 				std::cerr << "polling > " << e.what() << \
-				" (fatal error)" << std::endl; destroy_servers(hosts); return (1);
+				" (fatal error)" << std::endl; destroy_servers(hosts); close_all_fds(hosts); return (1);
 			}
 			if (PollClass::get_pollclass()->get_raw_revents(1) == POLLOUT)
 				std::cout	<< "Listen on "
@@ -104,7 +104,9 @@ int	main(int argc, char **argv)
 					cl != (*h)->get_clients().end();
 					++cl)
 			{
-				int	ret = handle_events(pc, *h, *cl);
+				int	ret = 0;
+				try { ret = handle_events(pc, *h, *cl); } catch (std::exception &e)
+				{ (*cl).state(DISCONNECTED); continue ; }
 				if (ret == -1)
 					print_error("webserv: client event");
 				else if (ret == 0) // child process
@@ -201,7 +203,6 @@ int handle_events(PollClass& pc, Server *host, Client& client)
 		for (size_t i = 0; i < client.files().size(); i++)
 		{
 			revent = pc.get_raw_revents(client.files()[i]->pfd.fd);
-			
 			if (revent & POLLIN) // file is ready for reading
 				host->create_file_response(client);
 			else if (revent & POLLOUT)
