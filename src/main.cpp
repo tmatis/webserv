@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/11/02 13:03:08 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/11/02 15:06:44 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,16 +40,21 @@ int	main(int argc, char **argv)
 	try {
 		for (size_t i = 0; i < mconfig._configs.size(); i++)
 		{
-			hosts.push_back(new Server(mconfig._configs[i]));
-			
-			for (i = i + 1; i < mconfig._configs.size(); i++)
+			// check if a server already exists on the same host:port
+			std::vector<Server*>::iterator it = hosts.begin();
+			for (it = it; it != hosts.end(); ++it)
 			{
-				if (mconfig._configs[i].address_res == mconfig._configs[i-1].address_res)
+				if ((*it)->get_listener().addr().sin_addr.s_addr == mconfig._configs[i].address_res)
 				{
-					if (mconfig._configs[i].port == mconfig._configs[i-1].port)
-						hosts.back()->add_virtual_server(mconfig._configs[i]);
+					if ((*it)->get_listener().addr().sin_port == mconfig._configs[i].port)
+						break ;
 				}
 			}
+
+			if (it == hosts.end()) // create a new host
+				hosts.push_back(new Server(mconfig._configs[i]));
+			else // add new virtual server configuration to the host
+				(*it)->add_virtual_server(mconfig._configs[i]);
 		}
 		pc = PollClass(mconfig._timeout);
 		PollClass::pc_ptr = &pc;

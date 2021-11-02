@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:04 by mamartin          #+#    #+#             */
-/*   Updated: 2021/11/02 13:38:36 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/11/02 15:13:41 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,14 +43,14 @@ Server::_resolve_host(std::string host)
 {
 	std::vector<Config>::iterator	it = _config.begin();
 
-	host = host.substr(0, host.find(":"));
+	host = host.substr(0, host.find(":")); // remove port section if any
 	while (it != _config.end())
 	{
 		if (*(it->server_names.begin()) == host)
-			return (*it);
+			return (*it); // virtual host found
 		++it;
 	}
-	return (_config.front());
+	return (_config.front()); // return default virtual host
 }
 
 const Route&
