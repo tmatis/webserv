@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/08 18:07:44 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/30 06:10:14 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/11/02 14:27:42 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,10 @@
 #include "../utils/random_access_iterator.hpp"
 
 Server::Server(const Config& conf) :
-	_host(Listener(conf.address_res, conf.port)), _config(conf), _timeout(conf._timeout / 1000) {}
+	_host(Listener(conf.address_res, conf.port)),  _timeout(conf._timeout / 1000)
+{
+	_config.push_back(conf);
+}
 
 Server::~Server(void)
 {
@@ -41,6 +44,12 @@ Server::close_fds(void)
 }
 
 /*** CONNECTIONS **************************************************************/
+
+void
+Server::add_virtual_server(const Config& vserv)
+{
+	_config.push_back(vserv);
+}
 
 int
 Server::add_new_client(void)
@@ -143,7 +152,8 @@ Server::handle_request(Client& client)
 	// find correct route
 	HTTPRequest&	req		= client.request();
 	const HTTPURI&	uri		= req.getURI();
-	const Route&	route	= _resolve_routes(uri.getPath());
+	const Config&	vserv	= _resolve_host(req.getHost());
+	const Route&	route	= _resolve_routes(vserv, uri.getPath());
 	client.rules(&route);
 
 	// check request compliance to route rules
@@ -302,12 +312,6 @@ const Listener&
 Server::get_listener(void) const
 {
 	return (_host);
-}
-
-const Config&
-Server::get_config(void) const
-{
-	return (_config);
 }
 
 std::vector<CGI>&

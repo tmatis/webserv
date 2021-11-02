@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:11:59 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/25 22:33:09 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/11/02 14:19:21 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ Server::_replace_conf_vars(Client& client, const std::string& redirection)
  	// replace "$server_port"
 	pos = url.find("$server_port");
 	if (pos != std::string::npos)
-		url.replace(pos, 12, itoa(ntohs(_config.port)));
+		url.replace(pos, 12, itoa(ntohs(client.rules()->port)));
 
  	// replace "$uri"
 	pos = url.find("$uri");

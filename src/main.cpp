@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/31 00:54:48 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/11/02 13:03:08 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,18 @@ int	main(int argc, char **argv)
 
 	try {
 		for (size_t i = 0; i < mconfig._configs.size(); i++)
+		{
 			hosts.push_back(new Server(mconfig._configs[i]));
+			
+			for (i = i + 1; i < mconfig._configs.size(); i++)
+			{
+				if (mconfig._configs[i].address_res == mconfig._configs[i-1].address_res)
+				{
+					if (mconfig._configs[i].port == mconfig._configs[i-1].port)
+						hosts.back()->add_virtual_server(mconfig._configs[i]);
+				}
+			}
+		}
 		pc = PollClass(mconfig._timeout);
 		PollClass::pc_ptr = &pc;
 	} catch(const std::exception& e) {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGI.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/10/30 10:56:19 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/11/02 14:19:20 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,11 +74,11 @@ CGI			&CGI::construct()
 
 	if (this->_request.getHeader().getValue("Content-Length")) //
 		vars["CONTENT_LENGTH"] = *(this->_request.getHeader().getValue("Content-Length")); //
-	vars["SERVER_SOFTWARE"] = this->_server.get_config()._server_name_version;
+	vars["SERVER_SOFTWARE"] = this->_client.rules()->_server_name_version;
 	vars["SERVER_NAME"] = this->_request.getHost().substr(0, this->_request.getHost().find(':')); //
 	vars["GATEWAY_INTERFACE"] = "CGI/1.1";
 	vars["SERVER_PROTOCOL"] = this->_request.getVersion();
-	vars["SERVER_PORT"] = this->_server.get_config().port_str;
+	vars["SERVER_PORT"] = this->_client.rules()->port_str;
 	vars["REQUEST_METHOD"] = this->_request.getMethod();
 	vars["REMOTE_ADDR"] = inet_ntoa(this->_client.addr().sin_addr);
 	while (pos != std::string::npos)

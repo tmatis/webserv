@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:04 by mamartin          #+#    #+#             */
-/*   Updated: 2021/10/28 22:35:18 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/11/02 13:38:36 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,14 +38,29 @@ Server::_read_request(Client &client)
 	return (client.request().isReady());
 }
 
+const Config&
+Server::_resolve_host(std::string host)
+{
+	std::vector<Config>::iterator	it = _config.begin();
+
+	host = host.substr(0, host.find(":"));
+	while (it != _config.end())
+	{
+		if (*(it->server_names.begin()) == host)
+			return (*it);
+		++it;
+	}
+	return (_config.front());
+}
+
 const Route&
-Server::_resolve_routes(const std::string& uri_path)
+Server::_resolve_routes(const Config& conf, const std::string& uri_path)
 {
 	const Route*	matching	= NULL;
 	std::string		path		= HTTPGeneral::append_paths(uri_path, "/");
 
-	for (std::vector<Route>::const_iterator it = _config.routes.begin();
-			it != _config.routes.end();
+	for (std::vector<Route>::const_iterator it = conf.routes.begin();
+			it != conf.routes.end();
 			++it)
 	{
 		if (path.find(it->location) == 0) // prefix found in uri
@@ -100,7 +115,7 @@ Server::_check_request_validity(const Route& rules, HTTPRequest& request)
 		return (METHOD_NOT_ALLOWED);
 
 	// a body limit of 0 means unlimited
-	if (_config.body_limit && request.getBodySize() > _config.body_limit)
+	if (rules.body_limit && request.getBodySize() > rules.body_limit)
 		return (PAYLOAD_TOO_LARGE);
 
 	// POST requests MUST have a Content-Length header
