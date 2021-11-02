@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 17:38:29 by nouchata          #+#    #+#             */
-/*   Updated: 2021/11/02 14:19:20 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/11/02 14:37:47 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,7 @@ CGI			&CGI::construct()
 	vars["SERVER_PORT"] = this->_client.rules()->port_str;
 	vars["REQUEST_METHOD"] = this->_request.getMethod();
 	vars["REMOTE_ADDR"] = inet_ntoa(this->_client.addr().sin_addr);
+	vars["REDIRECT_STATUS"] = "200";
 	while (pos != std::string::npos)
 	{
 		if (pos + this->cgi_infos.first.size() == tampon.size())

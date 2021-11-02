@@ -321,7 +321,13 @@ std::string HTTPResponse::toString(void)
 	_header.setValue("Server", "Webserv");
 	_header.setValue("Date", getDate());
 	_header.setValue("Content-Length", itoa(_body.size()));
-	if (!_header.getValue("Content-Type"))
+	std::string const *found = _header.getValue("Content-type");
+	if (found)
+	{
+		setContentType(*found);
+		_header.delValue("Content-type");
+	}
+	else if (!_header.getValue("Content-Type"))
 		setContentType("text/html");
 	if (!_header.getValue("Connection"))
 		setConnection(HTTP_CONNECTION_KEEP_ALIVE);

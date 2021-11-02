@@ -6,7 +6,7 @@
 /*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/18 03:12:06 by mamartin          #+#    #+#             */
-/*   Updated: 2021/11/02 14:19:22 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/11/02 14:37:48 by mamartin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ Server::_create_response(Client& client)
 		response.setAllow(allow_header_val);
 	}
 	// Location in case of a redirection (30x status)
-	else if (response.getStatus() / 100 == 3) // status indicates a redirection
+	else if (response.getStatus() / 100 == 3 && !response.getHeader().getValue("Location")) // status indicates a redirection
 	{
 		const std::string&	new_url = client.rules()->redirection.second;
 
