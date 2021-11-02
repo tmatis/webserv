@@ -41,8 +41,8 @@ int	main(int argc, char **argv)
 		for (size_t i = 0; i < mconfig._configs.size(); i++)
 		{
 			// check if a server already exists on the same host:port
-			std::vector<Server*>::iterator it = hosts.begin();
-			for (it = it; it != hosts.end(); ++it)
+			std::vector<Server*>::iterator it;
+			for (it = hosts.begin(); it != hosts.end(); ++it)
 			{
 				if ((*it)->get_listener().addr().sin_addr.s_addr == mconfig._configs[i].address_res)
 				{
