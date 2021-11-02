@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mamartin <mamartin@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/11/02 15:06:44 by mamartin         ###   ########.fr       */
+/*   Updated: 2021/11/02 15:54:11 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,8 @@ int	main(int argc, char **argv)
 	// create servers & poll class
 	std::vector<Server*>	hosts;
 	PollClass				pc;
+	bool				server_injection = true;
+	size_t				si = 0;
 
 	try {
 		for (size_t i = 0; i < mconfig._configs.size(); i++)
@@ -63,27 +65,6 @@ int	main(int argc, char **argv)
 	" (fatal error)" << std::endl; destroy_servers(hosts); return (1);
 	}
 
-	for (size_t i = 0 ; i < hosts.size() ; i++)
-	{
-		try {
-			if (pc.polling() == -1 && main_while_handler)
-				perror("webserv: poll: ");
-			// add server to poll class
-			pc.add_server(*hosts[i]);
-		} catch (std::exception &e) { // only a dead try can be catched here
-			std::cerr << "polling > " << e.what() << \
-			" (fatal error)" << std::endl; destroy_servers(hosts); return (1);
-		}
-		
-		// print server listener info
-		if (PollClass::get_pollclass()->get_raw_revents(1) == POLLOUT)
-			std::cout	<< "Listen on "
-						<< inet_ntoa(hosts[i]->get_listener().addr().sin_addr)
-						<< ":"
-						<< ntohs(hosts[i]->get_listener().addr().sin_port)
-						<< "\n";	
-	}
-
 	std::signal(SIGINT, &main_while_switch);
 	std::signal(SIGTERM, &main_while_switch);
 	while (main_while_handler)
@@ -93,6 +74,25 @@ int	main(int argc, char **argv)
 				perror("webserv: poll: ");
 		} catch (std::exception &e) { std::cerr << "polling > " << e.what() << \
 		" (fatal error)" << std::endl; destroy_servers(hosts); return (1); }
+		
+		// poll class server injection + server listener info
+		if (server_injection)
+		{
+			try { pc.add_server(*hosts[si]); } catch (std::exception &e) { // only a dead try can be catched here
+				std::cerr << "polling > " << e.what() << \
+				" (fatal error)" << std::endl; destroy_servers(hosts); return (1);
+			}
+			if (PollClass::get_pollclass()->get_raw_revents(1) == POLLOUT)
+				std::cout	<< "Listen on "
+							<< inet_ntoa(hosts[si]->get_listener().addr().sin_addr)
+							<< ":"
+							<< ntohs(hosts[si]->get_listener().addr().sin_port)
+							<< "\n";
+			si++;
+			if (si >= hosts.size())
+				server_injection = false;
+			continue ;
+		}
 
 		// check events for each server
 		for (std::vector<Server*>::iterator h = hosts.begin();
