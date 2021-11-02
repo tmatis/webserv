@@ -81,9 +81,9 @@ int	main(int argc, char **argv)
 			pc.add_server(*hosts[si]);
 			if (PollClass::get_pollclass()->get_raw_revents(1) == POLLOUT)
 				std::cout	<< "Listen on "
-							<< inet_ntoa(hosts[i]->get_listener().addr().sin_addr)
+							<< inet_ntoa(hosts[si]->get_listener().addr().sin_addr)
 							<< ":"
-							<< ntohs(hosts[i]->get_listener().addr().sin_port)
+							<< ntohs(hosts[si]->get_listener().addr().sin_port)
 							<< "\n";
 			si++;
 			if (si >= hosts.size())
