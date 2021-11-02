@@ -78,7 +78,10 @@ int	main(int argc, char **argv)
 		// poll class server injection + server listener info
 		if (server_injection)
 		{
-			pc.add_server(*hosts[si]);
+			try { pc.add_server(*hosts[i]); } catch (std::exception &e) { // only a dead try can be catched here
+				std::cerr << "polling > " << e.what() << \
+				" (fatal error)" << std::endl; destroy_servers(hosts); return (1);
+			}
 			if (PollClass::get_pollclass()->get_raw_revents(1) == POLLOUT)
 				std::cout	<< "Listen on "
 							<< inet_ntoa(hosts[si]->get_listener().addr().sin_addr)
