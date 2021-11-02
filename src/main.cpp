@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/11/02 16:33:45 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/11/02 16:41:31 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,17 +19,10 @@ void	main_while_switch(int signal)
 
 int	main(int argc, char **argv)
 {
-	if (argc != 2)
-	{
-		std::cerr << "webserv: Bad argument\n";
-		std::cerr << "usage: ./webserv path/to/config\n";
-		return (EXIT_FAILURE);
-	}
-
 	// create configurations for server
 	MasterConfig			mconfig;
 
-	try { mconfig.construct(argv[1]); }
+	try { mconfig.construct(argc == 1 ? "webserv.cnf" : argv[1]); }
 	catch (std::exception &e) { std::cerr << "config > " << e.what() << \
 	" (fatal error)" << std::endl; return (1); }
 
