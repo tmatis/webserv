@@ -6,7 +6,7 @@
 /*   By: nouchata <nouchata@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/12 00:40:46 by mamartin          #+#    #+#             */
-/*   Updated: 2021/11/02 16:23:26 by nouchata         ###   ########.fr       */
+/*   Updated: 2021/11/02 16:33:45 by nouchata         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ int	main(int argc, char **argv)
 			{
 				int	ret = 0;
 				try { ret = handle_events(pc, *h, *cl); } catch (std::exception &e)
-				{ (*cl).state(DISCONNECTED); continue ; }
+				{ (*cl).state(DISCONNECTED); ret = 1; }
 				if (ret == -1)
 					print_error("webserv: client event");
 				else if (ret == 0) // child process
